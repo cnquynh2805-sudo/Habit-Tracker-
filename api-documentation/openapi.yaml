@@ -63,7 +63,7 @@ info:
     | `422` | Unprocessable Entity | Validation Error (Invalid payload) |
     | `500` | Internal Server Error | Server Error (Mock breakdown) |
 servers:
-  - url: https://api.habit-tracker.local/v1
+  - url: https://api.some-backend.service/v1
     description: Placeholder Server
 
 tags:
