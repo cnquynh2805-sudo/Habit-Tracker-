@@ -63,8 +63,12 @@ info:
     | `422` | Unprocessable Entity | Validation Error (Invalid payload) |
     | `500` | Internal Server Error | Server Error (Mock breakdown) |
 servers:
-  - url: https://api.some-backend.service/v1
-    description: Placeholder Server
+  - url: '{serverUrl}'
+    description: Customizable Backend Environment
+    variables:
+      serverUrl:
+        default: 'https://api.some-backend.service/v1'
+        description: 'Enter your custom backend URL here (e.g., http://localhost:8080/v1) to test locally without changing the code.'
 
 tags:
   - name: Habits
