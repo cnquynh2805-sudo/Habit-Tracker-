@@ -5,7 +5,7 @@ info:
   description: |
     # Habit Tracker Pro API
 
-    Welcome to the Habit Tracker Pro API documentation. This API powers the frontend client by providing standard RESTful endpoints. The API is designed to be mocked via [Beeceptor](https://beeceptor.com/) to fulfill the requirements of a serverless MVP.
+    Welcome to the Habit Tracker Pro API documentation. This API powers the frontend client by providing standard RESTful endpoints. The API is designed to be highly modular to fulfill the requirements of a serverless MVP.
 
     Dates and times use RFC 3339 with milliseconds and default to Vietnam Time (`+07:00`).
 
@@ -19,9 +19,9 @@ info:
     - **System**: 1 endpoint to reset the mock database.
 
     ## Rate Limits
-    As this API uses Beeceptor's free tier, you are limited to:
-    - **50 requests per day** across all endpoints.
-    Ensure that your frontend implementation caches state and avoids polling to remain within this strict quota.
+    Depending on the deployed backend environment, you may be limited to:
+    - **100 requests per minute** across all endpoints.
+    Ensure that your frontend implementation caches state and avoids polling to remain within quota.
 
     ## Pagination
     List endpoints (e.g., `GET /habits`, `GET /habits/{id}/checkins`) return paginated responses. You must provide `page` and `pageSize` queries. The standard response structure for paginated lists is:
@@ -63,8 +63,8 @@ info:
     | `422` | Unprocessable Entity | Validation Error (Invalid payload) |
     | `500` | Internal Server Error | Server Error (Mock breakdown) |
 servers:
-  - url: https://habit-tracker.free.beeceptor.com
-    description: Beeceptor Mock Server
+  - url: https://api.habit-tracker.local/v1
+    description: Placeholder Server
 
 tags:
   - name: Habits
