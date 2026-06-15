@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Habit Tracker Pro - API Reference</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+</head>
+<body>
+  <!-- Mount Scalar API Reference and load our local openapi.yaml -->
+  <!-- Note the path: this file is in docs/, so it goes up one level to api-documentation/openapi.yaml -->
+  <script
+    id="api-reference"
+    data-url="../api-documentation/openapi.yaml"
+  ></script>
+
+  <!-- Load Scalar API Reference CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
+
+  <script>
+    // Configuration for Scalar
+    const configuration = {
+      theme: 'deepSpace',
+      layout: 'modern',
+      showSidebar: true,
+      darkMode: true,
+      metaData: {
+        title: 'Habit Tracker Pro - API Reference',
+        description: 'Complete API reference for Habit Tracker Pro'
+      }
+    };
+    
+    document.getElementById('api-reference').dataset.configuration = JSON.stringify(configuration);
+  </script>
+</body>
+</html>
