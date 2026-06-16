@@ -1,0 +1,801 @@
+openapi: 3.1.0
+info:
+  title: Habit Tracker Pro API
+  version: 1.0.0
+  description: |
+    # Habit Tracker Pro API
+
+    Welcome to the Habit Tracker Pro API documentation. This API powers the frontend client by providing standard RESTful endpoints. The API is designed to be highly modular to fulfill the requirements of a serverless MVP.
+
+    Dates and times use RFC 3339 with milliseconds and default to Vietnam Time (`+07:00`).
+
+    ## Overview
+    The API is divided into logical services:
+    - **Habits**: 5 endpoints for managing tracking items.
+    - **Checkins**: 5 endpoints for tracking daily progress.
+    - **Goals**: 4 endpoints for progress and milestones.
+    - **Dashboard**: 2 endpoints for pre-calculated views.
+    - **Mascot (Optional)**: 2 endpoints for the gamified reward system.
+    - **System**: 1 endpoint to reset the mock database.
+
+    ## Rate Limits
+    Depending on the deployed backend environment, you may be limited to:
+    - **100 requests per minute** across all endpoints.
+    Ensure that your frontend implementation caches state and avoids polling to remain within quota.
+
+    ## Pagination
+    List endpoints (e.g., `GET /habits`, `GET /habits/{id}/checkins`) return paginated responses. You must provide `page` and `pageSize` queries. The standard response structure for paginated lists is:
+    ```json
+    {
+      "data": [ ... ],
+      "pagination": {
+        "page": 1,
+        "pageSize": 20,
+        "totalItems": 100,
+        "totalPages": 5
+      }
+    }
+    ```
+
+    ## Errors
+    All errors in this API conform to a strict schema, ensuring predictable error handling on the client side.
+
+    ### Error Response Format
+    ```json
+    {
+      "error": {
+        "code": "VALIDATION_ERROR",
+        "message": "Target per day cannot be negative.",
+        "details": null
+      }
+    }
+    ```
+
+    ### HTTP Status Codes
+    | Code | Description | Category |
+    |---|---|---|
+    | `200` | OK | Success |
+    | `201` | Created | Success |
+    | `204` | No Content | Success |
+    | `400` | Bad Request | Client Error (Invalid filters/queries) |
+    | `404` | Not Found | Client Error (Resource missing) |
+    | `409` | Conflict | Client Error (Resource already exists) |
+    | `422` | Unprocessable Entity | Validation Error (Invalid payload) |
+    | `500` | Internal Server Error | Server Error (Mock breakdown) |
+servers:
+  - url: '{serverUrl}'
+    description: Customizable Backend Environment
+    variables:
+      serverUrl:
+        default: 'https://api.some-backend.service/v1'
+        description: 'Enter your custom backend URL here (e.g., http://localhost:8080/v1) to test locally without changing the code.'
+
+tags:
+  - name: Habits
+    description: Habit management operations
+  - name: Checkins
+    description: Daily check-in tracking
+  - name: Goals
+    description: Goals and progress tracking
+  - name: Dashboard
+    description: Statistics and derived state
+  - name: Mascot (Optional)
+    description: Goal-based rewards and mascot equipment
+  - name: System
+    description: App state management
+
+paths:
+  /habits:
+    get:
+      tags:
+        - Habits
+      summary: Get all habits
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A paginated list of habits
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HabitPaginatedResponse'
+        '400':
+          $ref: '#/components/responses/StandardError'
+    post:
+      tags:
+        - Habits
+      summary: Create a new habit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HabitInput'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Habit'
+        '422':
+          $ref: '#/components/responses/StandardError'
+
+  /habits/{id}:
+    get:
+      tags:
+        - Habits
+      summary: Get habit by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Habit details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Habit'
+        '404':
+          $ref: '#/components/responses/StandardError'
+    patch:
+      tags:
+        - Habits
+      summary: Partially update a habit (e.g., status)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HabitUpdateInput'
+      responses:
+        '200':
+          description: Updated habit
+        '404':
+          $ref: '#/components/responses/StandardError'
+        '422':
+          $ref: '#/components/responses/StandardError'
+    delete:
+      tags:
+        - Habits
+      summary: Delete a habit
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Deleted successfully
+        '404':
+          $ref: '#/components/responses/StandardError'
+
+  /checkins:
+    get:
+      tags:
+        - Checkins
+      summary: Get all check-ins globally
+      description: Global lookup for check-ins across all habits. Crucial for minimizing API calls on the Today screen.
+      parameters:
+        - name: date
+          in: query
+          description: "Filter by exact date (e.g., 2026-06-15)"
+          schema:
+            type: string
+        - name: startDate
+          in: query
+          schema:
+            type: string
+        - name: endDate
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of check-ins
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Checkin'
+        '400':
+          $ref: '#/components/responses/StandardError'
+
+  /habits/{id}/checkins:
+    get:
+      tags:
+        - Checkins
+      summary: Get check-ins for a specific habit
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: startDate
+          in: query
+          schema:
+            type: string
+        - name: endDate
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Paginated list of check-ins for the habit
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckinPaginatedResponse'
+        '404':
+          $ref: '#/components/responses/StandardError'
+    post:
+      tags:
+        - Checkins
+      summary: Record a new daily check-in for the habit
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckinInput'
+      responses:
+        '201':
+          description: Check-in saved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Checkin'
+        '404':
+          $ref: '#/components/responses/StandardError'
+        '422':
+          $ref: '#/components/responses/StandardError'
+
+  /habits/{id}/checkins/{cid}:
+    patch:
+      tags:
+        - Checkins
+      summary: Update a check-in
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: cid
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckinUpdateInput'
+      responses:
+        '200':
+          description: Updated check-in
+        '404':
+          $ref: '#/components/responses/StandardError'
+        '422':
+          $ref: '#/components/responses/StandardError'
+    delete:
+      tags:
+        - Checkins
+      summary: Delete a check-in
+      description: Handles the "Undo" logic client-side by deleting the record.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: cid
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Action reverted / check-in deleted
+        '404':
+          $ref: '#/components/responses/StandardError'
+
+  /habits/{id}/goals:
+    get:
+      tags:
+        - Goals
+      summary: Get goals for a habit
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of goals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Goal'
+        '404':
+          $ref: '#/components/responses/StandardError'
+    post:
+      tags:
+        - Goals
+      summary: Create a goal for a habit
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GoalInput'
+      responses:
+        '201':
+          description: Goal created
+        '404':
+          $ref: '#/components/responses/StandardError'
+        '409':
+          $ref: '#/components/responses/StandardError'
+        '422':
+          $ref: '#/components/responses/StandardError'
+
+  /habits/{id}/goals/{gid}:
+    patch:
+      tags:
+        - Goals
+      summary: Update a goal
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: gid
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GoalUpdateInput'
+      responses:
+        '200':
+          description: Goal updated
+        '404':
+          $ref: '#/components/responses/StandardError'
+        '422':
+          $ref: '#/components/responses/StandardError'
+
+  /habits/{id}/goals/{gid}/progress:
+    get:
+      tags:
+        - Goals
+      summary: Get derived goal progress
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: gid
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Derived progress and status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GoalProgress'
+        '404':
+          $ref: '#/components/responses/StandardError'
+
+  /dashboard/summary:
+    get:
+      tags:
+        - Dashboard
+      summary: Get overall dashboard metrics
+      parameters:
+        - name: date
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Pre-calculated overall metrics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardSummary'
+        '400':
+          $ref: '#/components/responses/StandardError'
+
+  /dashboard/habits-grouped:
+    get:
+      tags:
+        - Dashboard
+      summary: Get habit statistics grouped by category
+      parameters:
+        - name: date
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Grouped habit indicators
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DashboardCategoryGroup'
+        '400':
+          $ref: '#/components/responses/StandardError'
+
+  /rewards:
+    get:
+      tags:
+        - Mascot (Optional)
+      summary: Get user's unlocked reward items
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of unlocked items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RewardItem'
+        '400':
+          $ref: '#/components/responses/StandardError'
+    post:
+      tags:
+        - Mascot (Optional)
+      summary: Trigger reward unlock
+      description: Unlocks a mascot item immediately after a goal is achieved.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RewardUnlockInput'
+      responses:
+        '201':
+          description: Item unlocked successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RewardUnlockResponse'
+        '404':
+          $ref: '#/components/responses/StandardError'
+        '422':
+          $ref: '#/components/responses/StandardError'
+
+  /system/reset:
+    post:
+      tags:
+        - System
+      summary: Reset system data
+      description: Clears all user-related data (habits, check-ins, goals) on both local storage and the mock API server.
+      responses:
+        '204':
+          description: Data successfully reset
+        '500':
+          $ref: '#/components/responses/StandardError'
+
+components:
+  schemas:
+    APIError:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              example: "VALIDATION_ERROR"
+            message:
+              type: string
+              example: "Invalid input"
+            details:
+              type: ["object", "null"]
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        totalItems:
+          type: integer
+        totalPages:
+          type: integer
+
+    HabitInput:
+      type: object
+      required:
+        - name
+        - category
+        - frequency
+        - targetPerDay
+        - priority
+      properties:
+        name:
+          type: string
+        category:
+          type: string
+          enum: [Health, Study, Work, Mindfulness, Other]
+        frequency:
+          type: string
+          enum: [Daily, Custom]
+        daysOfWeek:
+          type: ["array", "null"]
+          items:
+            type: string
+            enum: [Mon, Tue, Wed, Thu, Fri, Sat, Sun]
+        targetPerDay:
+          type: integer
+          minimum: 1
+        priority:
+          type: string
+          enum: [Low, Medium, High]
+        status:
+          type: ["string", "null"]
+          enum: [Active, Paused, Archived]
+          default: Active
+
+    HabitUpdateInput:
+      type: object
+      properties:
+        status:
+          type: ["string", "null"]
+          enum: [Active, Paused, Archived]
+        name:
+          type: ["string", "null"]
+
+    HabitPaginatedResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Habit'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    CheckinInput:
+      type: object
+      required: [date, completedCount]
+      properties:
+        date:
+          type: string
+          format: date-time
+        completedCount:
+          type: integer
+
+    CheckinUpdateInput:
+      type: object
+      properties:
+        completedCount:
+          type: ["integer", "null"]
+
+    CheckinPaginatedResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Checkin'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    GoalUpdateInput:
+      type: object
+      properties:
+        targetValue:
+          type: ["integer", "null"]
+
+    RewardUnlockInput:
+      type: object
+      required: [goalId]
+      properties:
+        goalId:
+          type: string
+
+    RewardUnlockResponse:
+      type: object
+      properties:
+        unlockedItem:
+          anyOf:
+            - type: "null"
+            - $ref: '#/components/schemas/RewardItem'
+
+    Habit:
+      allOf:
+        - $ref: '#/components/schemas/HabitInput'
+        - type: object
+          properties:
+            id:
+              type: string
+            createdAt:
+              type: string
+              format: date-time
+              example: "2026-06-15T08:00:00.000+07:00"
+
+    Checkin:
+      type: object
+      properties:
+        id:
+          type: string
+        habitId:
+          type: string
+        date:
+          type: string
+          format: date-time
+          example: "2026-06-15T14:30:00.000+07:00"
+        completedCount:
+          type: integer
+        status:
+          type: string
+          enum: [Not Started, In Progress, Completed]
+
+    GoalInput:
+      type: object
+      required:
+        - targetType
+        - targetValue
+      properties:
+        targetType:
+          type: string
+          enum: [Streak, TotalCompletions]
+        targetValue:
+          type: integer
+          minimum: 1
+
+    Goal:
+      allOf:
+        - $ref: '#/components/schemas/GoalInput'
+        - type: object
+          properties:
+            id:
+              type: string
+            habitId:
+              type: string
+
+    GoalProgress:
+      type: object
+      properties:
+        currentProgress:
+          type: integer
+        progressPercent:
+          type: number
+        goalStatus:
+          type: string
+          enum: [Normal, Encouragement, Achieved]
+
+    DashboardSummary:
+      type: object
+      properties:
+        completedTodayPercent:
+          type: number
+        activeHabitsCount:
+          type: integer
+        habitsAtRiskCount:
+          type: integer
+
+    DashboardHabitIndicator:
+      type: object
+      properties:
+        habitId:
+          type: string
+        habitName:
+          type: string
+        currentStreak:
+          type: integer
+        longestStreak:
+          type: integer
+        totalCompletions:
+          type: integer
+        completionRateLast7Days:
+          type: number
+
+    DashboardCategoryGroup:
+      type: object
+      properties:
+        category:
+          type: string
+        habits:
+          type: array
+          items:
+            $ref: '#/components/schemas/DashboardHabitIndicator'
+
+    RewardItem:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+          example: "Hat"
+
+  responses:
+    StandardError:
+      description: Standard API Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIError'

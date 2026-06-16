@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Habit Tracker Pro - Developer Portal</title>
+    <!-- Lightweight Tailwind CSS via CDN for GitHub Pages compatibility -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center relative overflow-hidden">
+
+    <!-- Decorative Background -->
+    <div class="absolute inset-0 z-0">
+        <div class="absolute top-0 left-1/4 w-96 h-96 bg-blue-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
+        <div class="absolute top-0 right-1/4 w-96 h-96 bg-purple-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+        <div class="absolute -bottom-8 left-1/2 w-96 h-96 bg-pink-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
+    </div>
+
+    <!-- Content -->
+    <main class="relative z-10 max-w-4xl w-full px-6 text-center">
+        <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
+            Habit Tracker Pro
+        </h1>
+        <p class="text-xl md:text-2xl text-slate-400 mb-10 max-w-2xl mx-auto">
+            The robust API powering your next-generation habit tracking experience.
+        </p>
+
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <a href="docs/index.html" class="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-semibold transition-all shadow-lg hover:shadow-blue-500/30 transform hover:-translate-y-1">
+                View API Documentation
+            </a>
+            <a href="https://github.com/an-hp-win/Habit-Tracker-" target="_blank" rel="noopener noreferrer" class="px-8 py-4 bg-slate-800 hover:bg-slate-700 text-white rounded-lg font-semibold transition-all border border-slate-700 hover:border-slate-600">
+                GitHub Repository
+            </a>
+        </div>
+
+        <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+            <div class="p-6 bg-slate-800/50 rounded-xl border border-slate-700 backdrop-blur-sm">
+                <h3 class="text-lg font-semibold text-white mb-2">Strict OpenAPI 3.1.0</h3>
+                <p class="text-slate-400 text-sm">Fully typed and validated interface specifications ensuring reliable client-side integrations.</p>
+            </div>
+            <div class="p-6 bg-slate-800/50 rounded-xl border border-slate-700 backdrop-blur-sm">
+                <h3 class="text-lg font-semibold text-white mb-2">Backend Agnostic</h3>
+                <p class="text-slate-400 text-sm">Designed specifically to operate seamlessly with standard RESTful backends or No-Code platforms.</p>
+            </div>
+            <div class="p-6 bg-slate-800/50 rounded-xl border border-slate-700 backdrop-blur-sm">
+                <h3 class="text-lg font-semibold text-white mb-2">Modular Endpoints</h3>
+                <p class="text-slate-400 text-sm">RESTful nested routes grouping check-ins and goals intuitively under parent habits.</p>
+            </div>
+        </div>
+    </main>
+
+    <footer class="relative z-10 mt-20 text-slate-500 text-sm pb-8">
+        Designed for the NAB-WECAMP Capstone Project
+    </footer>
+
+</body>
+</html>
