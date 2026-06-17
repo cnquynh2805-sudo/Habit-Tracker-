@@ -87,5 +87,16 @@
     "errorDuplicateTitle": "Duplicate Name",
     "errorDuplicateDesc": "A habit with this name already exists. Please choose a unique name!",
     "errorSave": "Failed to save habit."
+  },
+  "tabs": {
+    "today": "Today",
+    "habits": "Habits",
+    "stats": "Stats",
+    "goals": "Goals",
+    "mascot": "Mascot",
+    "todayScreen": "Today Screen",
+    "statsScreen": "Statistics Screen",
+    "goalsScreen": "Goals Screen",
+    "mascotScreen": "Mascot Screen"
   }
 }

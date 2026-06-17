@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
   Text, 
   View, 
@@ -14,6 +15,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { styles } from './CreateHabitScreen.styles';
 
 export default function CreateHabitScreen({ route, navigation }) {
+  const { t } = useTranslation();
   const habitId = route?.params?.habitId;
   const isEditMode = !!habitId; // Currently in view/edit flow for an existing habit
 
@@ -348,11 +350,11 @@ export default function CreateHabitScreen({ route, navigation }) {
 
         {/* Habit Name Input */}
         <View style={styles.formGroup}>
-          <Text style={styles.formLabelText}>Habit Name</Text>
+          <Text style={styles.formLabelText}>{t('createHabit.habitNameLabel')}</Text>
           <View style={[styles.pencilInputWrapper, !isEditable && styles.inputFieldDisabled]}>
             <TextInput 
               style={styles.mainInputField} 
-              placeholder="e.g., Drink 8 glasses of water" 
+              placeholder={t('createHabit.habitNamePlaceholder')} 
               placeholderTextColor="#94A3B8" 
               value={habitName} 
               onChangeText={setHabitName}
@@ -365,7 +367,7 @@ export default function CreateHabitScreen({ route, navigation }) {
 
         {/* Category Chips */}
         <View style={styles.formGroup}>
-          <Text style={styles.formLabelText}>Category</Text>
+          <Text style={styles.formLabelText}>{t('createHabit.categoryLabel')}</Text>
           <View style={styles.categoryChipsMatrix}>
             {[
               { id: 'Health', label: 'Health 💚' },
@@ -383,7 +385,7 @@ export default function CreateHabitScreen({ route, navigation }) {
                   disabled={!isEditable || isLoading}
                 >
                   <Text style={[styles.figmaCategoryChipText, isSelected && styles.figmaCategoryChipTextActive]}>
-                    {chip.label}
+                    {t('category.' + chip.id.toLowerCase() + 'Emoji', { defaultValue: chip.label })}
                   </Text>
                 </TouchableOpacity>
               );
@@ -393,7 +395,7 @@ export default function CreateHabitScreen({ route, navigation }) {
 
         {/* Frequency Row */}
         <View style={styles.formInlineRow}>
-          <Text style={styles.formLabelText}>Frequency</Text>
+          <Text style={styles.formLabelText}>{t('createHabit.frequencyLabel')}</Text>
           
           <View style={styles.capsuleToggleContainer}>
             <TouchableOpacity accessible={true} accessibilityRole="button" accessibilityLabel="Interactive element"
@@ -402,7 +404,7 @@ export default function CreateHabitScreen({ route, navigation }) {
               disabled={!isEditable || isLoading}
             >
               <Text style={[styles.capsuleToggleText, frequency === 'Daily' && styles.capsuleToggleTextActive]}>
-                Daily
+                {t('frequency.daily', { defaultValue: 'Daily' })}
               </Text>
             </TouchableOpacity>
 
@@ -412,7 +414,7 @@ export default function CreateHabitScreen({ route, navigation }) {
               disabled={!isEditable || isLoading}
             >
               <Text style={[styles.capsuleToggleText, frequency === 'Custom' && styles.capsuleToggleTextActive]}>
-                {`Custom (${daysOfWeekList.length})`}
+                {t('frequency.customWithCount', { count: daysOfWeekList.length, defaultValue: `Custom (${daysOfWeekList.length})` })}
               </Text>
             </TouchableOpacity>
           </View>
@@ -421,8 +423,8 @@ export default function CreateHabitScreen({ route, navigation }) {
         {/* Target per Day Counter */}
         <View style={styles.formInlineRow}>
           <View style={styles.labelSubGroup}>
-            <Text style={styles.formLabelText}>Target per Day</Text>
-            <Text style={styles.subHintTextText}>times per day</Text>
+            <Text style={styles.formLabelText}>{t('createHabit.targetLabel')}</Text>
+            <Text style={styles.subHintTextText}>{t('createHabit.targetUnit')}</Text>
           </View>
           <View style={styles.figmaCounterPillContainer}>
             <TouchableOpacity accessible={true} accessibilityRole="button" accessibilityLabel="Interactive element" style={styles.counterCircleBtn} onPress={decrementTarget} disabled={!isEditable || isLoading}>
@@ -447,7 +449,7 @@ export default function CreateHabitScreen({ route, navigation }) {
 
         {/* Priority Grid Buttons */}
         <View style={styles.formGroup}>
-          <Text style={styles.formLabelText}>Priority</Text>
+          <Text style={styles.formLabelText}>{t('createHabit.priorityLabel')}</Text>
           <View style={styles.priorityFlexibleRow}>
             {[
               { id: 'Low', label: 'Low', activeStyle: styles.lowPriorityActiveBorder },
@@ -463,7 +465,7 @@ export default function CreateHabitScreen({ route, navigation }) {
                   disabled={!isEditable || isLoading}
                 >
                   <Text style={[styles.priorityBlockText, isSelected ? styles.priorityBlockTextActive : styles.priorityBlockTextInactive]}>
-                    {p.label}
+                    {t('priority.' + p.id.toLowerCase(), { defaultValue: p.label })}
                   </Text>
                 </TouchableOpacity>
               );
@@ -474,7 +476,7 @@ export default function CreateHabitScreen({ route, navigation }) {
         {/* Minimalist Green Footer Banner */}
         <View style={styles.bottomLightGreenBanner}>
           <View style={styles.proTipFloatingBadge}>
-            <Text style={styles.proTipTextContent}>Pro Tip: Consistency over intensity.</Text>
+            <Text style={styles.proTipTextContent}>{t('createHabit.proTip')}</Text>
           </View>
         </View>
 
@@ -489,8 +491,8 @@ export default function CreateHabitScreen({ route, navigation }) {
       >
         <View style={styles.modalOverlayBackground}>
           <View style={styles.modalContentCardBox}>
-            <Text style={styles.modalHeaderTitle}>Custom Frequency</Text>
-            <Text style={styles.modalSubDescription}>Select the active practice days</Text>
+            <Text style={styles.modalHeaderTitle}>{t('createHabit.modalCustomTitle')}</Text>
+            <Text style={styles.modalSubDescription}>{t('createHabit.modalCustomDesc')}</Text>
             
             <View style={styles.modalDaysHorizontalRow}>
               {daysOfWeekOptions.map((day) => {
@@ -513,7 +515,7 @@ export default function CreateHabitScreen({ route, navigation }) {
               style={styles.modalDoneActionButton}
               onPress={handleModalDonePress}
             >
-              <Text style={styles.modalDoneButtonText}>Done</Text>
+              <Text style={styles.modalDoneButtonText}>{t('common.done')}</Text>
             </TouchableOpacity>
           </View>
         </View>

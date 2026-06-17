@@ -95,16 +95,16 @@ This project strictly enforces UI guidelines documented in mobile-app/docs/UI_GU
 
 ### Auditing UI Code
 To scan the codebase for any responsive layout violations (e.g., hardcoded pixels > 48) or missing accessibility labels on interactive elements, run the auditor script:
-`ash
+```bash
 cd mobile-app
 npm run ui-audit
-`
+```
 
 ### Auto-Fixing Violations
-If you have existing UI violations, you can automatically remediate common layout and accessibility issues (e.g. converting width: 150 to relative percentages or injecting missing ccessible={true} tags) by running the auto-fix script:
-`ash
+If you have existing UI violations, you can automatically remediate common layout and accessibility issues (e.g. converting width: 150 to relative percentages or injecting missing accessible={true} tags) by running the auto-fix script:
+```bash
 cd mobile-app
 node scripts/auto-fix.js
-`
+```
 
 > Note: These tools are integrated into a GitHub Actions CI pipeline (.github/workflows/lint.yml) to automatically block Pull Requests that contain UI violations or invalid ESLint configurations.

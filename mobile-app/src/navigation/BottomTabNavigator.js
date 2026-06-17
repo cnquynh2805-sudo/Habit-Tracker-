@@ -1,44 +1,45 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View, Text } from 'react-native';
 import HabitListScreen from '../screens/HabitList/HabitListScreen';
 import { tabStyles } from './BottomTabNavigator.styles';
 
 // --- CLEAN DUMMY SCREENS ---
-const TodayScreen = () => (
+const TodayScreen = () => { const { t } = useTranslation(); return (
   <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F9FBF9' }}>
-    <Text style={{ fontSize: 16, color: '#2D4A3E', fontWeight: 'bold' }}>Today Screen</Text>
+    <Text style={{ fontSize: 16, color: '#2D4A3E', fontWeight: 'bold' }}>{t('tabs.todayScreen')}</Text>
   </View>
-);
+);};
 
-const StatsScreen = () => (
+const StatsScreen = () => { const { t } = useTranslation(); return (
   <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F9FBF9' }}>
-    <Text style={{ fontSize: 16, color: '#2D4A3E', fontWeight: 'bold' }}>Statistics Screen</Text>
+    <Text style={{ fontSize: 16, color: '#2D4A3E', fontWeight: 'bold' }}>{t('tabs.statsScreen')}</Text>
   </View>
-);
+);};
 
-const GoalsScreen = () => (
+const GoalsScreen = () => { const { t } = useTranslation(); return (
   <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F9FBF9' }}>
-    <Text style={{ fontSize: 16, color: '#2D4A3E', fontWeight: 'bold' }}>Goals Screen</Text>
+    <Text style={{ fontSize: 16, color: '#2D4A3E', fontWeight: 'bold' }}>{t('tabs.goalsScreen')}</Text>
   </View>
-);
+);};
 
-const MascotScreen = () => (
+const MascotScreen = () => { const { t } = useTranslation(); return (
   <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F9FBF9' }}>
-    <Text style={{ fontSize: 16, color: '#2D4A3E', fontWeight: 'bold' }}>Mascot Screen</Text>
+    <Text style={{ fontSize: 16, color: '#2D4A3E', fontWeight: 'bold' }}>{t('tabs.mascotScreen')}</Text>
   </View>
-);
+);};
 
 
 // --- ICON SUB-COMPONENTS (Isolated to Eliminate Warnings & Optimize Rendering) ---
-const TodayIcon = ({ focused }) => focused ? (
+const TodayIcon = ({ focused, t }) => focused ? (
   <View style={tabStyles.activeTabIndicatorCapsule}>
     <View style={tabStyles.vectorTabIconWrapper}>
       <View style={[tabStyles.vectorIconCalendarBase, { borderColor: '#1E4631' }]}>
         <View style={[tabStyles.vectorIconCalendarDot, { backgroundColor: '#1E4631' }]} />
       </View>
     </View>
-    <Text style={tabStyles.tabBarLabelTextActive}>Today</Text>
+    <Text style={tabStyles.tabBarLabelTextActive}>{t('tabs.today')}</Text>
   </View>
 ) : (
   <View style={tabStyles.inactiveTabContainer}>
@@ -47,11 +48,11 @@ const TodayIcon = ({ focused }) => focused ? (
         <View style={tabStyles.vectorIconCalendarDot} />
       </View>
     </View>
-    <Text style={tabStyles.tabBarLabelText}>Today</Text>
+    <Text style={tabStyles.tabBarLabelText}>{t('tabs.today')}</Text>
   </View>
 );
 
-const HabitsIcon = ({ focused }) => focused ? (
+const HabitsIcon = ({ focused, t }) => focused ? (
   <View style={tabStyles.activeTabIndicatorCapsule}>
     <View style={tabStyles.vectorTabIconWrapper}>
       <View style={tabStyles.vectorIconChecklistRow}>
@@ -59,7 +60,7 @@ const HabitsIcon = ({ focused }) => focused ? (
         <View style={tabStyles.vectorIconCheckLine} />
       </View>
     </View>
-    <Text style={tabStyles.tabBarLabelTextActive}>Habits</Text>
+    <Text style={tabStyles.tabBarLabelTextActive}>{t('tabs.habits')}</Text>
   </View>
 ) : (
   <View style={tabStyles.inactiveTabContainer}>
@@ -69,11 +70,11 @@ const HabitsIcon = ({ focused }) => focused ? (
         <View style={[tabStyles.vectorIconCheckLine, { backgroundColor: '#5F6368' }]} />
       </View>
     </View>
-    <Text style={tabStyles.tabBarLabelText}>Habits</Text>
+    <Text style={tabStyles.tabBarLabelText}>{t('tabs.habits')}</Text>
   </View>
 );
 
-const StatsIcon = ({ focused }) => focused ? (
+const StatsIcon = ({ focused, t }) => focused ? (
   <View style={tabStyles.activeTabIndicatorCapsule}>
     <View style={tabStyles.vectorTabIconWrapper}>
       <View style={tabStyles.vectorIconStatsBars}>
@@ -82,7 +83,7 @@ const StatsIcon = ({ focused }) => focused ? (
         <View style={[tabStyles.vectorStatBarSingle, { height: 10, backgroundColor: '#1E4631' }]} />
       </View>
     </View>
-    <Text style={tabStyles.tabBarLabelTextActive}>Stats</Text>
+    <Text style={tabStyles.tabBarLabelTextActive}>{t('tabs.stats')}</Text>
   </View>
 ) : (
   <View style={tabStyles.inactiveTabContainer}>
@@ -93,27 +94,27 @@ const StatsIcon = ({ focused }) => focused ? (
         <View style={[tabStyles.vectorStatBarSingle, { height: 10 }]} />
       </View>
     </View>
-    <Text style={tabStyles.tabBarLabelText}>Stats</Text>
+    <Text style={tabStyles.tabBarLabelText}>{t('tabs.stats')}</Text>
   </View>
 );
 
-const GoalsIcon = ({ focused }) => focused ? (
+const GoalsIcon = ({ focused, t }) => focused ? (
   <View style={tabStyles.activeTabIndicatorCapsule}>
     <View style={tabStyles.vectorTabIconWrapper}>
       <View style={[tabStyles.vectorIconTrophyCup, { borderColor: '#1E4631' }]} />
     </View>
-    <Text style={tabStyles.tabBarLabelTextActive}>Goals</Text>
+    <Text style={tabStyles.tabBarLabelTextActive}>{t('tabs.goals')}</Text>
   </View>
 ) : (
   <View style={tabStyles.inactiveTabContainer}>
     <View style={tabStyles.vectorTabIconWrapper}>
       <View style={tabStyles.vectorIconTrophyCup} />
     </View>
-    <Text style={tabStyles.tabBarLabelText}>Goals</Text>
+    <Text style={tabStyles.tabBarLabelText}>{t('tabs.goals')}</Text>
   </View>
 );
 
-const MascotIcon = ({ focused }) => focused ? (
+const MascotIcon = ({ focused, t }) => focused ? (
   <View style={tabStyles.activeTabIndicatorCapsule}>
     <View style={tabStyles.vectorTabIconWrapper}>
       <View style={[tabStyles.vectorIconMascotFaceSmiley, { borderColor: '#1E4631' }]}>
@@ -124,7 +125,7 @@ const MascotIcon = ({ focused }) => focused ? (
         <View style={[tabStyles.vectorIconMascotSmileMini, { borderColor: '#1E4631' }]} />
       </View>
     </View>
-    <Text style={tabStyles.tabBarLabelTextActive}>Mascot</Text>
+    <Text style={tabStyles.tabBarLabelTextActive}>{t('tabs.mascot')}</Text>
   </View>
 ) : (
   <View style={tabStyles.inactiveTabContainer}>
@@ -137,7 +138,7 @@ const MascotIcon = ({ focused }) => focused ? (
         <View style={tabStyles.vectorIconMascotSmileMini} />
       </View>
     </View>
-    <Text style={tabStyles.tabBarLabelText}>Mascot</Text>
+    <Text style={tabStyles.tabBarLabelText}>{t('tabs.mascot')}</Text>
   </View>
 );
 
@@ -146,6 +147,7 @@ const MascotIcon = ({ focused }) => focused ? (
 const Tab = createBottomTabNavigator();
 
 export default function BottomTabNavigator() {
+  const { t } = useTranslation();
   return (
     <Tab.Navigator
       initialRouteName="Habits"
@@ -164,7 +166,7 @@ export default function BottomTabNavigator() {
         name="Today" 
         component={TodayScreen}
         options={{
-          tabBarIcon: (props) => <TodayIcon {...props} />
+          tabBarIcon: (props) => <TodayIcon {...props} t={t} />
         }}
       />
 
@@ -172,7 +174,7 @@ export default function BottomTabNavigator() {
         name="Habits" 
         component={HabitListScreen}
         options={{
-          tabBarIcon: (props) => <HabitsIcon {...props} />
+          tabBarIcon: (props) => <HabitsIcon {...props} t={t} />
         }}
       />
 
@@ -180,7 +182,7 @@ export default function BottomTabNavigator() {
         name="Stats" 
         component={StatsScreen}
         options={{
-          tabBarIcon: (props) => <StatsIcon {...props} />
+          tabBarIcon: (props) => <StatsIcon {...props} t={t} />
         }}
       />
 
@@ -188,7 +190,7 @@ export default function BottomTabNavigator() {
         name="Goals" 
         component={GoalsScreen}
         options={{
-          tabBarIcon: (props) => <GoalsIcon {...props} />
+          tabBarIcon: (props) => <GoalsIcon {...props} t={t} />
         }}
       />
 
@@ -196,7 +198,7 @@ export default function BottomTabNavigator() {
         name="Mascot" 
         component={MascotScreen}
         options={{
-          tabBarIcon: (props) => <MascotIcon {...props} />
+          tabBarIcon: (props) => <MascotIcon {...props} t={t} />
         }}
       />
     </Tab.Navigator>
