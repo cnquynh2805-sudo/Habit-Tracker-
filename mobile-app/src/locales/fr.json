@@ -63,6 +63,13 @@
       "createHabit": "Créer une habitude",
       "switchLanguage": "Changer de langue",
       "switchTheme": "Changer de thème"
+    },
+    "contextMenu": {
+      "pause": "Pause",
+      "resume": "Resume",
+      "archive": "Archive",
+      "restore": "Restore",
+      "delete": "Delete"
     }
   },
   "createHabit": {
@@ -97,6 +104,14 @@
     "todayScreen": "Aujourd'hui",
     "statsScreen": "Statistiques",
     "goalsScreen": "Objectifs",
-    "mascotScreen": "Mascotte"
+    "mascotScreen": "Mascotte",
+    "tapToSeeScreenNames": "Tap to see screen names"
+  },
+  "icons": {
+    "check": "?",
+    "star": "?",
+    "arrowLeft": "?",
+    "plus": "+",
+    "kebab": "?"
   }
 }

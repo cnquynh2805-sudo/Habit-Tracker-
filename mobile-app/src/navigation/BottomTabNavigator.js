@@ -1,10 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { View, Text } from 'react-native';
+import { View, Text, TouchableOpacity, LayoutAnimation, Platform, UIManager } from 'react-native';
 import HabitListScreen from '../screens/HabitList/HabitListScreen';
 import { getTabStyles } from './BottomTabNavigator.styles';
 import { useTheme } from '../providers/ThemeProvider';
+
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 // --- CLEAN DUMMY SCREENS ---
 const TodayScreen = () => { const { t } = useTranslation(); const { colors } = useTheme(); return (
@@ -32,18 +36,20 @@ const MascotScreen = () => { const { t } = useTranslation(); const { colors } = 
 );};
 
 
-// --- ICON SUB-COMPONENTS (Isolated to Eliminate Warnings & Optimize Rendering) ---
-const TodayIcon = ({ focused, t }) => {
+// --- ICON SUB-COMPONENTS ---
+const TodayIcon = ({ focused, t, isExpanded }) => {
   const { colors } = useTheme();
   const tabStyles = getTabStyles(colors);
   return focused ? (
-  <View style={tabStyles.activeTabIndicatorCapsule}>
-    <View style={tabStyles.vectorTabIconWrapper}>
-      <View style={[tabStyles.vectorIconCalendarBase, { borderColor: colors.successDark }]}>
-        <View style={[tabStyles.vectorIconCalendarDot, { backgroundColor: colors.successDark }]} />
+  <View style={tabStyles.activeTabItemContainer}>
+    <View style={tabStyles.activeTabIndicatorCapsule}>
+      <View style={tabStyles.vectorTabIconWrapper}>
+        <View style={[tabStyles.vectorIconCalendarBase, { borderColor: colors.successDark }]}>
+          <View style={[tabStyles.vectorIconCalendarDot, { backgroundColor: colors.successDark }]} />
+        </View>
       </View>
     </View>
-    <Text style={tabStyles.tabBarLabelTextActive}>{t('tabs.today')}</Text>
+    {isExpanded && <Text style={tabStyles.tabBarLabelTextActive} adjustsFontSizeToFit={true} numberOfLines={1}>{t('tabs.today')}</Text>}
   </View>
 ) : (
   <View style={tabStyles.inactiveTabContainer}>
@@ -52,50 +58,54 @@ const TodayIcon = ({ focused, t }) => {
         <View style={tabStyles.vectorIconCalendarDot} />
       </View>
     </View>
-    <Text style={tabStyles.tabBarLabelText}>{t('tabs.today')}</Text>
+    {isExpanded && <Text style={tabStyles.tabBarLabelText} adjustsFontSizeToFit={true} numberOfLines={1}>{t('tabs.today')}</Text>}
   </View>
   );
 };
 
-const HabitsIcon = ({ focused, t }) => {
+const HabitsIcon = ({ focused, t, isExpanded }) => {
   const { colors } = useTheme();
   const tabStyles = getTabStyles(colors);
   return focused ? (
-  <View style={tabStyles.activeTabIndicatorCapsule}>
-    <View style={tabStyles.vectorTabIconWrapper}>
-      <View style={tabStyles.vectorIconChecklistRow}>
-        <Text style={tabStyles.vectorIconCheckmarkMini}>✓</Text>
-        <View style={tabStyles.vectorIconCheckLine} />
+  <View style={tabStyles.activeTabItemContainer}>
+    <View style={tabStyles.activeTabIndicatorCapsule}>
+      <View style={tabStyles.vectorTabIconWrapper}>
+        <View style={tabStyles.vectorIconChecklistRow}>
+          <Text style={tabStyles.vectorIconCheckmarkMini}>{t('icons.check')}</Text>
+          <View style={tabStyles.vectorIconCheckLine} />
+        </View>
       </View>
     </View>
-    <Text style={tabStyles.tabBarLabelTextActive}>{t('tabs.habits')}</Text>
+    {isExpanded && <Text style={tabStyles.tabBarLabelTextActive} adjustsFontSizeToFit={true} numberOfLines={1}>{t('tabs.habits')}</Text>}
   </View>
 ) : (
   <View style={tabStyles.inactiveTabContainer}>
     <View style={tabStyles.vectorTabIconWrapper}>
       <View style={tabStyles.vectorIconChecklistRow}>
-        <Text style={[tabStyles.vectorIconCheckmarkMini, { color: colors.textMuted }]}>✓</Text>
+        <Text style={[tabStyles.vectorIconCheckmarkMini, { color: colors.textMuted }]}>{t('icons.check')}</Text>
         <View style={[tabStyles.vectorIconCheckLine, { backgroundColor: colors.textMuted }]} />
       </View>
     </View>
-    <Text style={tabStyles.tabBarLabelText}>{t('tabs.habits')}</Text>
+    {isExpanded && <Text style={tabStyles.tabBarLabelText} adjustsFontSizeToFit={true} numberOfLines={1}>{t('tabs.habits')}</Text>}
   </View>
   );
 };
 
-const StatsIcon = ({ focused, t }) => {
+const StatsIcon = ({ focused, t, isExpanded }) => {
   const { colors } = useTheme();
   const tabStyles = getTabStyles(colors);
   return focused ? (
-  <View style={tabStyles.activeTabIndicatorCapsule}>
-    <View style={tabStyles.vectorTabIconWrapper}>
-      <View style={tabStyles.vectorIconStatsBars}>
-        <View style={[tabStyles.vectorStatBarSingle, { height: 8, backgroundColor: colors.successDark }]} />
-        <View style={[tabStyles.vectorStatBarSingle, { height: 14, backgroundColor: colors.successDark }]} />
-        <View style={[tabStyles.vectorStatBarSingle, { height: 10, backgroundColor: colors.successDark }]} />
+  <View style={tabStyles.activeTabItemContainer}>
+    <View style={tabStyles.activeTabIndicatorCapsule}>
+      <View style={tabStyles.vectorTabIconWrapper}>
+        <View style={tabStyles.vectorIconStatsBars}>
+          <View style={[tabStyles.vectorStatBarSingle, { height: 8, backgroundColor: colors.successDark }]} />
+          <View style={[tabStyles.vectorStatBarSingle, { height: 14, backgroundColor: colors.successDark }]} />
+          <View style={[tabStyles.vectorStatBarSingle, { height: 10, backgroundColor: colors.successDark }]} />
+        </View>
       </View>
     </View>
-    <Text style={tabStyles.tabBarLabelTextActive}>{t('tabs.stats')}</Text>
+    {isExpanded && <Text style={tabStyles.tabBarLabelTextActive} adjustsFontSizeToFit={true} numberOfLines={1}>{t('tabs.stats')}</Text>}
   </View>
 ) : (
   <View style={tabStyles.inactiveTabContainer}>
@@ -106,46 +116,50 @@ const StatsIcon = ({ focused, t }) => {
         <View style={[tabStyles.vectorStatBarSingle, { height: 10 }]} />
       </View>
     </View>
-    <Text style={tabStyles.tabBarLabelText}>{t('tabs.stats')}</Text>
+    {isExpanded && <Text style={tabStyles.tabBarLabelText} adjustsFontSizeToFit={true} numberOfLines={1}>{t('tabs.stats')}</Text>}
   </View>
   );
 };
 
-const GoalsIcon = ({ focused, t }) => {
+const GoalsIcon = ({ focused, t, isExpanded }) => {
   const { colors } = useTheme();
   const tabStyles = getTabStyles(colors);
   return focused ? (
-  <View style={tabStyles.activeTabIndicatorCapsule}>
-    <View style={tabStyles.vectorTabIconWrapper}>
-      <View style={[tabStyles.vectorIconTrophyCup, { borderColor: colors.successDark }]} />
+  <View style={tabStyles.activeTabItemContainer}>
+    <View style={tabStyles.activeTabIndicatorCapsule}>
+      <View style={tabStyles.vectorTabIconWrapper}>
+        <View style={[tabStyles.vectorIconTrophyCup, { borderColor: colors.successDark }]} />
+      </View>
     </View>
-    <Text style={tabStyles.tabBarLabelTextActive}>{t('tabs.goals')}</Text>
+    {isExpanded && <Text style={tabStyles.tabBarLabelTextActive} adjustsFontSizeToFit={true} numberOfLines={1}>{t('tabs.goals')}</Text>}
   </View>
 ) : (
   <View style={tabStyles.inactiveTabContainer}>
     <View style={tabStyles.vectorTabIconWrapper}>
       <View style={tabStyles.vectorIconTrophyCup} />
     </View>
-    <Text style={tabStyles.tabBarLabelText}>{t('tabs.goals')}</Text>
+    {isExpanded && <Text style={tabStyles.tabBarLabelText} adjustsFontSizeToFit={true} numberOfLines={1}>{t('tabs.goals')}</Text>}
   </View>
   );
 };
 
-const MascotIcon = ({ focused, t }) => {
+const MascotIcon = ({ focused, t, isExpanded }) => {
   const { colors } = useTheme();
   const tabStyles = getTabStyles(colors);
   return focused ? (
-  <View style={tabStyles.activeTabIndicatorCapsule}>
-    <View style={tabStyles.vectorTabIconWrapper}>
-      <View style={[tabStyles.vectorIconMascotFaceSmiley, { borderColor: colors.successDark }]}>
-        <View style={tabStyles.vectorIconMascotEyesLine}>
-          <View style={[tabStyles.vectorIconMascotEyeDot, { backgroundColor: colors.successDark }]} />
-          <View style={[tabStyles.vectorIconMascotEyeDot, { backgroundColor: colors.successDark }]} />
+  <View style={tabStyles.activeTabItemContainer}>
+    <View style={tabStyles.activeTabIndicatorCapsule}>
+      <View style={tabStyles.vectorTabIconWrapper}>
+        <View style={[tabStyles.vectorIconMascotFaceSmiley, { borderColor: colors.successDark }]}>
+          <View style={tabStyles.vectorIconMascotEyesLine}>
+            <View style={[tabStyles.vectorIconMascotEyeDot, { backgroundColor: colors.successDark }]} />
+            <View style={[tabStyles.vectorIconMascotEyeDot, { backgroundColor: colors.successDark }]} />
+          </View>
+          <View style={[tabStyles.vectorIconMascotSmileMini, { borderColor: colors.successDark }]} />
         </View>
-        <View style={[tabStyles.vectorIconMascotSmileMini, { borderColor: colors.successDark }]} />
       </View>
     </View>
-    <Text style={tabStyles.tabBarLabelTextActive}>{t('tabs.mascot')}</Text>
+    {isExpanded && <Text style={tabStyles.tabBarLabelTextActive} adjustsFontSizeToFit={true} numberOfLines={1}>{t('tabs.mascot')}</Text>}
   </View>
 ) : (
   <View style={tabStyles.inactiveTabContainer}>
@@ -158,7 +172,7 @@ const MascotIcon = ({ focused, t }) => {
         <View style={tabStyles.vectorIconMascotSmileMini} />
       </View>
     </View>
-    <Text style={tabStyles.tabBarLabelText}>{t('tabs.mascot')}</Text>
+    {isExpanded && <Text style={tabStyles.tabBarLabelText} adjustsFontSizeToFit={true} numberOfLines={1}>{t('tabs.mascot')}</Text>}
   </View>
   );
 };
@@ -171,59 +185,84 @@ export default function BottomTabNavigator() {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const tabStyles = getTabStyles(colors);
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const toggleExpand = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setIsExpanded(!isExpanded);
+  };
+
   return (
-    <Tab.Navigator
-      initialRouteName="Habits"
-      screenOptions={{
-        headerShown: false,
-        tabBarShowLabel: false,
-        tabBarStyle: tabStyles.globalBottomTabBar,
-        tabBarItemStyle: {
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '100%',
-        },
-      }}
-    >
-      <Tab.Screen 
-        name="Today" 
-        component={TodayScreen}
-        options={{
-          tabBarIcon: (props) => <TodayIcon {...props} t={t} />
+    <View style={{ flex: 1 }}>
+      <Tab.Navigator
+        initialRouteName="Habits"
+        screenOptions={{
+          headerShown: false,
+          tabBarShowLabel: false,
+          tabBarStyle: isExpanded ? tabStyles.globalBottomTabBarExpanded : tabStyles.globalBottomTabBar,
+          tabBarItemStyle: isExpanded ? tabStyles.tabBarItemExpanded : tabStyles.tabBarItem,
         }}
-      />
+      >
+        <Tab.Screen 
+          name="Today" 
+          component={TodayScreen}
+          options={{
+            tabBarIcon: (props) => <TodayIcon {...props} t={t} isExpanded={isExpanded} />
+          }}
+        />
 
-      <Tab.Screen 
-        name="Habits" 
-        component={HabitListScreen}
-        options={{
-          tabBarIcon: (props) => <HabitsIcon {...props} t={t} />
-        }}
-      />
+        <Tab.Screen 
+          name="Habits" 
+          component={HabitListScreen}
+          options={{
+            tabBarIcon: (props) => <HabitsIcon {...props} t={t} isExpanded={isExpanded} />
+          }}
+        />
 
-      <Tab.Screen 
-        name="Stats" 
-        component={StatsScreen}
-        options={{
-          tabBarIcon: (props) => <StatsIcon {...props} t={t} />
-        }}
-      />
+        <Tab.Screen 
+          name="Stats" 
+          component={StatsScreen}
+          options={{
+            tabBarIcon: (props) => <StatsIcon {...props} t={t} isExpanded={isExpanded} />
+          }}
+        />
 
-      <Tab.Screen 
-        name="Goals" 
-        component={GoalsScreen}
-        options={{
-          tabBarIcon: (props) => <GoalsIcon {...props} t={t} />
-        }}
-      />
+        <Tab.Screen 
+          name="Goals" 
+          component={GoalsScreen}
+          options={{
+            tabBarIcon: (props) => <GoalsIcon {...props} t={t} isExpanded={isExpanded} />
+          }}
+        />
 
-      <Tab.Screen 
-        name="Mascot" 
-        component={MascotScreen}
-        options={{
-          tabBarIcon: (props) => <MascotIcon {...props} t={t} />
-        }}
-      />
-    </Tab.Navigator>
+        <Tab.Screen 
+          name="Mascot" 
+          component={MascotScreen}
+          options={{
+            tabBarIcon: (props) => <MascotIcon {...props} t={t} isExpanded={isExpanded} />
+          }}
+        />
+      </Tab.Navigator>
+
+      {!isExpanded && (
+        <View style={tabStyles.expandHandleWrapper}>
+          <Text style={tabStyles.helperPromptText}>
+            {t('tabs.tapToSeeScreenNames')}
+          </Text>
+          <TouchableOpacity onPress={toggleExpand} style={tabStyles.tripleArrowIconBase} activeOpacity={0.7}>
+            <View style={tabStyles.arrowLineTop} />
+            <View style={tabStyles.arrowLineMid} />
+            <View style={tabStyles.arrowLineBot} />
+          </TouchableOpacity>
+        </View>
+      )}
+      {isExpanded && (
+        <TouchableOpacity style={tabStyles.collapseHandleWrapper} onPress={toggleExpand} activeOpacity={0.7}>
+          <View style={tabStyles.arrowLineBot} />
+          <View style={tabStyles.arrowLineMid} />
+          <View style={tabStyles.arrowLineTop} />
+        </TouchableOpacity>
+      )}
+    </View>
   );
 }

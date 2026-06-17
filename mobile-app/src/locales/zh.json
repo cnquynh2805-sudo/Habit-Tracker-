@@ -63,6 +63,13 @@
       "createHabit": "创建新习惯",
       "switchLanguage": "切换语言",
       "switchTheme": "切换主题"
+    },
+    "contextMenu": {
+      "pause": "Pause",
+      "resume": "Resume",
+      "archive": "Archive",
+      "restore": "Restore",
+      "delete": "Delete"
     }
   },
   "createHabit": {
@@ -97,6 +104,14 @@
     "todayScreen": "今天",
     "statsScreen": "统计",
     "goalsScreen": "目标",
-    "mascotScreen": "吉祥物"
+    "mascotScreen": "吉祥物",
+    "tapToSeeScreenNames": "Tap to see screen names"
+  },
+  "icons": {
+    "check": "?",
+    "star": "?",
+    "arrowLeft": "?",
+    "plus": "+",
+    "kebab": "?"
   }
 }

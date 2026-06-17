@@ -63,6 +63,13 @@
       "createHabit": "Neue Gewohnheit",
       "switchLanguage": "Sprache wechseln",
       "switchTheme": "Thema wechseln"
+    },
+    "contextMenu": {
+      "pause": "Pause",
+      "resume": "Resume",
+      "archive": "Archive",
+      "restore": "Restore",
+      "delete": "Delete"
     }
   },
   "createHabit": {
@@ -97,6 +104,14 @@
     "todayScreen": "Heute",
     "statsScreen": "Statistiken",
     "goalsScreen": "Ziele",
-    "mascotScreen": "Maskottchen"
+    "mascotScreen": "Maskottchen",
+    "tapToSeeScreenNames": "Tap to see screen names"
+  },
+  "icons": {
+    "check": "?",
+    "star": "?",
+    "arrowLeft": "?",
+    "plus": "+",
+    "kebab": "?"
   }
 }

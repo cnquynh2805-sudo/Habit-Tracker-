@@ -151,25 +151,25 @@ export default function HabitListScreen({ navigation }) {
     switch (currentStatus) {
       case "Active":
         options = [
-          { id: "Paused", label: "Pause" },
-          { id: "Archived", label: "Archive" },
+          { id: "Paused", label: t('habitList.contextMenu.pause') },
+          { id: "Archived", label: t('habitList.contextMenu.archive') },
         ];
         break;
       case "Paused":
         options = [
-          { id: "Active", label: "Resume" },
-          { id: "Archived", label: "Archive" },
+          { id: "Active", label: t('habitList.contextMenu.resume') },
+          { id: "Archived", label: t('habitList.contextMenu.archive') },
         ];
         break;
       case "Archived":
-        options = [{ id: "Active", label: "Restore" }];
+        options = [{ id: "Active", label: t('habitList.contextMenu.restore') }];
         break;
       default:
         options = [];
     }
 
     // Always append the Delete option at the end of the context dropdown
-    return [...options, { id: "delete", label: "Delete", isDestructive: true }];
+    return [...options, { id: "delete", label: t('habitList.contextMenu.delete'), isDestructive: true }];
   };
 
   const filteredHabits = habits.filter((item) => {
@@ -227,14 +227,14 @@ export default function HabitListScreen({ navigation }) {
         return {
           bg: colors.priorityLowBg,
           text: colors.priorityLowText,
-          label: t("priority.lowLong", { defaultValue: "Low Priority" }),
+          label: t("priority.lowLong"),
           stripe: colors.priorityLowStripe,
         };
       case "high":
         return {
           bg: colors.priorityHighBg,
           text: colors.priorityHighText,
-          label: t("priority.highLong", { defaultValue: "High Priority" }),
+          label: t("priority.highLong"),
           stripe: colors.priorityHighStripe,
         };
       case "medium":
@@ -242,7 +242,7 @@ export default function HabitListScreen({ navigation }) {
         return {
           bg: colors.priorityMediumBg,
           text: colors.priorityMediumText,
-          label: t("priority.mediumLong", { defaultValue: "Medium Priority" }),
+          label: t("priority.mediumLong"),
           stripe: colors.priorityMediumStripe,
         };
     }
@@ -309,86 +309,21 @@ export default function HabitListScreen({ navigation }) {
                 {item.name}
               </Text>
 
-              <View style={styles.cardBadgesRow}>
-                <View
-                  style={[
-                    styles.miniMetaBadge,
-                    { backgroundColor: categoryBadgeBg },
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.miniMetaBadgeText,
-                      { color: categoryBadgeText },
-                    ]}
-                  >
-                    {item.category}
-                  </Text>
-                </View>
-                <View
-                  style={[
-                    styles.miniMetaBadge,
-                    { backgroundColor: colors.border },
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.miniMetaBadgeText,
-                      { color: colors.textMuted },
-                    ]}
-                  >
-                    {item.frequency}
-                  </Text>
-                </View>
-              </View>
-
-              <View style={styles.priorityCapsuleRow}>
-                <View
-                  style={[
-                    styles.figmaPriorityCapsuleBase,
-                    { backgroundColor: priTheme.bg },
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.figmaPriorityCapsuleText,
-                      { color: priTheme.text },
-                    ]}
-                  >
-                    {priTheme.label}
-                  </Text>
-                </View>
-              </View>
+              <DynamicPriorityTagsGrid
+                item={item}
+                currentStatus={currentStatus}
+                categoryBadgeBg={categoryBadgeBg}
+                categoryBadgeText={categoryBadgeText}
+                colors={colors}
+                styles={styles}
+                t={t}
+                isDropdownVisible={isDropdownVisible}
+                setActiveDropdownId={setActiveDropdownId}
+                priTheme={priTheme}
+              />
             </View>
 
             <View style={styles.cardRightActionBlock}>
-              <TouchableOpacity
-                accessible
-                accessibilityRole="button"
-                accessibilityLabel="Interactive element"
-                style={[
-                  styles.statusCapsule,
-                  currentStatus === "Active" && styles.statusCapsuleActive,
-                  currentStatus === "Paused" && styles.statusCapsulePaused,
-                  currentStatus === "Archived" && styles.statusCapsuleArchived,
-                ]}
-                onPress={() =>
-                  setActiveDropdownId(isDropdownVisible ? null : item.id)
-                }
-                activeOpacity={0.7}
-              >
-                <Text
-                  style={[
-                    styles.statusCapsuleText,
-                    currentStatus === "Active" && styles.statusTextActive,
-                    currentStatus === "Paused" && styles.statusTextPaused,
-                    currentStatus === "Archived" && styles.statusTextArchived,
-                  ]}
-                >
-                  {currentStatus}
-                </Text>
-              </TouchableOpacity>
-
               <View style={styles.figmaChevronRightContainer}>
                 <View style={styles.figmaChevronLineTop} />
                 <View style={styles.figmaChevronLineBottom} />
@@ -689,3 +624,108 @@ export default function HabitListScreen({ navigation }) {
     </SafeAreaView>
   );
 }
+
+
+const DynamicPriorityTagsGrid = ({ item, currentStatus, categoryBadgeBg, categoryBadgeText, colors, styles, t, isDropdownVisible, setActiveDropdownId, priTheme }) => {
+  const [topGroupWidth, setTopGroupWidth] = React.useState(null);
+
+  return (
+    <View style={styles.cardTagsGrid}>
+      <View style={styles.cardTagsRow}>
+        <View 
+          style={{ flexDirection: 'row', gap: 8, alignSelf: 'flex-start' }}
+          onLayout={(e) => setTopGroupWidth(e.nativeEvent.layout.width)}
+        >
+          <View
+            style={[
+              styles.miniMetaBadge,
+              { backgroundColor: categoryBadgeBg },
+            ]}
+          >
+            <Text
+              style={[
+                styles.miniMetaBadgeText,
+                { color: categoryBadgeText },
+              ]}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+              adjustsFontSizeToFit={true}
+            >
+              {t(`category.${(item.category || '').toLowerCase()}`)}
+            </Text>
+          </View>
+          <View
+            style={[
+              styles.miniMetaBadge,
+              { backgroundColor: colors.border },
+            ]}
+          >
+            <Text
+              style={[
+                styles.miniMetaBadgeText,
+                { color: colors.textMuted },
+              ]}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+              adjustsFontSizeToFit={true}
+            >
+              {t(`frequency.${(item.frequency || '').toLowerCase()}`)}
+            </Text>
+          </View>
+        </View>
+
+        <TouchableOpacity
+          accessible
+          accessibilityRole="button"
+          accessibilityLabel="Interactive element"
+          style={[
+            styles.statusCapsule,
+            currentStatus === "Active" && styles.statusCapsuleActive,
+            currentStatus === "Paused" && styles.statusCapsulePaused,
+            currentStatus === "Archived" && styles.statusCapsuleArchived,
+          ]}
+          onPress={() =>
+            setActiveDropdownId(isDropdownVisible ? null : item.id)
+          }
+          activeOpacity={0.7}
+        >
+          <Text
+            style={[
+              styles.statusCapsuleText,
+              currentStatus === "Active" && styles.statusTextActive,
+              currentStatus === "Paused" && styles.statusTextPaused,
+              currentStatus === "Archived" && styles.statusTextArchived,
+            ]}
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            adjustsFontSizeToFit={true}
+          >
+            {t(`status.${currentStatus.toLowerCase()}`)}
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.cardTagsRow}>
+        <View
+          style={[
+            styles.figmaPriorityCapsuleBase,
+            { backgroundColor: priTheme.bg },
+            topGroupWidth ? { width: topGroupWidth } : { flexShrink: 1 }
+          ]}
+        >
+          <Text
+            style={[
+              styles.figmaPriorityCapsuleText,
+              { color: priTheme.text },
+            ]}
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            adjustsFontSizeToFit={true}
+          >
+            {priTheme.label}
+          </Text>
+        </View>
+      </View>
+    </View>
+  );
+};
