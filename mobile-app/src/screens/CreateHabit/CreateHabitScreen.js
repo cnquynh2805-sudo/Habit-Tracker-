@@ -1,0 +1,516 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  Text, 
+  View, 
+  TextInput, 
+  TouchableOpacity, 
+  ScrollView, 
+  Alert, 
+  ActivityIndicator,
+  Modal
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { styles } from './CreateHabitScreen.styles';
+
+export default function CreateHabitScreen({ route, navigation }) {
+  const habitId = route?.params?.habitId;
+  const isEditMode = !!habitId; // Currently in view/edit flow for an existing habit
+
+  // Standard Editable Logic: If creating new, open immediately; if viewing existing, lock initially (false)
+  const [isEditable, setIsEditable] = useState(!isEditMode);
+  const [habitName, setHabitName] = useState('');
+  const [category, setCategory] = useState('Mindfulness'); 
+  const [frequency, setFrequency] = useState('Daily'); 
+  const [currentStatus, setCurrentStatus] = useState('active'); // Runs in the background to preserve logic
+  const [customDays, setCustomDays] = useState([]); 
+  const [targetPerDay, setTargetPerDay] = useState('1'); 
+  const [priority, setPriority] = useState('Medium'); 
+  
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Backup state to restore original data if the user presses "Cancel" while editing
+  const [backupData, setBackupData] = useState(null);
+
+  const daysOfWeek = [
+    { id: 'Mon', label: 'M' },
+    { id: 'Tue', label: 'T' },
+    { id: 'Wed', label: 'W' },
+    { id: 'Thu', label: 'T' },
+    { id: 'Fri', label: 'F' },
+    { id: 'Sat', label: 'S' },
+    { id: 'Sun', label: 'S' },
+  ];
+
+  useEffect(() => {
+    if (isEditMode) {
+      loadHabitForEditing();
+    } else {
+      setCurrentStatus('active');
+    }
+  }, [isEditMode]);
+
+  const loadHabitForEditing = async () => {
+    try {
+      const existingDataJson = await AsyncStorage.getItem('@habits_list');
+      if (existingDataJson) {
+        const habitsList = JSON.parse(existingDataJson);
+        const targetHabit = habitsList.find(h => h.id === habitId);
+        if (targetHabit) {
+          // Populate data into the form
+          setHabitName(targetHabit.name);
+          setCategory(targetHabit.category || 'Mindfulness');
+          setFrequency(targetHabit.frequency || 'Daily');
+          setCustomDays(targetHabit.custom_days || []);
+          setTargetPerDay((targetHabit.target_per_day || 1).toString());
+          setCurrentStatus(targetHabit.status || 'active'); // Keep old status in background to prevent data loss
+          const rawPriority = targetHabit.priority || 'medium';
+          const formattedPriority = rawPriority.charAt(0).toUpperCase() + rawPriority.slice(1);
+          setPriority(formattedPriority);
+
+          // Save backup in case user cancels during editing
+          setBackupData({
+            name: targetHabit.name,
+            category: targetHabit.category || 'Mindfulness',
+            frequency: targetHabit.frequency || 'Daily',
+            custom_days: targetHabit.custom_days || [],
+            target_per_day: (targetHabit.target_per_day || 1).toString(),
+            status: targetHabit.status || 'active',
+            priority: formattedPriority
+          });
+        }
+      }
+    } catch (e) {
+      console.log('Error loading habit details:', e);
+    }
+  };
+
+  // LEFT HEADER BUTTON ACTION (Cancel or Delete)
+  const handleLeftHeaderPress = () => {
+    if (!isEditMode) {
+      if (navigation) navigation.goBack();
+    } else {
+      if (isEditable) {
+        if (backupData) {
+          setHabitName(backupData.name);
+          setCategory(backupData.category);
+          setFrequency(backupData.frequency);
+          setCustomDays(backupData.custom_days);
+          setTargetPerDay(backupData.target_per_day);
+          setCurrentStatus(backupData.status);
+          setPriority(backupData.priority);
+        }
+        setIsEditable(false);
+      } else {
+        handleDeleteAction();
+      }
+    }
+  };
+
+  // RIGHT HEADER BUTTON ACTION (Save or Edit)
+  const handleRightHeaderPress = () => {
+    if (isEditable) {
+      handleSaveAction();
+    } else {
+      setIsEditable(true);
+    }
+  };
+
+  const handleFrequencyPress = (type) => {
+    setFrequency(type);
+    if (type === 'Custom' && isEditable) {
+      setIsModalVisible(true);
+    }
+  };
+
+  const handleToggleDay = (dayId) => {
+    if (customDays.includes(dayId)) {
+      setCustomDays(customDays.filter(d => d !== dayId));
+    } else {
+      setCustomDays([...customDays, dayId]);
+    }
+  };
+
+  const handleModalCloseRequest = () => {
+    if (customDays.length === 0) {
+      setFrequency('Daily');
+    }
+    setIsModalVisible(false);
+  };
+
+  const handleModalDonePress = () => {
+    if (customDays.length === 0) {
+      Alert.alert(
+        'Required', 
+        'Please select at least one day for your custom schedule.',
+        [{ text: 'OK' }]
+      );
+      return;
+    }
+    setIsModalVisible(false);
+  };
+
+  const incrementTarget = () => {
+    if (!isEditable) return;
+    const current = parseInt(targetPerDay, 10) || 0;
+    setTargetPerDay((current + 1).toString());
+  };
+
+  const decrementTarget = () => {
+    if (!isEditable) return;
+    const current = parseInt(targetPerDay, 10) || 0;
+    if (current > 1) setTargetPerDay((current - 1).toString());
+    else setTargetPerDay('1');
+  };
+
+  const handleSaveAction = async () => {
+    const cleanedName = habitName.trim();
+    if (!cleanedName) {
+      Alert.alert('Error', 'Please enter a habit name.');
+      return;
+    }
+    
+    if (frequency === 'Custom' && customDays.length === 0) {
+      Alert.alert('Error', 'Please select at least one day for Custom frequency.');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const existingHabitsJson = await AsyncStorage.getItem('@habits_list');
+      let currentHabits = existingHabitsJson ? JSON.parse(existingHabitsJson) : [];
+      
+      const isNameDuplicate = currentHabits.some(habit => {
+        const isSameName = habit.name.trim().toLowerCase() === cleanedName.toLowerCase();
+        if (isEditMode) {
+          return isSameName && habit.id !== habitId;
+        }
+        return isSameName;
+      });
+
+      if (isNameDuplicate) {
+        Alert.alert(
+          'Duplicate Name', 
+          'A habit with this name already exists. Please choose a unique name!'
+        );
+        setIsLoading(false);
+        return;
+      }
+
+      // New habit flow is always 'active', edit flow keeps the existing background status
+      const finalStatus = isEditMode ? currentStatus : 'active';
+      const canCheckIn = finalStatus === 'active';
+
+      if (isEditMode) {
+        currentHabits = currentHabits.map(habit => {
+          if (habit.id === habitId) {
+            return {
+              ...habit,
+              name: cleanedName,
+              category: category,
+              frequency: frequency,
+              custom_days: frequency === 'Custom' ? customDays : null,
+              target_per_day: parseInt(targetPerDay, 10) || 1,
+              priority: priority.toLowerCase(),
+              status: finalStatus,        
+              can_checkin: canCheckIn,    
+              is_synced: false
+            };
+          }
+          return habit;
+        });
+        
+        setBackupData({
+          name: cleanedName,
+          category: category,
+          frequency: frequency,
+          custom_days: frequency === 'Custom' ? customDays : [],
+          target_per_day: targetPerDay,
+          status: finalStatus,
+          priority: priority
+        });
+
+        await AsyncStorage.setItem('@habits_list', JSON.stringify(currentHabits));
+        setIsEditable(false);
+      } else {
+        const newHabit = {
+          id: Date.now().toString(), 
+          name: cleanedName,
+          category: category,             
+          frequency: frequency,           
+          custom_days: frequency === 'Custom' ? customDays : null,
+          target_per_day: parseInt(targetPerDay, 10) || 1, 
+          priority: priority.toLowerCase(), 
+          status: 'active',              
+          can_checkin: true,        
+          is_synced: false, 
+          created_at: new Date().toISOString()
+        };
+        currentHabits.unshift(newHabit);
+        await AsyncStorage.setItem('@habits_list', JSON.stringify(currentHabits));
+        if (navigation) navigation.goBack();
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to save habit.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDeleteAction = () => {
+    Alert.alert(
+      'Delete Habit',
+      'Are you sure you want to delete this habit permanently?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Delete', 
+          style: 'destructive',
+          onPress: async () => {
+            setIsLoading(true);
+            try {
+              const existingHabitsJson = await AsyncStorage.getItem('@habits_list');
+              if (existingHabitsJson) {
+                const currentHabits = JSON.parse(existingHabitsJson);
+                const updatedList = currentHabits.filter(h => h.id !== habitId);
+                await AsyncStorage.setItem('@habits_list', JSON.stringify(updatedList));
+                if (navigation) navigation.goBack();
+              }
+            } catch (e) {
+              console.log('Error deleting habit:', e);
+            } finally {
+              setIsLoading(false);
+            }
+          }
+        }
+      ]
+    );
+  };
+
+  return (
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+      <View style={styles.topHeaderContainer}>
+        <TouchableOpacity onPress={handleLeftHeaderPress} disabled={isLoading}>
+          <Text style={!isEditMode || isEditable ? styles.headerCancelText : styles.headerDeleteText}>
+            {!isEditMode ? 'Cancel' : (isEditable ? 'Cancel' : 'Delete')}
+          </Text>
+        </TouchableOpacity>
+        
+        <Text style={styles.headerTitleText}>
+          {!isEditMode ? 'New Habit' : (isEditable ? 'Edit Habit' : 'Habit Detail')}
+        </Text>
+
+        <TouchableOpacity 
+          style={styles.headerSaveCapsuleButton} 
+          onPress={handleRightHeaderPress} 
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <ActivityIndicator size="small" color="#FFFFFF" />
+          ) : (
+            <Text style={styles.headerSaveCapsuleText}>
+              {isEditable ? 'Save' : 'Edit'}
+            </Text>
+          )}
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+        
+        {/* Mascot Speech Bubble */}
+        <View style={styles.mascotSpeechSection}>
+          <View style={styles.mascotRoundAvatar}>
+            <View style={styles.mascotMiniFace}>
+              <View style={styles.mascotMiniEyesRow}>
+                <View style={styles.mascotMiniEye} />
+                <View style={styles.mascotMiniEye} />
+              </View>
+              <View style={styles.mascotMiniSmile} />
+            </View>
+          </View>
+          <View style={styles.mascotBubbleCloud}>
+            <Text style={styles.mascotBubbleText}>
+              {!isEditMode 
+                ? "Starting a new habit is the first step towards a better you! What shall we tackle today?"
+                : (isEditable ? "Tweak your progress metrics here to stay on track!" : "Review your progress metrics below.")}
+            </Text>
+          </View>
+        </View>
+
+        {/* Habit Name Input */}
+        <View style={styles.formGroup}>
+          <Text style={styles.formLabelText}>Habit Name</Text>
+          <View style={[styles.pencilInputWrapper, !isEditable && styles.inputFieldDisabled]}>
+            <TextInput 
+              style={styles.mainInputField} 
+              placeholder="e.g., Drink 8 glasses of water" 
+              placeholderTextColor="#94A3B8" 
+              value={habitName} 
+              onChangeText={setHabitName}
+              editable={isEditable && !isLoading}
+              multiline={true}
+              textAlignVertical="center"
+            />
+          </View>
+        </View>
+
+        {/* Category Chips */}
+        <View style={styles.formGroup}>
+          <Text style={styles.formLabelText}>Category</Text>
+          <View style={styles.categoryChipsMatrix}>
+            {[
+              { id: 'Health', label: 'Health 💚' },
+              { id: 'Study', label: 'Study 📘' },
+              { id: 'Work', label: 'Work 💼' },
+              { id: 'Mindfulness', label: 'Mindfulness 🧘' },
+              { id: 'Other', label: 'Other ⭐' }
+            ].map(chip => {
+              const isSelected = category === chip.id;
+              return (
+                <TouchableOpacity
+                  key={chip.id}
+                  style={[styles.figmaCategoryChip, isSelected && styles.figmaCategoryChipActive]}
+                  onPress={() => setCategory(chip.id)}
+                  disabled={!isEditable || isLoading}
+                >
+                  <Text style={[styles.figmaCategoryChipText, isSelected && styles.figmaCategoryChipTextActive]}>
+                    {chip.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </View>
+
+        {/* Frequency Row */}
+        <View style={styles.formInlineRow}>
+          <Text style={styles.formLabelText}>Frequency</Text>
+          
+          <View style={styles.capsuleToggleContainer}>
+            <TouchableOpacity
+              style={[styles.capsuleToggleButton, frequency === 'Daily' && styles.capsuleToggleButtonActive]}
+              onPress={() => handleFrequencyPress('Daily')}
+              disabled={!isEditable || isLoading}
+            >
+              <Text style={[styles.capsuleToggleText, frequency === 'Daily' && styles.capsuleToggleTextActive]}>
+                Daily
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.capsuleToggleButton, frequency === 'Custom' && styles.capsuleToggleButtonActive]}
+              onPress={() => handleFrequencyPress('Custom')}
+              disabled={!isEditable || isLoading}
+            >
+              <Text style={[styles.capsuleToggleText, frequency === 'Custom' && styles.capsuleToggleTextActive]}>
+                {`Custom (${customDays.length})`}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Target per Day Counter */}
+        <View style={styles.formInlineRow}>
+          <View style={styles.labelSubGroup}>
+            <Text style={styles.formLabelText}>Target per Day</Text>
+            <Text style={styles.subHintTextText}>times per day</Text>
+          </View>
+          <View style={styles.figmaCounterPillContainer}>
+            <TouchableOpacity style={styles.counterCircleBtn} onPress={decrementTarget} disabled={!isEditable || isLoading}>
+              <Text style={styles.counterBtnSymbol}>−</Text>
+            </TouchableOpacity>
+            
+            <TextInput
+              style={styles.counterValueInputNode}
+              value={targetPerDay}
+              onChangeText={(txt) => setTargetPerDay(txt.replace(/[^0-9]/g, ''))}
+              keyboardType="number-pad"
+              maxLength={2}
+              selectTextOnFocus={true}
+              editable={isEditable && !isLoading}
+            />
+
+            <TouchableOpacity style={styles.counterCircleBtn} onPress={incrementTarget} disabled={!isEditable || isLoading}>
+              <Text style={styles.counterBtnSymbol}>+</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Priority Grid Buttons */}
+        <View style={styles.formGroup}>
+          <Text style={styles.formLabelText}>Priority</Text>
+          <View style={styles.priorityFlexibleRow}>
+            {[
+              { id: 'Low', label: 'Low', activeStyle: styles.lowPriorityActiveBorder },
+              { id: 'Medium', label: 'Medium', activeStyle: styles.mediumPriorityActiveBorder },
+              { id: 'High', label: 'High', activeStyle: styles.highPriorityActiveBorder }
+            ].map(p => {
+              const isSelected = priority === p.id;
+              return (
+                <TouchableOpacity
+                  key={p.id}
+                  style={[styles.priorityBlockButton, isSelected ? p.activeStyle : styles.priorityBlockButtonInactive]}
+                  onPress={() => setPriority(p.id)}
+                  disabled={!isEditable || isLoading}
+                >
+                  <Text style={[styles.priorityBlockText, isSelected ? styles.priorityBlockTextActive : styles.priorityBlockTextInactive]}>
+                    {p.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </View>
+
+        {/* Minimalist Green Footer Banner */}
+        <View style={styles.bottomLightGreenBanner}>
+          <View style={styles.proTipFloatingBadge}>
+            <Text style={styles.proTipTextContent}>Pro Tip: Consistency over intensity.</Text>
+          </View>
+        </View>
+
+      </ScrollView>
+
+      {/* CUSTOM FREQUENCY DAY SELECTION MODAL POPUP */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={isModalVisible}
+        onRequestClose={handleModalCloseRequest}
+      >
+        <View style={styles.modalOverlayBackground}>
+          <View style={styles.modalContentCardBox}>
+            <Text style={styles.modalHeaderTitle}>Custom Frequency</Text>
+            <Text style={styles.modalSubDescription}>Select the active practice days</Text>
+            
+            <View style={styles.modalDaysHorizontalRow}>
+              {daysOfWeek.map((day) => {
+                const isSelected = customDays.includes(day.id);
+                return (
+                  <TouchableOpacity
+                    key={day.id}
+                    style={[styles.ratioDayCircleButton, isSelected && styles.ratioDayCircleButtonActive]}
+                    onPress={() => handleToggleDay(day.id)}
+                  >
+                    <Text style={[styles.ratioDayCircleText, isSelected && styles.ratioDayCircleTextActive]}>
+                      {day.label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+
+            <TouchableOpacity 
+              style={styles.modalDoneActionButton}
+              onPress={handleModalDonePress}
+            >
+              <Text style={styles.modalDoneButtonText}>Done</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+    </SafeAreaView>
+  );
+}
