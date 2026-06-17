@@ -1,12 +1,22 @@
-import React from 'react';
-import { Text as RNText, TextProps as RNTextProps, StyleSheet } from 'react-native';
-import { useTheme } from '../../providers/ThemeProvider';
+import React from "react";
+import {
+  Text as RNText,
+  TextProps as RNTextProps,
+  StyleSheet,
+} from "react-native";
+
+import { useTheme } from "../../providers/ThemeProvider";
 
 export interface TextProps extends RNTextProps {
-  variant?: 'body' | 'title' | 'caption';
+  variant?: "body" | "title" | "caption";
 }
 
-export function Text({ style, variant = 'body', children, ...props }: TextProps) {
+export function Text({
+  style,
+  variant = "body",
+  children,
+  ...props
+}: TextProps) {
   const { colors } = useTheme();
 
   return (
@@ -18,7 +28,7 @@ export function Text({ style, variant = 'body', children, ...props }: TextProps)
         style,
       ]}
       // Enforce accessibility scaling by default
-      allowFontScaling={true}
+      allowFontScaling
       {...props}
     >
       {children}
@@ -35,7 +45,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   caption: {
     fontSize: 12,

@@ -1,13 +1,13 @@
-import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import React from "react";
 
 // 1. IMPORT SCREENS AND NEW NAVIGATORS
-import BottomTabNavigator from './src/navigation/BottomTabNavigator'; // Path to the newly created Tab Navigator file
-import CreateHabitScreen from './src/screens/CreateHabit/CreateHabitScreen'; // Habit creation/modification screen
-import { ThemeProvider } from './src/providers/ThemeProvider'; // Theme provider
-import { QueryProvider } from './src/providers/QueryProvider'; // React Query provider
-import './src/i18n'; // Initialize i18n
+import BottomTabNavigator from "./src/navigation/BottomTabNavigator"; // Path to the newly created Tab Navigator file
+import { QueryProvider } from "./src/providers/QueryProvider"; // React Query provider
+import { ThemeProvider } from "./src/providers/ThemeProvider"; // Theme provider
+import CreateHabitScreen from "./src/screens/CreateHabit/CreateHabitScreen"; // Habit creation/modification screen
+import "./src/i18n"; // Initialize i18n
 
 const Stack = createNativeStackNavigator();
 
@@ -23,17 +23,14 @@ export default function App() {
             }}
           >
             {/* 2. SET UP BOTTOM TAB AS THE MAIN APPLICATION FLOW */}
-            <Stack.Screen 
-              name="MainTabs" 
-              component={BottomTabNavigator} 
-            />
+            <Stack.Screen name="MainTabs" component={BottomTabNavigator} />
 
             {/* 3. CREATE/EDIT HABIT SCREEN WILL OVERLAY THE TAB BAR ON NAVIGATION */}
-            <Stack.Screen 
-              name="CreateHabit" 
-              component={CreateHabitScreen} 
+            <Stack.Screen
+              name="CreateHabit"
+              component={CreateHabitScreen}
               options={{
-                animation: 'slide_from_bottom', // Premium bottom-up slide transition effect
+                animation: "slide_from_bottom", // Premium bottom-up slide transition effect
               }}
             />
           </Stack.Navigator>

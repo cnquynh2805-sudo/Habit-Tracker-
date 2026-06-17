@@ -1,8 +1,9 @@
-import { Stack } from 'expo-router';
-import { ThemeProvider } from '../providers/ThemeProvider';
-import { QueryProvider } from '../providers/QueryProvider';
-import { useAppStore } from '../stores/useAppStore';
-import '../i18n';
+import { Stack } from "expo-router";
+
+import { QueryProvider } from "../providers/QueryProvider";
+import { ThemeProvider } from "../providers/ThemeProvider";
+import { useAppStore } from "../stores/useAppStore";
+import "../i18n";
 
 export default function RootLayout() {
   return (

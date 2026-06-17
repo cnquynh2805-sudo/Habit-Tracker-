@@ -1,34 +1,38 @@
-import React, { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
-import { 
-  Text, 
-  View, 
-  TextInput, 
-  TouchableOpacity, 
-  ScrollView, 
-  Alert, 
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
+import {
+  Text,
+  View,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
   ActivityIndicator,
-  Modal
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { styles } from './CreateHabitScreen.styles';
+  Modal,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+import { getStyles } from "./CreateHabitScreen.styles";
+import { useTheme } from "../../providers/ThemeProvider";
 
 export default function CreateHabitScreen({ route, navigation }) {
+  const { colors } = useTheme();
+  const styles = getStyles(colors);
   const { t } = useTranslation();
   const habitId = route?.params?.habitId;
   const isEditMode = !!habitId; // Currently in view/edit flow for an existing habit
 
   // Standard Editable Logic: If creating new, open immediately; if viewing existing, lock initially (false)
   const [isEditable, setIsEditable] = useState(!isEditMode);
-  const [habitName, setHabitName] = useState('');
-  const [category, setCategory] = useState('Mindfulness'); 
-  const [frequency, setFrequency] = useState('Daily'); 
-  const [currentStatus, setCurrentStatus] = useState('Active'); // Capitalized to match OpenAPI specification
+  const [habitName, setHabitName] = useState("");
+  const [category, setCategory] = useState("Mindfulness");
+  const [frequency, setFrequency] = useState("Daily");
+  const [currentStatus, setCurrentStatus] = useState("Active"); // Capitalized to match OpenAPI specification
   const [daysOfWeekList, setDaysOfWeekList] = useState([]); // Map fields: custom_days -> daysOfWeek
-  const [targetPerDay, setTargetPerDay] = useState('1'); 
-  const [priority, setPriority] = useState('Medium'); 
-  
+  const [targetPerDay, setTargetPerDay] = useState("1");
+  const [priority, setPriority] = useState("Medium");
+
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -36,23 +40,16 @@ export default function CreateHabitScreen({ route, navigation }) {
   const [backupData, setBackupData] = useState(null);
 
   const daysOfWeekOptions = [
-    { id: 'Mon', label: 'M' },
-    { id: 'Tue', label: 'T' },
-    { id: 'Wed', label: 'W' },
-    { id: 'Thu', label: 'T' },
-    { id: 'Fri', label: 'F' },
-    { id: 'Sat', label: 'S' },
-    { id: 'Sun', label: 'S' },
+    { id: "Mon", label: "M" },
+    { id: "Tue", label: "T" },
+    { id: "Wed", label: "W" },
+    { id: "Thu", label: "T" },
+    { id: "Fri", label: "F" },
+    { id: "Sat", label: "S" },
+    { id: "Sun", label: "S" },
   ];
 
-  useEffect(() => {
-    if (isEditMode) {
-      loadHabitForEditing();
-    } else {
-      setCurrentStatus('Active');
-    }
-  }, [isEditMode]);
-
+  
   const loadHabitForEditing = async () => {
     try {
       const existingDataJson = await AsyncStorage.getItem('@habits_list');
@@ -60,7 +57,6 @@ export default function CreateHabitScreen({ route, navigation }) {
         const habitsList = JSON.parse(existingDataJson);
         const targetHabit = habitsList.find(h => h.id === habitId);
         if (targetHabit) {
-          // Normalize formatting to match exact PascalCase capitalization in OpenAPI specification
           const rawPriority = targetHabit.priority || 'Medium';
           const formattedPriority = rawPriority.charAt(0).toUpperCase() + rawPriority.slice(1).toLowerCase();
           
@@ -70,7 +66,6 @@ export default function CreateHabitScreen({ route, navigation }) {
           const rawStatus = targetHabit.status || 'Active';
           const formattedStatus = rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1).toLowerCase();
 
-          // Populate data into the form matching camelCase specs
           setHabitName(targetHabit.name);
           setCategory(targetHabit.category || 'Mindfulness');
           setFrequency(formattedFrequency);
@@ -79,7 +74,6 @@ export default function CreateHabitScreen({ route, navigation }) {
           setCurrentStatus(formattedStatus); 
           setPriority(formattedPriority);
 
-          // Save backup using strict OpenAPI specs fields in case user cancels during editing
           setBackupData({
             name: targetHabit.name,
             category: targetHabit.category || 'Mindfulness',
@@ -96,6 +90,15 @@ export default function CreateHabitScreen({ route, navigation }) {
     }
   };
 
+  useEffect(() => {
+    if (isEditMode) {
+      loadHabitForEditing();
+    } else {
+      setCurrentStatus("Active");
+    }
+  }, [isEditMode]);
+
+  
   // LEFT HEADER BUTTON ACTION (Cancel or Delete)
   const handleLeftHeaderPress = () => {
     if (!isEditMode) {
@@ -129,14 +132,14 @@ export default function CreateHabitScreen({ route, navigation }) {
 
   const handleFrequencyPress = (type) => {
     setFrequency(type);
-    if (type === 'Custom' && isEditable) {
+    if (type === "Custom" && isEditable) {
       setIsModalVisible(true);
     }
   };
 
   const handleToggleDay = (dayId) => {
     if (daysOfWeekList.includes(dayId)) {
-      setDaysOfWeekList(daysOfWeekList.filter(d => d !== dayId));
+      setDaysOfWeekList(daysOfWeekList.filter((d) => d !== dayId));
     } else {
       setDaysOfWeekList([...daysOfWeekList, dayId]);
     }
@@ -144,7 +147,7 @@ export default function CreateHabitScreen({ route, navigation }) {
 
   const handleModalCloseRequest = () => {
     if (daysOfWeekList.length === 0) {
-      setFrequency('Daily');
+      setFrequency("Daily");
     }
     setIsModalVisible(false);
   };
@@ -152,9 +155,9 @@ export default function CreateHabitScreen({ route, navigation }) {
   const handleModalDonePress = () => {
     if (daysOfWeekList.length === 0) {
       Alert.alert(
-        'Required', 
-        'Please select at least one day for your custom schedule.',
-        [{ text: 'OK' }]
+        "Required",
+        "Please select at least one day for your custom schedule.",
+        [{ text: "OK" }],
       );
       return;
     }
@@ -171,28 +174,34 @@ export default function CreateHabitScreen({ route, navigation }) {
     if (!isEditable) return;
     const current = parseInt(targetPerDay, 10) || 0;
     if (current > 1) setTargetPerDay((current - 1).toString());
-    else setTargetPerDay('1');
+    else setTargetPerDay("1");
   };
 
   const handleSaveAction = async () => {
     const cleanedName = habitName.trim();
     if (!cleanedName) {
-      Alert.alert('Error', 'Please enter a habit name.');
+      Alert.alert("Error", "Please enter a habit name.");
       return;
     }
-    
-    if (frequency === 'Custom' && daysOfWeekList.length === 0) {
-      Alert.alert('Error', 'Please select at least one day for Custom frequency.');
+
+    if (frequency === "Custom" && daysOfWeekList.length === 0) {
+      Alert.alert(
+        "Error",
+        "Please select at least one day for Custom frequency.",
+      );
       return;
     }
 
     setIsLoading(true);
     try {
-      const existingHabitsJson = await AsyncStorage.getItem('@habits_list');
-      let currentHabits = existingHabitsJson ? JSON.parse(existingHabitsJson) : [];
-      
-      const isNameDuplicate = currentHabits.some(habit => {
-        const isSameName = habit.name.trim().toLowerCase() === cleanedName.toLowerCase();
+      const existingHabitsJson = await AsyncStorage.getItem("@habits_list");
+      let currentHabits = existingHabitsJson
+        ? JSON.parse(existingHabitsJson)
+        : [];
+
+      const isNameDuplicate = currentHabits.some((habit) => {
+        const isSameName =
+          habit.name.trim().toLowerCase() === cleanedName.toLowerCase();
         if (isEditMode) {
           return isSameName && habit.id !== habitId;
         }
@@ -201,68 +210,74 @@ export default function CreateHabitScreen({ route, navigation }) {
 
       if (isNameDuplicate) {
         Alert.alert(
-          'Duplicate Name', 
-          'A habit with this name already exists. Please choose a unique name!'
+          "Duplicate Name",
+          "A habit with this name already exists. Please choose a unique name!",
         );
         setIsLoading(false);
         return;
       }
 
       // Ensure standard Active state behavior or retain strict localized derived structures
-      const finalStatus = isEditMode ? currentStatus : 'Active';
-      const canCheckIn = finalStatus === 'Active';
+      const finalStatus = isEditMode ? currentStatus : "Active";
+      const canCheckIn = finalStatus === "Active";
 
       if (isEditMode) {
-        currentHabits = currentHabits.map(habit => {
+        currentHabits = currentHabits.map((habit) => {
           if (habit.id === habitId) {
             return {
               ...habit,
               name: cleanedName,
-              category: category,
-              frequency: frequency,
-              daysOfWeek: frequency === 'Custom' ? daysOfWeekList : null,
+              category,
+              frequency,
+              daysOfWeek: frequency === "Custom" ? daysOfWeekList : null,
               targetPerDay: parseInt(targetPerDay, 10) || 1,
-              priority: priority,
-              status: finalStatus,        
-              canCheckin: canCheckIn,    
-              isSynced: false
+              priority,
+              status: finalStatus,
+              canCheckin: canCheckIn,
+              isSynced: false,
             };
           }
           return habit;
         });
-        
+
         setBackupData({
           name: cleanedName,
-          category: category,
-          frequency: frequency,
-          daysOfWeek: frequency === 'Custom' ? daysOfWeekList : [],
-          targetPerDay: targetPerDay,
+          category,
+          frequency,
+          daysOfWeek: frequency === "Custom" ? daysOfWeekList : [],
+          targetPerDay,
           status: finalStatus,
-          priority: priority
+          priority,
         });
 
-        await AsyncStorage.setItem('@habits_list', JSON.stringify(currentHabits));
+        await AsyncStorage.setItem(
+          "@habits_list",
+          JSON.stringify(currentHabits),
+        );
         setIsEditable(false);
       } else {
         const newHabit = {
-          id: Date.now().toString(), 
+          id: Date.now().toString(),
           name: cleanedName,
-          category: category,             
-          frequency: frequency,           
-          daysOfWeek: frequency === 'Custom' ? daysOfWeekList : null,
-          targetPerDay: parseInt(targetPerDay, 10) || 1, 
-          priority: priority, 
-          status: 'Active',              
-          canCheckin: true,        
-          isSynced: false, 
-          createdAt: new Date().toISOString() // Structured matching standard specification
+          category,
+          frequency,
+          daysOfWeek: frequency === "Custom" ? daysOfWeekList : null,
+          targetPerDay: parseInt(targetPerDay, 10) || 1,
+          priority,
+          status: "Active",
+          canCheckin: true,
+          isSynced: false,
+          createdAt: new Date().toISOString(), // Structured matching standard specification
         };
         currentHabits.unshift(newHabit);
-        await AsyncStorage.setItem('@habits_list', JSON.stringify(currentHabits));
+        await AsyncStorage.setItem(
+          "@habits_list",
+          JSON.stringify(currentHabits),
+        );
         if (navigation) navigation.goBack();
       }
     } catch (error) {
-      Alert.alert('Error', 'Failed to save habit.');
+      Alert.alert("Error", "Failed to save habit.");
     } finally {
       setIsLoading(false);
     }
@@ -270,64 +285,91 @@ export default function CreateHabitScreen({ route, navigation }) {
 
   const handleDeleteAction = () => {
     Alert.alert(
-      'Delete Habit',
-      'Are you sure you want to delete this habit permanently?',
+      "Delete Habit",
+      "Are you sure you want to delete this habit permanently?",
       [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Delete', 
-          style: 'destructive',
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
           onPress: async () => {
             setIsLoading(true);
             try {
-              const existingHabitsJson = await AsyncStorage.getItem('@habits_list');
+              const existingHabitsJson =
+                await AsyncStorage.getItem("@habits_list");
               if (existingHabitsJson) {
                 const currentHabits = JSON.parse(existingHabitsJson);
-                const updatedList = currentHabits.filter(h => h.id !== habitId);
-                await AsyncStorage.setItem('@habits_list', JSON.stringify(updatedList));
+                const updatedList = currentHabits.filter(
+                  (h) => h.id !== habitId,
+                );
+                await AsyncStorage.setItem(
+                  "@habits_list",
+                  JSON.stringify(updatedList),
+                );
                 if (navigation) navigation.goBack();
               }
             } catch (e) {
-              console.log('Error deleting habit:', e);
+              console.log("Error deleting habit:", e);
             } finally {
               setIsLoading(false);
             }
-          }
-        }
-      ]
+          },
+        },
+      ],
     );
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+    <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
       <View style={styles.topHeaderContainer}>
-        <TouchableOpacity accessible={true} accessibilityRole="button" accessibilityLabel="Interactive element" onPress={handleLeftHeaderPress} disabled={isLoading}>
-          <Text style={!isEditMode || isEditable ? styles.headerCancelText : styles.headerDeleteText}>
-            {!isEditMode ? 'Cancel' : (isEditable ? 'Cancel' : 'Delete')}
+        <TouchableOpacity
+          accessible
+          accessibilityRole="button"
+          accessibilityLabel="Interactive element"
+          onPress={handleLeftHeaderPress}
+          disabled={isLoading}
+        >
+          <Text
+            style={
+              !isEditMode || isEditable
+                ? styles.headerCancelText
+                : styles.headerDeleteText
+            }
+          >
+            {!isEditMode ? "Cancel" : isEditable ? "Cancel" : "Delete"}
           </Text>
         </TouchableOpacity>
-        
+
         <Text style={styles.headerTitleText}>
-          {!isEditMode ? 'New Habit' : (isEditable ? 'Edit Habit' : 'Habit Detail')}
+          {!isEditMode
+            ? "New Habit"
+            : isEditable
+              ? "Edit Habit"
+              : "Habit Detail"}
         </Text>
 
-        <TouchableOpacity accessible={true} accessibilityRole="button" accessibilityLabel="Interactive element" 
-          style={styles.headerSaveCapsuleButton} 
-          onPress={handleRightHeaderPress} 
+        <TouchableOpacity
+          accessible
+          accessibilityRole="button"
+          accessibilityLabel="Interactive element"
+          style={styles.headerSaveCapsuleButton}
+          onPress={handleRightHeaderPress}
           disabled={isLoading}
         >
           {isLoading ? (
-            <ActivityIndicator size="small" color="#FFFFFF" />
+            <ActivityIndicator size="small" color={colors.onPrimary} />
           ) : (
             <Text style={styles.headerSaveCapsuleText}>
-              {isEditable ? 'Save' : 'Edit'}
+              {isEditable ? "Save" : "Edit"}
             </Text>
           )}
         </TouchableOpacity>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
-        
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Mascot Speech Bubble */}
         <View style={styles.mascotSpeechSection}>
           <View style={styles.mascotRoundAvatar}>
@@ -341,25 +383,35 @@ export default function CreateHabitScreen({ route, navigation }) {
           </View>
           <View style={styles.mascotBubbleCloud}>
             <Text style={styles.mascotBubbleText}>
-              {!isEditMode 
+              {!isEditMode
                 ? "Starting a new habit is the first step towards a better you! What shall we tackle today?"
-                : (isEditable ? "Tweak your progress metrics here to stay on track!" : "Review your progress metrics below.")}
+                : isEditable
+                  ? "Tweak your progress metrics here to stay on track!"
+                  : "Review your progress metrics below."}
             </Text>
           </View>
         </View>
 
         {/* Habit Name Input */}
         <View style={styles.formGroup}>
-          <Text style={styles.formLabelText}>{t('createHabit.habitNameLabel')}</Text>
-          <View style={[styles.pencilInputWrapper, !isEditable && styles.inputFieldDisabled]}>
-            <TextInput 
-              style={styles.mainInputField} 
-              placeholder={t('createHabit.habitNamePlaceholder')} 
-              placeholderTextColor="#94A3B8" 
-              value={habitName} 
+          <Text style={styles.formLabelText}>
+            {t("createHabit.habitNameLabel")}
+          </Text>
+          <View
+            style={[
+              styles.pencilInputWrapper,
+              !isEditable && styles.inputFieldDisabled,
+            ]}
+          >
+            <TextInput
+              accessibilityLabel="Text input field"
+              style={styles.mainInputField}
+              placeholder={t("createHabit.habitNamePlaceholder")}
+              placeholderTextColor={colors.textDisabled}
+              value={habitName}
               onChangeText={setHabitName}
               editable={isEditable && !isLoading}
-              multiline={true}
+              multiline
               textAlignVertical="center"
             />
           </View>
@@ -367,25 +419,40 @@ export default function CreateHabitScreen({ route, navigation }) {
 
         {/* Category Chips */}
         <View style={styles.formGroup}>
-          <Text style={styles.formLabelText}>{t('createHabit.categoryLabel')}</Text>
+          <Text style={styles.formLabelText}>
+            {t("createHabit.categoryLabel")}
+          </Text>
           <View style={styles.categoryChipsMatrix}>
             {[
-              { id: 'Health', label: 'Health 💚' },
-              { id: 'Study', label: 'Study 📘' },
-              { id: 'Work', label: 'Work 💼' },
-              { id: 'Mindfulness', label: 'Mindfulness 🧘' },
-              { id: 'Other', label: 'Other ⭐' }
-            ].map(chip => {
+              { id: "Health", label: "Health 💚" },
+              { id: "Study", label: "Study 📘" },
+              { id: "Work", label: "Work 💼" },
+              { id: "Mindfulness", label: "Mindfulness 🧘" },
+              { id: "Other", label: "Other ⭐" },
+            ].map((chip) => {
               const isSelected = category === chip.id;
               return (
-                <TouchableOpacity accessible={true} accessibilityRole="button" accessibilityLabel="Interactive element"
+                <TouchableOpacity
+                  accessible
+                  accessibilityRole="button"
+                  accessibilityLabel="Interactive element"
                   key={chip.id}
-                  style={[styles.figmaCategoryChip, isSelected && styles.figmaCategoryChipActive]}
+                  style={[
+                    styles.figmaCategoryChip,
+                    isSelected && styles.figmaCategoryChipActive,
+                  ]}
                   onPress={() => setCategory(chip.id)}
                   disabled={!isEditable || isLoading}
                 >
-                  <Text style={[styles.figmaCategoryChipText, isSelected && styles.figmaCategoryChipTextActive]}>
-                    {t('category.' + chip.id.toLowerCase() + 'Emoji', { defaultValue: chip.label })}
+                  <Text
+                    style={[
+                      styles.figmaCategoryChipText,
+                      isSelected && styles.figmaCategoryChipTextActive,
+                    ]}
+                  >
+                    {t("category." + chip.id.toLowerCase() + "Emoji", {
+                      defaultValue: chip.label,
+                    })}
                   </Text>
                 </TouchableOpacity>
               );
@@ -395,26 +462,53 @@ export default function CreateHabitScreen({ route, navigation }) {
 
         {/* Frequency Row */}
         <View style={styles.formInlineRow}>
-          <Text style={styles.formLabelText}>{t('createHabit.frequencyLabel')}</Text>
-          
+          <Text style={styles.formLabelText}>
+            {t("createHabit.frequencyLabel")}
+          </Text>
+
           <View style={styles.capsuleToggleContainer}>
-            <TouchableOpacity accessible={true} accessibilityRole="button" accessibilityLabel="Interactive element"
-              style={[styles.capsuleToggleButton, frequency === 'Daily' && styles.capsuleToggleButtonActive]}
-              onPress={() => handleFrequencyPress('Daily')}
+            <TouchableOpacity
+              accessible
+              accessibilityRole="button"
+              accessibilityLabel="Interactive element"
+              style={[
+                styles.capsuleToggleButton,
+                frequency === "Daily" && styles.capsuleToggleButtonActive,
+              ]}
+              onPress={() => handleFrequencyPress("Daily")}
               disabled={!isEditable || isLoading}
             >
-              <Text style={[styles.capsuleToggleText, frequency === 'Daily' && styles.capsuleToggleTextActive]}>
-                {t('frequency.daily', { defaultValue: 'Daily' })}
+              <Text
+                style={[
+                  styles.capsuleToggleText,
+                  frequency === "Daily" && styles.capsuleToggleTextActive,
+                ]}
+              >
+                {t("frequency.daily", { defaultValue: "Daily" })}
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity accessible={true} accessibilityRole="button" accessibilityLabel="Interactive element"
-              style={[styles.capsuleToggleButton, frequency === 'Custom' && styles.capsuleToggleButtonActive]}
-              onPress={() => handleFrequencyPress('Custom')}
+            <TouchableOpacity
+              accessible
+              accessibilityRole="button"
+              accessibilityLabel="Interactive element"
+              style={[
+                styles.capsuleToggleButton,
+                frequency === "Custom" && styles.capsuleToggleButtonActive,
+              ]}
+              onPress={() => handleFrequencyPress("Custom")}
               disabled={!isEditable || isLoading}
             >
-              <Text style={[styles.capsuleToggleText, frequency === 'Custom' && styles.capsuleToggleTextActive]}>
-                {t('frequency.customWithCount', { count: daysOfWeekList.length, defaultValue: `Custom (${daysOfWeekList.length})` })}
+              <Text
+                style={[
+                  styles.capsuleToggleText,
+                  frequency === "Custom" && styles.capsuleToggleTextActive,
+                ]}
+              >
+                {t("frequency.customWithCount", {
+                  count: daysOfWeekList.length,
+                  defaultValue: `Custom (${daysOfWeekList.length})`,
+                })}
               </Text>
             </TouchableOpacity>
           </View>
@@ -423,25 +517,46 @@ export default function CreateHabitScreen({ route, navigation }) {
         {/* Target per Day Counter */}
         <View style={styles.formInlineRow}>
           <View style={styles.labelSubGroup}>
-            <Text style={styles.formLabelText}>{t('createHabit.targetLabel')}</Text>
-            <Text style={styles.subHintTextText}>{t('createHabit.targetUnit')}</Text>
+            <Text style={styles.formLabelText}>
+              {t("createHabit.targetLabel")}
+            </Text>
+            <Text style={styles.subHintTextText}>
+              {t("createHabit.targetUnit")}
+            </Text>
           </View>
           <View style={styles.figmaCounterPillContainer}>
-            <TouchableOpacity accessible={true} accessibilityRole="button" accessibilityLabel="Interactive element" style={styles.counterCircleBtn} onPress={decrementTarget} disabled={!isEditable || isLoading}>
+            <TouchableOpacity
+              accessible
+              accessibilityRole="button"
+              accessibilityLabel="Interactive element"
+              style={styles.counterCircleBtn}
+              onPress={decrementTarget}
+              disabled={!isEditable || isLoading}
+            >
               <Text style={styles.counterBtnSymbol}>−</Text>
             </TouchableOpacity>
-            
+
             <TextInput
+              accessibilityLabel="Text input field"
               style={styles.counterValueInputNode}
               value={targetPerDay}
-              onChangeText={(txt) => setTargetPerDay(txt.replace(/[^0-9]/g, ''))}
+              onChangeText={(txt) =>
+                setTargetPerDay(txt.replace(/[^0-9]/g, ""))
+              }
               keyboardType="number-pad"
               maxLength={2}
-              selectTextOnFocus={true}
+              selectTextOnFocus
               editable={isEditable && !isLoading}
             />
 
-            <TouchableOpacity accessible={true} accessibilityRole="button" accessibilityLabel="Interactive element" style={styles.counterCircleBtn} onPress={incrementTarget} disabled={!isEditable || isLoading}>
+            <TouchableOpacity
+              accessible
+              accessibilityRole="button"
+              accessibilityLabel="Interactive element"
+              style={styles.counterCircleBtn}
+              onPress={incrementTarget}
+              disabled={!isEditable || isLoading}
+            >
               <Text style={styles.counterBtnSymbol}>+</Text>
             </TouchableOpacity>
           </View>
@@ -449,23 +564,54 @@ export default function CreateHabitScreen({ route, navigation }) {
 
         {/* Priority Grid Buttons */}
         <View style={styles.formGroup}>
-          <Text style={styles.formLabelText}>{t('createHabit.priorityLabel')}</Text>
+          <Text style={styles.formLabelText}>
+            {t("createHabit.priorityLabel")}
+          </Text>
           <View style={styles.priorityFlexibleRow}>
             {[
-              { id: 'Low', label: 'Low', activeStyle: styles.lowPriorityActiveBorder },
-              { id: 'Medium', label: 'Medium', activeStyle: styles.mediumPriorityActiveBorder },
-              { id: 'High', label: 'High', activeStyle: styles.highPriorityActiveBorder }
-            ].map(p => {
+              {
+                id: "Low",
+                label: "Low",
+                activeStyle: styles.lowPriorityActiveBorder,
+              },
+              {
+                id: "Medium",
+                label: "Medium",
+                activeStyle: styles.mediumPriorityActiveBorder,
+              },
+              {
+                id: "High",
+                label: "High",
+                activeStyle: styles.highPriorityActiveBorder,
+              },
+            ].map((p) => {
               const isSelected = priority === p.id;
               return (
-                <TouchableOpacity accessible={true} accessibilityRole="button" accessibilityLabel="Interactive element"
+                <TouchableOpacity
+                  accessible
+                  accessibilityRole="button"
+                  accessibilityLabel="Interactive element"
                   key={p.id}
-                  style={[styles.priorityBlockButton, isSelected ? p.activeStyle : styles.priorityBlockButtonInactive]}
+                  style={[
+                    styles.priorityBlockButton,
+                    isSelected
+                      ? p.activeStyle
+                      : styles.priorityBlockButtonInactive,
+                  ]}
                   onPress={() => setPriority(p.id)}
                   disabled={!isEditable || isLoading}
                 >
-                  <Text style={[styles.priorityBlockText, isSelected ? styles.priorityBlockTextActive : styles.priorityBlockTextInactive]}>
-                    {t('priority.' + p.id.toLowerCase(), { defaultValue: p.label })}
+                  <Text
+                    style={[
+                      styles.priorityBlockText,
+                      isSelected
+                        ? styles.priorityBlockTextActive
+                        : styles.priorityBlockTextInactive,
+                    ]}
+                  >
+                    {t("priority." + p.id.toLowerCase(), {
+                      defaultValue: p.label,
+                    })}
                   </Text>
                 </TouchableOpacity>
               );
@@ -476,34 +622,50 @@ export default function CreateHabitScreen({ route, navigation }) {
         {/* Minimalist Green Footer Banner */}
         <View style={styles.bottomLightGreenBanner}>
           <View style={styles.proTipFloatingBadge}>
-            <Text style={styles.proTipTextContent}>{t('createHabit.proTip')}</Text>
+            <Text style={styles.proTipTextContent}>
+              {t("createHabit.proTip")}
+            </Text>
           </View>
         </View>
-
       </ScrollView>
 
       {/* CUSTOM FREQUENCY DAY SELECTION MODAL POPUP */}
       <Modal
         animationType="fade"
-        transparent={true}
+        transparent
         visible={isModalVisible}
         onRequestClose={handleModalCloseRequest}
       >
         <View style={styles.modalOverlayBackground}>
           <View style={styles.modalContentCardBox}>
-            <Text style={styles.modalHeaderTitle}>{t('createHabit.modalCustomTitle')}</Text>
-            <Text style={styles.modalSubDescription}>{t('createHabit.modalCustomDesc')}</Text>
-            
+            <Text style={styles.modalHeaderTitle}>
+              {t("createHabit.modalCustomTitle")}
+            </Text>
+            <Text style={styles.modalSubDescription}>
+              {t("createHabit.modalCustomDesc")}
+            </Text>
+
             <View style={styles.modalDaysHorizontalRow}>
               {daysOfWeekOptions.map((day) => {
                 const isSelected = daysOfWeekList.includes(day.id);
                 return (
-                  <TouchableOpacity accessible={true} accessibilityRole="button" accessibilityLabel="Interactive element"
+                  <TouchableOpacity
+                    accessible
+                    accessibilityRole="button"
+                    accessibilityLabel="Interactive element"
                     key={day.id}
-                    style={[styles.ratioDayCircleButton, isSelected && styles.ratioDayCircleButtonActive]}
+                    style={[
+                      styles.ratioDayCircleButton,
+                      isSelected && styles.ratioDayCircleButtonActive,
+                    ]}
                     onPress={() => handleToggleDay(day.id)}
                   >
-                    <Text style={[styles.ratioDayCircleText, isSelected && styles.ratioDayCircleTextActive]}>
+                    <Text
+                      style={[
+                        styles.ratioDayCircleText,
+                        isSelected && styles.ratioDayCircleTextActive,
+                      ]}
+                    >
                       {day.label}
                     </Text>
                   </TouchableOpacity>
@@ -511,16 +673,18 @@ export default function CreateHabitScreen({ route, navigation }) {
               })}
             </View>
 
-            <TouchableOpacity accessible={true} accessibilityRole="button" accessibilityLabel="Interactive element" 
+            <TouchableOpacity
+              accessible
+              accessibilityRole="button"
+              accessibilityLabel="Interactive element"
               style={styles.modalDoneActionButton}
               onPress={handleModalDonePress}
             >
-              <Text style={styles.modalDoneButtonText}>{t('common.done')}</Text>
+              <Text style={styles.modalDoneButtonText}>{t("common.done")}</Text>
             </TouchableOpacity>
           </View>
         </View>
       </Modal>
-
     </SafeAreaView>
   );
 }

@@ -3,40 +3,44 @@ import { useTranslation } from 'react-i18next';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View, Text } from 'react-native';
 import HabitListScreen from '../screens/HabitList/HabitListScreen';
-import { tabStyles } from './BottomTabNavigator.styles';
+import { getTabStyles } from './BottomTabNavigator.styles';
+import { useTheme } from '../../providers/ThemeProvider';
 
 // --- CLEAN DUMMY SCREENS ---
-const TodayScreen = () => { const { t } = useTranslation(); return (
-  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F9FBF9' }}>
-    <Text style={{ fontSize: 16, color: '#2D4A3E', fontWeight: 'bold' }}>{t('tabs.todayScreen')}</Text>
+const TodayScreen = () => { const { t } = useTranslation(); const { colors } = useTheme(); return (
+  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>
+    <Text style={{ fontSize: 16, color: colors.primary, fontWeight: 'bold' }}>{t('tabs.todayScreen')}</Text>
   </View>
 );};
 
-const StatsScreen = () => { const { t } = useTranslation(); return (
-  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F9FBF9' }}>
-    <Text style={{ fontSize: 16, color: '#2D4A3E', fontWeight: 'bold' }}>{t('tabs.statsScreen')}</Text>
+const StatsScreen = () => { const { t } = useTranslation(); const { colors } = useTheme(); return (
+  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>
+    <Text style={{ fontSize: 16, color: colors.primary, fontWeight: 'bold' }}>{t('tabs.statsScreen')}</Text>
   </View>
 );};
 
-const GoalsScreen = () => { const { t } = useTranslation(); return (
-  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F9FBF9' }}>
-    <Text style={{ fontSize: 16, color: '#2D4A3E', fontWeight: 'bold' }}>{t('tabs.goalsScreen')}</Text>
+const GoalsScreen = () => { const { t } = useTranslation(); const { colors } = useTheme(); return (
+  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>
+    <Text style={{ fontSize: 16, color: colors.primary, fontWeight: 'bold' }}>{t('tabs.goalsScreen')}</Text>
   </View>
 );};
 
-const MascotScreen = () => { const { t } = useTranslation(); return (
-  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F9FBF9' }}>
-    <Text style={{ fontSize: 16, color: '#2D4A3E', fontWeight: 'bold' }}>{t('tabs.mascotScreen')}</Text>
+const MascotScreen = () => { const { t } = useTranslation(); const { colors } = useTheme(); return (
+  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>
+    <Text style={{ fontSize: 16, color: colors.primary, fontWeight: 'bold' }}>{t('tabs.mascotScreen')}</Text>
   </View>
 );};
 
 
 // --- ICON SUB-COMPONENTS (Isolated to Eliminate Warnings & Optimize Rendering) ---
-const TodayIcon = ({ focused, t }) => focused ? (
+const TodayIcon = ({ focused, t }) => {
+  const { colors } = useTheme();
+  const tabStyles = getTabStyles(colors);
+  return focused ? (
   <View style={tabStyles.activeTabIndicatorCapsule}>
     <View style={tabStyles.vectorTabIconWrapper}>
-      <View style={[tabStyles.vectorIconCalendarBase, { borderColor: '#1E4631' }]}>
-        <View style={[tabStyles.vectorIconCalendarDot, { backgroundColor: '#1E4631' }]} />
+      <View style={[tabStyles.vectorIconCalendarBase, { borderColor: colors.successDark }]}>
+        <View style={[tabStyles.vectorIconCalendarDot, { backgroundColor: colors.successDark }]} />
       </View>
     </View>
     <Text style={tabStyles.tabBarLabelTextActive}>{t('tabs.today')}</Text>
@@ -52,7 +56,10 @@ const TodayIcon = ({ focused, t }) => focused ? (
   </View>
 );
 
-const HabitsIcon = ({ focused, t }) => focused ? (
+const HabitsIcon = ({ focused, t }) => {
+  const { colors } = useTheme();
+  const tabStyles = getTabStyles(colors);
+  return focused ? (
   <View style={tabStyles.activeTabIndicatorCapsule}>
     <View style={tabStyles.vectorTabIconWrapper}>
       <View style={tabStyles.vectorIconChecklistRow}>
@@ -66,21 +73,24 @@ const HabitsIcon = ({ focused, t }) => focused ? (
   <View style={tabStyles.inactiveTabContainer}>
     <View style={tabStyles.vectorTabIconWrapper}>
       <View style={tabStyles.vectorIconChecklistRow}>
-        <Text style={[tabStyles.vectorIconCheckmarkMini, { color: '#5F6368' }]}>✓</Text>
-        <View style={[tabStyles.vectorIconCheckLine, { backgroundColor: '#5F6368' }]} />
+        <Text style={[tabStyles.vectorIconCheckmarkMini, { color: colors.textMuted }]}>✓</Text>
+        <View style={[tabStyles.vectorIconCheckLine, { backgroundColor: colors.textMuted }]} />
       </View>
     </View>
     <Text style={tabStyles.tabBarLabelText}>{t('tabs.habits')}</Text>
   </View>
 );
 
-const StatsIcon = ({ focused, t }) => focused ? (
+const StatsIcon = ({ focused, t }) => {
+  const { colors } = useTheme();
+  const tabStyles = getTabStyles(colors);
+  return focused ? (
   <View style={tabStyles.activeTabIndicatorCapsule}>
     <View style={tabStyles.vectorTabIconWrapper}>
       <View style={tabStyles.vectorIconStatsBars}>
-        <View style={[tabStyles.vectorStatBarSingle, { height: 8, backgroundColor: '#1E4631' }]} />
-        <View style={[tabStyles.vectorStatBarSingle, { height: 14, backgroundColor: '#1E4631' }]} />
-        <View style={[tabStyles.vectorStatBarSingle, { height: 10, backgroundColor: '#1E4631' }]} />
+        <View style={[tabStyles.vectorStatBarSingle, { height: 8, backgroundColor: colors.successDark }]} />
+        <View style={[tabStyles.vectorStatBarSingle, { height: 14, backgroundColor: colors.successDark }]} />
+        <View style={[tabStyles.vectorStatBarSingle, { height: 10, backgroundColor: colors.successDark }]} />
       </View>
     </View>
     <Text style={tabStyles.tabBarLabelTextActive}>{t('tabs.stats')}</Text>
@@ -98,10 +108,13 @@ const StatsIcon = ({ focused, t }) => focused ? (
   </View>
 );
 
-const GoalsIcon = ({ focused, t }) => focused ? (
+const GoalsIcon = ({ focused, t }) => {
+  const { colors } = useTheme();
+  const tabStyles = getTabStyles(colors);
+  return focused ? (
   <View style={tabStyles.activeTabIndicatorCapsule}>
     <View style={tabStyles.vectorTabIconWrapper}>
-      <View style={[tabStyles.vectorIconTrophyCup, { borderColor: '#1E4631' }]} />
+      <View style={[tabStyles.vectorIconTrophyCup, { borderColor: colors.successDark }]} />
     </View>
     <Text style={tabStyles.tabBarLabelTextActive}>{t('tabs.goals')}</Text>
   </View>
@@ -114,15 +127,18 @@ const GoalsIcon = ({ focused, t }) => focused ? (
   </View>
 );
 
-const MascotIcon = ({ focused, t }) => focused ? (
+const MascotIcon = ({ focused, t }) => {
+  const { colors } = useTheme();
+  const tabStyles = getTabStyles(colors);
+  return focused ? (
   <View style={tabStyles.activeTabIndicatorCapsule}>
     <View style={tabStyles.vectorTabIconWrapper}>
-      <View style={[tabStyles.vectorIconMascotFaceSmiley, { borderColor: '#1E4631' }]}>
+      <View style={[tabStyles.vectorIconMascotFaceSmiley, { borderColor: colors.successDark }]}>
         <View style={tabStyles.vectorIconMascotEyesLine}>
-          <View style={[tabStyles.vectorIconMascotEyeDot, { backgroundColor: '#1E4631' }]} />
-          <View style={[tabStyles.vectorIconMascotEyeDot, { backgroundColor: '#1E4631' }]} />
+          <View style={[tabStyles.vectorIconMascotEyeDot, { backgroundColor: colors.successDark }]} />
+          <View style={[tabStyles.vectorIconMascotEyeDot, { backgroundColor: colors.successDark }]} />
         </View>
-        <View style={[tabStyles.vectorIconMascotSmileMini, { borderColor: '#1E4631' }]} />
+        <View style={[tabStyles.vectorIconMascotSmileMini, { borderColor: colors.successDark }]} />
       </View>
     </View>
     <Text style={tabStyles.tabBarLabelTextActive}>{t('tabs.mascot')}</Text>
@@ -148,6 +164,8 @@ const Tab = createBottomTabNavigator();
 
 export default function BottomTabNavigator() {
   const { t } = useTranslation();
+  const { colors } = useTheme();
+  const tabStyles = getTabStyles(colors);
   return (
     <Tab.Navigator
       initialRouteName="Habits"
