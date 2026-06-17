@@ -4,7 +4,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View, Text } from 'react-native';
 import HabitListScreen from '../screens/HabitList/HabitListScreen';
 import { getTabStyles } from './BottomTabNavigator.styles';
-import { useTheme } from '../../providers/ThemeProvider';
+import { useTheme } from '../providers/ThemeProvider';
 
 // --- CLEAN DUMMY SCREENS ---
 const TodayScreen = () => { const { t } = useTranslation(); const { colors } = useTheme(); return (
@@ -54,7 +54,8 @@ const TodayIcon = ({ focused, t }) => {
     </View>
     <Text style={tabStyles.tabBarLabelText}>{t('tabs.today')}</Text>
   </View>
-);
+  );
+};
 
 const HabitsIcon = ({ focused, t }) => {
   const { colors } = useTheme();
@@ -79,7 +80,8 @@ const HabitsIcon = ({ focused, t }) => {
     </View>
     <Text style={tabStyles.tabBarLabelText}>{t('tabs.habits')}</Text>
   </View>
-);
+  );
+};
 
 const StatsIcon = ({ focused, t }) => {
   const { colors } = useTheme();
@@ -106,7 +108,8 @@ const StatsIcon = ({ focused, t }) => {
     </View>
     <Text style={tabStyles.tabBarLabelText}>{t('tabs.stats')}</Text>
   </View>
-);
+  );
+};
 
 const GoalsIcon = ({ focused, t }) => {
   const { colors } = useTheme();
@@ -125,7 +128,8 @@ const GoalsIcon = ({ focused, t }) => {
     </View>
     <Text style={tabStyles.tabBarLabelText}>{t('tabs.goals')}</Text>
   </View>
-);
+  );
+};
 
 const MascotIcon = ({ focused, t }) => {
   const { colors } = useTheme();
@@ -156,7 +160,8 @@ const MascotIcon = ({ focused, t }) => {
     </View>
     <Text style={tabStyles.tabBarLabelText}>{t('tabs.mascot')}</Text>
   </View>
-);
+  );
+};
 
 
 // --- MAIN NAVIGATOR ---
