@@ -1,0 +1,91 @@
+{
+  "common": {
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "save": "Enregistrer",
+    "edit": "Modifier",
+    "done": "Terminé",
+    "required": "Requis",
+    "error": "Erreur"
+  },
+  "action": {
+    "pause": "Mettre en pause",
+    "resume": "Reprendre",
+    "archive": "Archiver",
+    "restore": "Restaurer"
+  },
+  "status": {
+    "active": "Actif",
+    "paused": "En pause",
+    "archived": "Archivé"
+  },
+  "category": {
+    "all": "Tout",
+    "health": "Santé",
+    "study": "Études",
+    "work": "Travail",
+    "mindfulness": "Pleine conscience",
+    "other": "Autre",
+    "healthEmoji": "Santé 💚",
+    "studyEmoji": "Études 📘",
+    "workEmoji": "Travail 💼",
+    "mindfulnessEmoji": "Pleine conscience 🧘",
+    "otherEmoji": "Autre ⭐"
+  },
+  "priority": {
+    "low": "Faible",
+    "medium": "Moyenne",
+    "high": "Haute",
+    "lowLong": "Priorité Faible",
+    "mediumLong": "Priorité Moyenne",
+    "highLong": "Priorité Haute"
+  },
+  "frequency": {
+    "daily": "Quotidien",
+    "custom": "Personnalisé",
+    "customWithCount": "Personnalisé ({{count}})"
+  },
+  "theme": {
+    "light": "Clair",
+    "dark": "Sombre",
+    "system": "Système"
+  },
+  "habitList": {
+    "title": "Mes Habitudes",
+    "deleteTitle": "Supprimer l'habitude",
+    "deleteConfirm": "Êtes-vous sûr de vouloir supprimer cette habitude définitivement ?",
+    "filter": {
+      "active": "Habitudes Actives",
+      "paused": "Liste en Pause",
+      "archived": "Liste Archivée"
+    },
+    "a11y": {
+      "createHabit": "Créer une nouvelle habitude",
+      "switchLanguage": "Changer de langue",
+      "switchTheme": "Changer le thème"
+    }
+  },
+  "createHabit": {
+    "titleNew": "Nouvelle Habitude",
+    "titleEdit": "Modifier l'Habitude",
+    "titleDetail": "Détails de l'Habitude",
+    "mascotNew": "Commencer une nouvelle habitude est le premier pas vers un vous meilleur ! Que faisons-nous aujourd'hui ?",
+    "mascotEdit": "Ajustez vos métriques de progrès ici pour rester sur la bonne voie !",
+    "mascotDetail": "Examinez vos progrès ci-dessous.",
+    "habitNameLabel": "Nom de l'Habitude",
+    "habitNamePlaceholder": "ex: Boire 8 verres d'eau",
+    "categoryLabel": "Catégorie",
+    "frequencyLabel": "Fréquence",
+    "targetLabel": "Objectif par Jour",
+    "targetUnit": "fois par jour",
+    "priorityLabel": "Priorité",
+    "proTip": "Conseil Pro : La régularité avant l'intensité.",
+    "modalCustomTitle": "Fréquence Personnalisée",
+    "modalCustomDesc": "Sélectionnez les jours de pratique actifs",
+    "errorNoDays": "Veuillez sélectionner au moins un jour pour votre planning personnalisé.",
+    "errorNoName": "Veuillez entrer un nom d'habitude.",
+    "errorDuplicateTitle": "Nom en double",
+    "errorDuplicateDesc": "Une habitude avec ce nom existe déjà. Veuillez choisir un nom unique !",
+    "errorSave": "Échec de l'enregistrement de l'habitude."
+  }
+}

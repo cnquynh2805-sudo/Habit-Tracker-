@@ -70,7 +70,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 14,
   },
   headerMenuPopoverText: {
-    fontSize: 13,
+    fontSize: 16,
     color: '#334155',
   },
   topFilterBarContainer: {
@@ -100,18 +100,18 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
   },
   listScrollContentBody: {
-    paddingHorizontal: (SCREEN_WIDTH - 350) / 2, 
+    paddingHorizontal: 20, 
     gap: 12,
     paddingBottom: 100, 
   },
   cardOuterContainer: {
     position: 'relative',
-    width: 350,
-    height: 112, 
+    width: '100%',
+    paddingVertical: 16, 
   },
   habitCardWrapper: {
-    width: 350,
-    height: 112,
+    width: '100%',
+    paddingVertical: 16,
     flexDirection: 'row',
     backgroundColor: '#FFFFFF',
     borderRadius: 32,

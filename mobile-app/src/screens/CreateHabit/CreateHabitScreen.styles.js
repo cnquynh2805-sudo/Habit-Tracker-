@@ -8,7 +8,7 @@ export const styles = StyleSheet.create({
     backgroundColor: '#FAFBFB',
   },
   topHeaderContainer: {
-    height: 60,
+    paddingVertical: 16,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -131,7 +131,7 @@ export const styles = StyleSheet.create({
   },
   pencilInputWrapper: {
     width: width - 48, 
-    minHeight: 76, 
+    paddingVertical: 16, 
     backgroundColor: '#FBFDFD',
     borderRadius: 24,
     borderWidth: 1,
@@ -184,11 +184,13 @@ export const styles = StyleSheet.create({
   },
   figmaCategoryChip: {
     paddingHorizontal: 16,
-    height: 38,
-    borderRadius: 20,
+    paddingVertical: 10,
+    borderRadius: 100,
     backgroundColor: '#EEF1F0',
     justifyContent: 'center',
     alignItems: 'center',
+    flexShrink: 1,
+    maxWidth: '45%',
   },
   figmaCategoryChipActive: {
     backgroundColor: '#3D6A52',
@@ -213,6 +215,7 @@ export const styles = StyleSheet.create({
     borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
+    flexShrink: 1,
   },
   capsuleToggleButtonActive: {
     backgroundColor: '#3D6A52',
@@ -295,7 +298,7 @@ export const styles = StyleSheet.create({
   },
   bottomLightGreenBanner: {
     width: '100%',
-    height: 160,
+    paddingVertical: 24,
     borderRadius: 32,
     backgroundColor: '#E8F2EE',
     marginTop: 16,
@@ -383,7 +386,7 @@ export const styles = StyleSheet.create({
   },
   modalDoneActionButton: {
     backgroundColor: '#3D6A52',
-    height: 50,
+    paddingVertical: 12,
     borderRadius: 25,
     justifyContent: 'center',
     alignItems: 'center',

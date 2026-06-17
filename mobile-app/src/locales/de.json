@@ -1,0 +1,91 @@
+{
+  "common": {
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "save": "Speichern",
+    "edit": "Bearbeiten",
+    "done": "Fertig",
+    "required": "Erforderlich",
+    "error": "Fehler"
+  },
+  "action": {
+    "pause": "Pausieren",
+    "resume": "Fortsetzen",
+    "archive": "Archivieren",
+    "restore": "Wiederherstellen"
+  },
+  "status": {
+    "active": "Aktiv",
+    "paused": "Pausiert",
+    "archived": "Archiviert"
+  },
+  "category": {
+    "all": "Alle",
+    "health": "Gesundheit",
+    "study": "Lernen",
+    "work": "Arbeit",
+    "mindfulness": "Achtsamkeit",
+    "other": "Sonstiges",
+    "healthEmoji": "Gesundheit 💚",
+    "studyEmoji": "Lernen 📘",
+    "workEmoji": "Arbeit 💼",
+    "mindfulnessEmoji": "Achtsamkeit 🧘",
+    "otherEmoji": "Sonstiges ⭐"
+  },
+  "priority": {
+    "low": "Niedrig",
+    "medium": "Mittel",
+    "high": "Hoch",
+    "lowLong": "Niedrige Priorität",
+    "mediumLong": "Mittlere Priorität",
+    "highLong": "Hohe Priorität"
+  },
+  "frequency": {
+    "daily": "Täglich",
+    "custom": "Benutzerdefiniert",
+    "customWithCount": "Benutzerdefiniert ({{count}})"
+  },
+  "theme": {
+    "light": "Hell",
+    "dark": "Dunkel",
+    "system": "System"
+  },
+  "habitList": {
+    "title": "Meine Gewohnheiten",
+    "deleteTitle": "Gewohnheit löschen",
+    "deleteConfirm": "Sind Sie sicher, dass Sie diese Gewohnheit dauerhaft löschen möchten?",
+    "filter": {
+      "active": "Aktive Gewohnheiten",
+      "paused": "Pausierte Liste",
+      "archived": "Archivierte Liste"
+    },
+    "a11y": {
+      "createHabit": "Neue Gewohnheit erstellen",
+      "switchLanguage": "Sprache wechseln",
+      "switchTheme": "Design wechseln"
+    }
+  },
+  "createHabit": {
+    "titleNew": "Neue Gewohnheit",
+    "titleEdit": "Gewohnheit bearbeiten",
+    "titleDetail": "Gewohnheitsdetails",
+    "mascotNew": "Eine neue Gewohnheit zu beginnen, ist der erste Schritt zu einem besseren Ich! Was wollen wir heute in Angriff nehmen?",
+    "mascotEdit": "Passen Sie Ihre Fortschrittsmetriken hier an, um auf dem richtigen Weg zu bleiben!",
+    "mascotDetail": "Überprüfen Sie unten Ihren Fortschritt.",
+    "habitNameLabel": "Name der Gewohnheit",
+    "habitNamePlaceholder": "z.B. 8 Gläser Wasser trinken",
+    "categoryLabel": "Kategorie",
+    "frequencyLabel": "Häufigkeit",
+    "targetLabel": "Ziel pro Tag",
+    "targetUnit": "Mal pro Tag",
+    "priorityLabel": "Priorität",
+    "proTip": "Profi-Tipp: Konsistenz über Intensität.",
+    "modalCustomTitle": "Benutzerdefinierte Häufigkeit",
+    "modalCustomDesc": "Wählen Sie die aktiven Übungstage aus",
+    "errorNoDays": "Bitte wählen Sie mindestens einen Tag für Ihren benutzerdefinierten Zeitplan aus.",
+    "errorNoName": "Bitte geben Sie einen Namen für die Gewohnheit ein.",
+    "errorDuplicateTitle": "Name bereits vergeben",
+    "errorDuplicateDesc": "Eine Gewohnheit mit diesem Namen existiert bereits. Bitte wählen Sie einen eindeutigen Namen!",
+    "errorSave": "Fehler beim Speichern der Gewohnheit."
+  }
+}

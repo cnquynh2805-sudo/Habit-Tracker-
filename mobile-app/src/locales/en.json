@@ -1,0 +1,91 @@
+{
+  "common": {
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "save": "Save",
+    "edit": "Edit",
+    "done": "Done",
+    "required": "Required",
+    "error": "Error"
+  },
+  "action": {
+    "pause": "Pause",
+    "resume": "Resume",
+    "archive": "Archive",
+    "restore": "Restore"
+  },
+  "status": {
+    "active": "Active",
+    "paused": "Paused",
+    "archived": "Archived"
+  },
+  "category": {
+    "all": "All",
+    "health": "Health",
+    "study": "Study",
+    "work": "Work",
+    "mindfulness": "Mindfulness",
+    "other": "Other",
+    "healthEmoji": "Health 💚",
+    "studyEmoji": "Study 📘",
+    "workEmoji": "Work 💼",
+    "mindfulnessEmoji": "Mindfulness 🧘",
+    "otherEmoji": "Other ⭐"
+  },
+  "priority": {
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High",
+    "lowLong": "Low Priority",
+    "mediumLong": "Medium Priority",
+    "highLong": "High Priority"
+  },
+  "frequency": {
+    "daily": "Daily",
+    "custom": "Custom",
+    "customWithCount": "Custom ({{count}})"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "habitList": {
+    "title": "My Habits",
+    "deleteTitle": "Delete Habit",
+    "deleteConfirm": "Are you sure you want to delete this habit permanently?",
+    "filter": {
+      "active": "Active Habits",
+      "paused": "Paused List",
+      "archived": "Archived List"
+    },
+    "a11y": {
+      "createHabit": "Create a new habit",
+      "switchLanguage": "Switch Language",
+      "switchTheme": "Switch Theme"
+    }
+  },
+  "createHabit": {
+    "titleNew": "New Habit",
+    "titleEdit": "Edit Habit",
+    "titleDetail": "Habit Detail",
+    "mascotNew": "Starting a new habit is the first step towards a better you! What shall we tackle today?",
+    "mascotEdit": "Tweak your progress metrics here to stay on track!",
+    "mascotDetail": "Review your progress metrics below.",
+    "habitNameLabel": "Habit Name",
+    "habitNamePlaceholder": "e.g., Drink 8 glasses of water",
+    "categoryLabel": "Category",
+    "frequencyLabel": "Frequency",
+    "targetLabel": "Target per Day",
+    "targetUnit": "times per day",
+    "priorityLabel": "Priority",
+    "proTip": "Pro Tip: Consistency over intensity.",
+    "modalCustomTitle": "Custom Frequency",
+    "modalCustomDesc": "Select the active practice days",
+    "errorNoDays": "Please select at least one day for your custom schedule.",
+    "errorNoName": "Please enter a habit name.",
+    "errorDuplicateTitle": "Duplicate Name",
+    "errorDuplicateDesc": "A habit with this name already exists. Please choose a unique name!",
+    "errorSave": "Failed to save habit."
+  }
+}

@@ -299,7 +299,7 @@ export default function CreateHabitScreen({ route, navigation }) {
   return (
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       <View style={styles.topHeaderContainer}>
-        <TouchableOpacity onPress={handleLeftHeaderPress} disabled={isLoading}>
+        <TouchableOpacity accessible={true} accessibilityRole="button" accessibilityLabel="Interactive element" onPress={handleLeftHeaderPress} disabled={isLoading}>
           <Text style={!isEditMode || isEditable ? styles.headerCancelText : styles.headerDeleteText}>
             {!isEditMode ? 'Cancel' : (isEditable ? 'Cancel' : 'Delete')}
           </Text>
@@ -309,7 +309,7 @@ export default function CreateHabitScreen({ route, navigation }) {
           {!isEditMode ? 'New Habit' : (isEditable ? 'Edit Habit' : 'Habit Detail')}
         </Text>
 
-        <TouchableOpacity 
+        <TouchableOpacity accessible={true} accessibilityRole="button" accessibilityLabel="Interactive element" 
           style={styles.headerSaveCapsuleButton} 
           onPress={handleRightHeaderPress} 
           disabled={isLoading}
@@ -376,7 +376,7 @@ export default function CreateHabitScreen({ route, navigation }) {
             ].map(chip => {
               const isSelected = category === chip.id;
               return (
-                <TouchableOpacity
+                <TouchableOpacity accessible={true} accessibilityRole="button" accessibilityLabel="Interactive element"
                   key={chip.id}
                   style={[styles.figmaCategoryChip, isSelected && styles.figmaCategoryChipActive]}
                   onPress={() => setCategory(chip.id)}
@@ -396,7 +396,7 @@ export default function CreateHabitScreen({ route, navigation }) {
           <Text style={styles.formLabelText}>Frequency</Text>
           
           <View style={styles.capsuleToggleContainer}>
-            <TouchableOpacity
+            <TouchableOpacity accessible={true} accessibilityRole="button" accessibilityLabel="Interactive element"
               style={[styles.capsuleToggleButton, frequency === 'Daily' && styles.capsuleToggleButtonActive]}
               onPress={() => handleFrequencyPress('Daily')}
               disabled={!isEditable || isLoading}
@@ -406,7 +406,7 @@ export default function CreateHabitScreen({ route, navigation }) {
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
+            <TouchableOpacity accessible={true} accessibilityRole="button" accessibilityLabel="Interactive element"
               style={[styles.capsuleToggleButton, frequency === 'Custom' && styles.capsuleToggleButtonActive]}
               onPress={() => handleFrequencyPress('Custom')}
               disabled={!isEditable || isLoading}
@@ -425,7 +425,7 @@ export default function CreateHabitScreen({ route, navigation }) {
             <Text style={styles.subHintTextText}>times per day</Text>
           </View>
           <View style={styles.figmaCounterPillContainer}>
-            <TouchableOpacity style={styles.counterCircleBtn} onPress={decrementTarget} disabled={!isEditable || isLoading}>
+            <TouchableOpacity accessible={true} accessibilityRole="button" accessibilityLabel="Interactive element" style={styles.counterCircleBtn} onPress={decrementTarget} disabled={!isEditable || isLoading}>
               <Text style={styles.counterBtnSymbol}>−</Text>
             </TouchableOpacity>
             
@@ -439,7 +439,7 @@ export default function CreateHabitScreen({ route, navigation }) {
               editable={isEditable && !isLoading}
             />
 
-            <TouchableOpacity style={styles.counterCircleBtn} onPress={incrementTarget} disabled={!isEditable || isLoading}>
+            <TouchableOpacity accessible={true} accessibilityRole="button" accessibilityLabel="Interactive element" style={styles.counterCircleBtn} onPress={incrementTarget} disabled={!isEditable || isLoading}>
               <Text style={styles.counterBtnSymbol}>+</Text>
             </TouchableOpacity>
           </View>
@@ -456,7 +456,7 @@ export default function CreateHabitScreen({ route, navigation }) {
             ].map(p => {
               const isSelected = priority === p.id;
               return (
-                <TouchableOpacity
+                <TouchableOpacity accessible={true} accessibilityRole="button" accessibilityLabel="Interactive element"
                   key={p.id}
                   style={[styles.priorityBlockButton, isSelected ? p.activeStyle : styles.priorityBlockButtonInactive]}
                   onPress={() => setPriority(p.id)}
@@ -496,7 +496,7 @@ export default function CreateHabitScreen({ route, navigation }) {
               {daysOfWeekOptions.map((day) => {
                 const isSelected = daysOfWeekList.includes(day.id);
                 return (
-                  <TouchableOpacity
+                  <TouchableOpacity accessible={true} accessibilityRole="button" accessibilityLabel="Interactive element"
                     key={day.id}
                     style={[styles.ratioDayCircleButton, isSelected && styles.ratioDayCircleButtonActive]}
                     onPress={() => handleToggleDay(day.id)}
@@ -509,7 +509,7 @@ export default function CreateHabitScreen({ route, navigation }) {
               })}
             </View>
 
-            <TouchableOpacity 
+            <TouchableOpacity accessible={true} accessibilityRole="button" accessibilityLabel="Interactive element" 
               style={styles.modalDoneActionButton}
               onPress={handleModalDonePress}
             >
