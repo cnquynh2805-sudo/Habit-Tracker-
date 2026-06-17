@@ -7,7 +7,7 @@ export const getStyles = (colors) =>
   StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: "#FAFBFB",
+      backgroundColor: colors.background,
     },
     topHeaderContainer: {
       paddingVertical: 16,
@@ -17,7 +17,7 @@ export const getStyles = (colors) =>
       paddingHorizontal: 20,
       backgroundColor: colors.surface,
       borderBottomWidth: 1,
-      borderBottomColor: "#F1F3F2",
+      borderBottomColor: colors.border,
     },
     headerCancelText: {
       fontSize: 16,

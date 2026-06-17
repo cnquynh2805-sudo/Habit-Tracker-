@@ -84,7 +84,7 @@ export default function HabitListScreen({ navigation }) {
     return unsubscribe;
   }, [navigation]);
 
-  
+
   // Update habit status (Active / Paused / Archived)
   const handleUpdateStatus = async (habitId, newStatus) => {
     try {
@@ -632,7 +632,7 @@ const DynamicPriorityTagsGrid = ({ item, currentStatus, categoryBadgeBg, categor
   return (
     <View style={styles.cardTagsGrid}>
       <View style={styles.cardTagsRow}>
-        <View 
+        <View
           style={{ flexDirection: 'row', gap: 8, alignSelf: 'flex-start' }}
           onLayout={(e) => setTopGroupWidth(e.nativeEvent.layout.width)}
         >
