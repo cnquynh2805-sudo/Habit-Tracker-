@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Text, 
-  View, 
-  ScrollView, 
-  TouchableOpacity, 
-  FlatList, 
+import {
+  Text,
+  View,
+  ScrollView,
+  TouchableOpacity,
+  FlatList,
   ActivityIndicator,
   Alert,
-  TouchableWithoutFeedback
+  TouchableWithoutFeedback,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -20,21 +20,31 @@ export default function HabitListScreen({ navigation }) {
   const { t, i18n } = useTranslation();
   const { isDark, setThemeMode, themeMode } = useTheme();
 
-  const handleLanguageChange = (lang) => {
-    i18n.changeLanguage(lang);
-    setIsLangMenuOpen(false);
+  const handleLanguageChange = async (lang) => {
+    try {
+      await i18n.changeLanguage(lang);
+      setIsLangMenuOpen(false);
+    } catch (e) {
+      console.error('Language error:', e);
+      Alert.alert('Error', 'Failed to change language');
+    }
   };
 
-  const handleThemeChange = (theme) => {
-    setThemeMode(theme);
-    setIsThemeMenuOpen(false);
+  const handleThemeChange = async (theme) => {
+    try {
+      setThemeMode(theme);
+      setIsThemeMenuOpen(false);
+    } catch (e) {
+      console.error('Theme error:', e);
+      Alert.alert('Error', 'Failed to change theme');
+    }
   };
 
   const [habits, setHabits] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [currentViewStatus, setCurrentViewStatus] = useState('Active'); // Matches exact PascalCase capitalization in OpenAPI specs
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const [activeDropdownId, setActiveDropdownId] = useState(null);
   const [isHeaderMenuOpen, setIsHeaderMenuOpen] = useState(false);
   const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
@@ -47,8 +57,8 @@ export default function HabitListScreen({ navigation }) {
       loadOriginalHabits();
       setActiveDropdownId(null);
       setIsHeaderMenuOpen(false);
-          setIsLangMenuOpen(false);
-          setIsThemeMenuOpen(false);
+      setIsLangMenuOpen(false);
+      setIsThemeMenuOpen(false);
       setIsLangMenuOpen(false);
       setIsThemeMenuOpen(false);
     });
@@ -79,8 +89,8 @@ export default function HabitListScreen({ navigation }) {
 
       allHabits = allHabits.map(h => {
         if (h.id === habitId) {
-          return { 
-            ...h, 
+          return {
+            ...h,
             status: newStatus, // Receives normalized 'Active' / 'Paused' / 'Archived' values
             canCheckin: newStatus === 'Active', // Structuring local key mapping to camelCase
             isSynced: false
@@ -91,7 +101,7 @@ export default function HabitListScreen({ navigation }) {
 
       setHabits(allHabits);
       await AsyncStorage.setItem('@habits_list', JSON.stringify(allHabits));
-      setActiveDropdownId(null); 
+      setActiveDropdownId(null);
     } catch (error) {
       console.log('Error updating status:', error);
     }
@@ -104,16 +114,16 @@ export default function HabitListScreen({ navigation }) {
       'Are you sure you want to delete this habit permanently?',
       [
         { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Delete', 
+        {
+          text: 'Delete',
           style: 'destructive',
           onPress: async () => {
             try {
               const cachedData = await AsyncStorage.getItem('@habits_list');
               let allHabits = cachedData ? JSON.parse(cachedData) : [];
-              
+
               const updatedList = allHabits.filter(h => h.id !== habitId);
-              
+
               setHabits(updatedList);
               await AsyncStorage.setItem('@habits_list', JSON.stringify(updatedList));
               setActiveDropdownId(null);
@@ -130,7 +140,7 @@ export default function HabitListScreen({ navigation }) {
   const getAvailableStatusOptions = (status) => {
     const currentStatus = status || 'Active';
     let options = [];
-    
+
     switch (currentStatus) {
       case 'Active':
         options = [
@@ -159,16 +169,16 @@ export default function HabitListScreen({ navigation }) {
 
   const filteredHabits = habits.filter(item => {
     const matchCategory = selectedCategory === 'All' || item.category?.toLowerCase() === selectedCategory.toLowerCase();
-    
+
     // Normalize existing legacy items or missing items defaults gracefully to 'Active' 
     const itemStatus = item.status ? (item.status.charAt(0).toUpperCase() + item.status.slice(1).toLowerCase()) : 'Active';
     const matchStatus = itemStatus === currentViewStatus;
-    
+
     return matchCategory && matchStatus;
   });
 
   const renderCategoryIcon = (categoryType) => {
-    switch(categoryType?.toLowerCase()) {
+    switch (categoryType?.toLowerCase()) {
       case 'health':
         return (
           <View style={styles.iconDropletBase}>
@@ -218,7 +228,7 @@ export default function HabitListScreen({ navigation }) {
     // Ensures clean rendering even if backward compatible structural fields mismatch 
     const rawStatus = item.status || 'Active';
     const currentStatus = rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1).toLowerCase();
-    
+
     const isDropdownVisible = activeDropdownId === item.id;
     const priTheme = getPriorityStyleMapping(item.priority);
     const availableOptions = getAvailableStatusOptions(currentStatus);
@@ -229,25 +239,25 @@ export default function HabitListScreen({ navigation }) {
 
     return (
       <View style={styles.cardOuterContainer}>
-        <TouchableOpacity accessible={true} accessibilityRole="button" accessibilityLabel="Interactive element" 
+        <TouchableOpacity accessible={true} accessibilityRole="button" accessibilityLabel="Interactive element"
           style={styles.habitCardWrapper}
           onPress={() => navigation && navigation.navigate('CreateHabit', { habitId: item.id })}
           activeOpacity={0.9}
         >
           <View style={[styles.cardLeftStripe, { backgroundColor: priTheme.stripe }]} />
-          
+
           <View style={styles.cardMainContentContainer}>
             <View style={styles.leftMetaContainer}>
               <View style={[styles.iconCircleBadge, currentStatus !== 'Active' && styles.iconCircleBadgePaused]}>
                 {renderCategoryIcon(item.category)}
               </View>
             </View>
-            
+
             <View style={styles.cardTextGroup}>
               <Text style={[styles.habitTitleLabel, currentStatus !== 'Active' && styles.textMuted]} numberOfLines={1}>
                 {item.name}
               </Text>
-              
+
               <View style={styles.cardBadgesRow}>
                 <View style={[styles.miniMetaBadge, { backgroundColor: categoryBadgeBg }]}>
                   <Text style={[styles.miniMetaBadgeText, { color: categoryBadgeText }]}>{item.category}</Text>
@@ -265,9 +275,9 @@ export default function HabitListScreen({ navigation }) {
             </View>
 
             <View style={styles.cardRightActionBlock}>
-              <TouchableOpacity accessible={true} accessibilityRole="button" accessibilityLabel="Interactive element" 
+              <TouchableOpacity accessible={true} accessibilityRole="button" accessibilityLabel="Interactive element"
                 style={[
-                  styles.statusCapsule, 
+                  styles.statusCapsule,
                   currentStatus === 'Active' && styles.statusCapsuleActive,
                   currentStatus === 'Paused' && styles.statusCapsulePaused,
                   currentStatus === 'Archived' && styles.statusCapsuleArchived
@@ -276,7 +286,7 @@ export default function HabitListScreen({ navigation }) {
                 activeOpacity={0.7}
               >
                 <Text style={[
-                  styles.statusCapsuleText, 
+                  styles.statusCapsuleText,
                   currentStatus === 'Active' && styles.statusTextActive,
                   currentStatus === 'Paused' && styles.statusTextPaused,
                   currentStatus === 'Archived' && styles.statusTextArchived
@@ -284,7 +294,7 @@ export default function HabitListScreen({ navigation }) {
                   {currentStatus}
                 </Text>
               </TouchableOpacity>
-              
+
               <View style={styles.figmaChevronRightContainer}>
                 <View style={styles.figmaChevronLineTop} />
                 <View style={styles.figmaChevronLineBottom} />
@@ -295,7 +305,7 @@ export default function HabitListScreen({ navigation }) {
 
         {isDropdownVisible && availableOptions.length > 0 && (
           <View style={[
-            styles.cardDropdownListMenu, 
+            styles.cardDropdownListMenu,
             { height: availableOptions.length * 36 + 8 }
           ]}>
             {availableOptions.map((option) => (
@@ -311,7 +321,7 @@ export default function HabitListScreen({ navigation }) {
                 }}
               >
                 <Text style={[
-                  styles.cardDropdownOptionText, 
+                  styles.cardDropdownOptionText,
                   option.isDestructive && { color: '#DC2626', fontWeight: 'bold' }
                 ]}>
                   {option.label}
@@ -326,7 +336,7 @@ export default function HabitListScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-      <TouchableWithoutFeedback 
+      <TouchableWithoutFeedback
         onPress={() => {
           setActiveDropdownId(null);
           setIsHeaderMenuOpen(false);
@@ -335,15 +345,15 @@ export default function HabitListScreen({ navigation }) {
         }}
       >
         <View style={styles.flexContainer}>
-          
+
           {/* TOP HEADER */}
           <View style={styles.globalTopNavigationHeader}>
             <TouchableOpacity accessible={true} accessibilityRole="button" accessibilityLabel="Interactive element" style={styles.headerLeftArrowButton} onPress={() => navigation && navigation.goBack()}>
               <Text style={styles.headerArrowSymbol}>←</Text>
             </TouchableOpacity>
-            
-            <Text style={styles.headerMainTitleText}>My Habits</Text>
-            
+
+            <Text style={styles.headerMainTitleText}>{t('habitList.title')}</Text>
+
             <View style={styles.headerRightActionGroup}>
               <View style={styles.langMenuWrapper}>
                 <TouchableOpacity accessible={true} accessibilityRole="button" accessibilityLabel="Toggle Language" onPress={() => setIsLangMenuOpen(!isLangMenuOpen)} style={styles.headerIconButton}>
@@ -377,22 +387,22 @@ export default function HabitListScreen({ navigation }) {
                   <View style={styles.headerStatePopoverMenu}>
                     {['Light', 'Dark', 'System'].map(theme => (
                       <TouchableOpacity accessible={true} accessibilityRole="button" accessibilityLabel={theme} key={theme} style={styles.headerMenuPopoverItem} onPress={() => handleThemeChange(theme)}>
-                        <Text style={[styles.headerMenuPopoverText, themeMode === theme && { color: '#2D4A3E', fontWeight: '700' }]}>{theme}</Text>
+                        <Text style={[styles.headerMenuPopoverText, themeMode === theme && { color: '#2D4A3E', fontWeight: '700' }]}>{t('theme.' + theme.toLowerCase())}</Text>
                       </TouchableOpacity>
                     ))}
                   </View>
                 )}
               </View>
 
-              <TouchableOpacity accessible={true} accessibilityRole="button" accessibilityLabel="Interactive element" 
-                style={styles.headerActionIconBtn} 
+              <TouchableOpacity accessible={true} accessibilityRole="button" accessibilityLabel="Interactive element"
+                style={styles.headerActionIconBtn}
                 onPress={() => navigation && navigation.navigate('CreateHabit')}
               >
                 <Text style={styles.headerPlusIconSymbol}>+</Text>
               </TouchableOpacity>
-              
+
               <View style={styles.relativeWrapper}>
-                <TouchableOpacity accessible={true} accessibilityRole="button" accessibilityLabel="Interactive element" 
+                <TouchableOpacity accessible={true} accessibilityRole="button" accessibilityLabel="Interactive element"
                   style={styles.headerActionIconBtn}
                   onPress={() => setIsHeaderMenuOpen(!isHeaderMenuOpen)}
                 >
@@ -402,9 +412,9 @@ export default function HabitListScreen({ navigation }) {
                 {isHeaderMenuOpen && (
                   <View style={styles.headerStatePopoverMenu}>
                     {[
-                      { id: 'Active', title: 'Active Habits' },
-                      { id: 'Paused', title: 'Paused List' },
-                      { id: 'Archived', title: 'Archived List' }
+                      { id: 'Active', title: t('habitList.filter.active') },
+                      { id: 'Paused', title: t('habitList.filter.paused') },
+                      { id: 'Archived', title: t('habitList.filter.archived') }
                     ].map((menuItem) => (
                       <TouchableOpacity accessible={true} accessibilityRole="button" accessibilityLabel="Interactive element"
                         key={menuItem.id}
@@ -415,8 +425,8 @@ export default function HabitListScreen({ navigation }) {
                         onPress={() => {
                           setCurrentViewStatus(menuItem.id);
                           setIsHeaderMenuOpen(false);
-          setIsLangMenuOpen(false);
-          setIsThemeMenuOpen(false);
+                          setIsLangMenuOpen(false);
+                          setIsThemeMenuOpen(false);
                           setActiveDropdownId(null);
                         }}
                       >
@@ -440,12 +450,12 @@ export default function HabitListScreen({ navigation }) {
               {categories.map((cat) => {
                 const isCurrent = selectedCategory === cat;
                 return (
-                  <TouchableOpacity accessible={true} accessibilityRole="button" accessibilityLabel="Interactive element" 
-                    key={cat} 
-                    style={[styles.filterChipButton, isCurrent && styles.filterChipButtonActive]} 
+                  <TouchableOpacity accessible={true} accessibilityRole="button" accessibilityLabel="Interactive element"
+                    key={cat}
+                    style={[styles.filterChipButton, isCurrent && styles.filterChipButtonActive]}
                     onPress={() => setSelectedCategory(cat)}
                   >
-                    <Text style={[styles.filterChipText, isCurrent && styles.filterChipTextActive]}>{cat}</Text>
+                    <Text style={[styles.filterChipText, isCurrent && styles.filterChipTextActive]}>{t('category.' + cat.toLowerCase())}</Text>
                   </TouchableOpacity>
                 );
               })}
@@ -467,22 +477,22 @@ export default function HabitListScreen({ navigation }) {
               onScrollBeginDrag={() => {
                 setActiveDropdownId(null);
                 setIsHeaderMenuOpen(false);
-          setIsLangMenuOpen(false);
-          setIsThemeMenuOpen(false);
+                setIsLangMenuOpen(false);
+                setIsThemeMenuOpen(false);
               }}
             />
           )}
 
           {/* FLOATING ACTION BUTTON */}
-          <TouchableOpacity accessible={true} accessibilityRole="button" accessibilityLabel="Interactive element" 
-            style={styles.floatingActionButton} 
-            onPress={() => navigation && navigation.navigate('CreateHabit')} 
+          <TouchableOpacity accessible={true} accessibilityRole="button" accessibilityLabel="Interactive element"
+            style={styles.floatingActionButton}
+            onPress={() => navigation && navigation.navigate('CreateHabit')}
             activeOpacity={0.85}
           >
             <View style={styles.fabPlusSignHorizontal} />
             <View style={styles.fabPlusSignVertical} />
           </TouchableOpacity>
-          
+
         </View>
       </TouchableWithoutFeedback>
     </SafeAreaView>
