@@ -16,7 +16,7 @@ import { styles } from './HabitListScreen.styles';
 export default function HabitListScreen({ navigation }) {
   const [habits, setHabits] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [currentViewStatus, setCurrentViewStatus] = useState('active'); 
+  const [currentViewStatus, setCurrentViewStatus] = useState('Active'); // Matches exact PascalCase capitalization in OpenAPI specs
   const [isLoading, setIsLoading] = useState(false);
   
   const [activeDropdownId, setActiveDropdownId] = useState(null);
@@ -49,7 +49,7 @@ export default function HabitListScreen({ navigation }) {
     }
   };
 
-  // Update habit status (Active / Pause / Archive)
+  // Update habit status (Active / Paused / Archived)
   const handleUpdateStatus = async (habitId, newStatus) => {
     try {
       const cachedData = await AsyncStorage.getItem('@habits_list');
@@ -59,9 +59,9 @@ export default function HabitListScreen({ navigation }) {
         if (h.id === habitId) {
           return { 
             ...h, 
-            status: newStatus,
-            can_checkin: newStatus === 'active',
-            is_synced: false
+            status: newStatus, // Receives normalized 'Active' / 'Paused' / 'Archived' values
+            canCheckin: newStatus === 'Active', // Structuring local key mapping to camelCase
+            isSynced: false
           };
         }
         return h;
@@ -104,27 +104,27 @@ export default function HabitListScreen({ navigation }) {
     );
   };
 
-  // Generate action menu options dynamically based on current context status
+  // Generate action menu options dynamically based on current context status matching PascalCase specification
   const getAvailableStatusOptions = (status) => {
-    const currentStatus = status || 'active';
+    const currentStatus = status || 'Active';
     let options = [];
     
-    switch (currentStatus.toLowerCase()) {
-      case 'active':
+    switch (currentStatus) {
+      case 'Active':
         options = [
-          { id: 'paused', label: 'Pause' },
-          { id: 'archived', label: 'Archive' }
+          { id: 'Paused', label: 'Pause' },
+          { id: 'Archived', label: 'Archive' }
         ];
         break;
-      case 'paused':
+      case 'Paused':
         options = [
-          { id: 'active', label: 'Resume' },
-          { id: 'archived', label: 'Archive' }
+          { id: 'Active', label: 'Resume' },
+          { id: 'Archived', label: 'Archive' }
         ];
         break;
-      case 'archived':
+      case 'Archived':
         options = [
-          { id: 'active', label: 'Restore' }
+          { id: 'Active', label: 'Restore' }
         ];
         break;
       default:
@@ -137,7 +137,11 @@ export default function HabitListScreen({ navigation }) {
 
   const filteredHabits = habits.filter(item => {
     const matchCategory = selectedCategory === 'All' || item.category?.toLowerCase() === selectedCategory.toLowerCase();
-    const matchStatus = (item.status || 'active').toLowerCase() === currentViewStatus.toLowerCase();
+    
+    // Normalize existing legacy items or missing items defaults gracefully to 'Active' 
+    const itemStatus = item.status ? (item.status.charAt(0).toUpperCase() + item.status.slice(1).toLowerCase()) : 'Active';
+    const matchStatus = itemStatus === currentViewStatus;
+    
     return matchCategory && matchStatus;
   });
 
@@ -189,7 +193,10 @@ export default function HabitListScreen({ navigation }) {
   };
 
   const renderHabitItem = ({ item }) => {
-    const currentStatus = item.status || 'active';
+    // Ensures clean rendering even if backward compatible structural fields mismatch 
+    const rawStatus = item.status || 'Active';
+    const currentStatus = rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1).toLowerCase();
+    
     const isDropdownVisible = activeDropdownId === item.id;
     const priTheme = getPriorityStyleMapping(item.priority);
     const availableOptions = getAvailableStatusOptions(currentStatus);
@@ -209,13 +216,13 @@ export default function HabitListScreen({ navigation }) {
           
           <View style={styles.cardMainContentContainer}>
             <View style={styles.leftMetaContainer}>
-              <View style={[styles.iconCircleBadge, currentStatus !== 'active' && styles.iconCircleBadgePaused]}>
+              <View style={[styles.iconCircleBadge, currentStatus !== 'Active' && styles.iconCircleBadgePaused]}>
                 {renderCategoryIcon(item.category)}
               </View>
             </View>
             
             <View style={styles.cardTextGroup}>
-              <Text style={[styles.habitTitleLabel, currentStatus !== 'active' && styles.textMuted]} numberOfLines={1}>
+              <Text style={[styles.habitTitleLabel, currentStatus !== 'Active' && styles.textMuted]} numberOfLines={1}>
                 {item.name}
               </Text>
               
@@ -239,20 +246,20 @@ export default function HabitListScreen({ navigation }) {
               <TouchableOpacity 
                 style={[
                   styles.statusCapsule, 
-                  currentStatus === 'active' && styles.statusCapsuleActive,
-                  currentStatus === 'paused' && styles.statusCapsulePaused,
-                  currentStatus === 'archived' && styles.statusCapsuleArchived
+                  currentStatus === 'Active' && styles.statusCapsuleActive,
+                  currentStatus === 'Paused' && styles.statusCapsulePaused,
+                  currentStatus === 'Archived' && styles.statusCapsuleArchived
                 ]}
                 onPress={() => setActiveDropdownId(isDropdownVisible ? null : item.id)}
                 activeOpacity={0.7}
               >
                 <Text style={[
                   styles.statusCapsuleText, 
-                  currentStatus === 'active' && styles.statusTextActive,
-                  currentStatus === 'paused' && styles.statusTextPaused,
-                  currentStatus === 'archived' && styles.statusTextArchived
+                  currentStatus === 'Active' && styles.statusTextActive,
+                  currentStatus === 'Paused' && styles.statusTextPaused,
+                  currentStatus === 'Archived' && styles.statusTextArchived
                 ]}>
-                  {currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1)}
+                  {currentStatus}
                 </Text>
               </TouchableOpacity>
               
@@ -332,9 +339,9 @@ export default function HabitListScreen({ navigation }) {
                 {isHeaderMenuOpen && (
                   <View style={styles.headerStatePopoverMenu}>
                     {[
-                      { id: 'active', title: 'Active Habits' },
-                      { id: 'paused', title: 'Paused List' },
-                      { id: 'archived', title: 'Archived List' }
+                      { id: 'Active', title: 'Active Habits' },
+                      { id: 'Paused', title: 'Paused List' },
+                      { id: 'Archived', title: 'Archived List' }
                     ].map((menuItem) => (
                       <TouchableOpacity
                         key={menuItem.id}

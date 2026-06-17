@@ -22,8 +22,8 @@ export default function CreateHabitScreen({ route, navigation }) {
   const [habitName, setHabitName] = useState('');
   const [category, setCategory] = useState('Mindfulness'); 
   const [frequency, setFrequency] = useState('Daily'); 
-  const [currentStatus, setCurrentStatus] = useState('active'); // Runs in the background to preserve logic
-  const [customDays, setCustomDays] = useState([]); 
+  const [currentStatus, setCurrentStatus] = useState('Active'); // Capitalized to match OpenAPI specification
+  const [daysOfWeekList, setDaysOfWeekList] = useState([]); // Map fields: custom_days -> daysOfWeek
   const [targetPerDay, setTargetPerDay] = useState('1'); 
   const [priority, setPriority] = useState('Medium'); 
   
@@ -33,7 +33,7 @@ export default function CreateHabitScreen({ route, navigation }) {
   // Backup state to restore original data if the user presses "Cancel" while editing
   const [backupData, setBackupData] = useState(null);
 
-  const daysOfWeek = [
+  const daysOfWeekOptions = [
     { id: 'Mon', label: 'M' },
     { id: 'Tue', label: 'T' },
     { id: 'Wed', label: 'W' },
@@ -47,7 +47,7 @@ export default function CreateHabitScreen({ route, navigation }) {
     if (isEditMode) {
       loadHabitForEditing();
     } else {
-      setCurrentStatus('active');
+      setCurrentStatus('Active');
     }
   }, [isEditMode]);
 
@@ -58,25 +58,33 @@ export default function CreateHabitScreen({ route, navigation }) {
         const habitsList = JSON.parse(existingDataJson);
         const targetHabit = habitsList.find(h => h.id === habitId);
         if (targetHabit) {
-          // Populate data into the form
+          // Normalize formatting to match exact PascalCase capitalization in OpenAPI specification
+          const rawPriority = targetHabit.priority || 'Medium';
+          const formattedPriority = rawPriority.charAt(0).toUpperCase() + rawPriority.slice(1).toLowerCase();
+          
+          const rawFrequency = targetHabit.frequency || 'Daily';
+          const formattedFrequency = rawFrequency.charAt(0).toUpperCase() + rawFrequency.slice(1).toLowerCase();
+
+          const rawStatus = targetHabit.status || 'Active';
+          const formattedStatus = rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1).toLowerCase();
+
+          // Populate data into the form matching camelCase specs
           setHabitName(targetHabit.name);
           setCategory(targetHabit.category || 'Mindfulness');
-          setFrequency(targetHabit.frequency || 'Daily');
-          setCustomDays(targetHabit.custom_days || []);
-          setTargetPerDay((targetHabit.target_per_day || 1).toString());
-          setCurrentStatus(targetHabit.status || 'active'); // Keep old status in background to prevent data loss
-          const rawPriority = targetHabit.priority || 'medium';
-          const formattedPriority = rawPriority.charAt(0).toUpperCase() + rawPriority.slice(1);
+          setFrequency(formattedFrequency);
+          setDaysOfWeekList(targetHabit.daysOfWeek || []);
+          setTargetPerDay((targetHabit.targetPerDay || 1).toString());
+          setCurrentStatus(formattedStatus); 
           setPriority(formattedPriority);
 
-          // Save backup in case user cancels during editing
+          // Save backup using strict OpenAPI specs fields in case user cancels during editing
           setBackupData({
             name: targetHabit.name,
             category: targetHabit.category || 'Mindfulness',
-            frequency: targetHabit.frequency || 'Daily',
-            custom_days: targetHabit.custom_days || [],
-            target_per_day: (targetHabit.target_per_day || 1).toString(),
-            status: targetHabit.status || 'active',
+            frequency: formattedFrequency,
+            daysOfWeek: targetHabit.daysOfWeek || [],
+            targetPerDay: (targetHabit.targetPerDay || 1).toString(),
+            status: formattedStatus,
             priority: formattedPriority
           });
         }
@@ -96,8 +104,8 @@ export default function CreateHabitScreen({ route, navigation }) {
           setHabitName(backupData.name);
           setCategory(backupData.category);
           setFrequency(backupData.frequency);
-          setCustomDays(backupData.custom_days);
-          setTargetPerDay(backupData.target_per_day);
+          setDaysOfWeekList(backupData.daysOfWeek);
+          setTargetPerDay(backupData.targetPerDay);
           setCurrentStatus(backupData.status);
           setPriority(backupData.priority);
         }
@@ -125,22 +133,22 @@ export default function CreateHabitScreen({ route, navigation }) {
   };
 
   const handleToggleDay = (dayId) => {
-    if (customDays.includes(dayId)) {
-      setCustomDays(customDays.filter(d => d !== dayId));
+    if (daysOfWeekList.includes(dayId)) {
+      setDaysOfWeekList(daysOfWeekList.filter(d => d !== dayId));
     } else {
-      setCustomDays([...customDays, dayId]);
+      setDaysOfWeekList([...daysOfWeekList, dayId]);
     }
   };
 
   const handleModalCloseRequest = () => {
-    if (customDays.length === 0) {
+    if (daysOfWeekList.length === 0) {
       setFrequency('Daily');
     }
     setIsModalVisible(false);
   };
 
   const handleModalDonePress = () => {
-    if (customDays.length === 0) {
+    if (daysOfWeekList.length === 0) {
       Alert.alert(
         'Required', 
         'Please select at least one day for your custom schedule.',
@@ -171,7 +179,7 @@ export default function CreateHabitScreen({ route, navigation }) {
       return;
     }
     
-    if (frequency === 'Custom' && customDays.length === 0) {
+    if (frequency === 'Custom' && daysOfWeekList.length === 0) {
       Alert.alert('Error', 'Please select at least one day for Custom frequency.');
       return;
     }
@@ -198,9 +206,9 @@ export default function CreateHabitScreen({ route, navigation }) {
         return;
       }
 
-      // New habit flow is always 'active', edit flow keeps the existing background status
-      const finalStatus = isEditMode ? currentStatus : 'active';
-      const canCheckIn = finalStatus === 'active';
+      // Ensure standard Active state behavior or retain strict localized derived structures
+      const finalStatus = isEditMode ? currentStatus : 'Active';
+      const canCheckIn = finalStatus === 'Active';
 
       if (isEditMode) {
         currentHabits = currentHabits.map(habit => {
@@ -210,12 +218,12 @@ export default function CreateHabitScreen({ route, navigation }) {
               name: cleanedName,
               category: category,
               frequency: frequency,
-              custom_days: frequency === 'Custom' ? customDays : null,
-              target_per_day: parseInt(targetPerDay, 10) || 1,
-              priority: priority.toLowerCase(),
+              daysOfWeek: frequency === 'Custom' ? daysOfWeekList : null,
+              targetPerDay: parseInt(targetPerDay, 10) || 1,
+              priority: priority,
               status: finalStatus,        
-              can_checkin: canCheckIn,    
-              is_synced: false
+              canCheckin: canCheckIn,    
+              isSynced: false
             };
           }
           return habit;
@@ -225,8 +233,8 @@ export default function CreateHabitScreen({ route, navigation }) {
           name: cleanedName,
           category: category,
           frequency: frequency,
-          custom_days: frequency === 'Custom' ? customDays : [],
-          target_per_day: targetPerDay,
+          daysOfWeek: frequency === 'Custom' ? daysOfWeekList : [],
+          targetPerDay: targetPerDay,
           status: finalStatus,
           priority: priority
         });
@@ -239,13 +247,13 @@ export default function CreateHabitScreen({ route, navigation }) {
           name: cleanedName,
           category: category,             
           frequency: frequency,           
-          custom_days: frequency === 'Custom' ? customDays : null,
-          target_per_day: parseInt(targetPerDay, 10) || 1, 
-          priority: priority.toLowerCase(), 
-          status: 'active',              
-          can_checkin: true,        
-          is_synced: false, 
-          created_at: new Date().toISOString()
+          daysOfWeek: frequency === 'Custom' ? daysOfWeekList : null,
+          targetPerDay: parseInt(targetPerDay, 10) || 1, 
+          priority: priority, 
+          status: 'Active',              
+          canCheckin: true,        
+          isSynced: false, 
+          createdAt: new Date().toISOString() // Structured matching standard specification
         };
         currentHabits.unshift(newHabit);
         await AsyncStorage.setItem('@habits_list', JSON.stringify(currentHabits));
@@ -404,7 +412,7 @@ export default function CreateHabitScreen({ route, navigation }) {
               disabled={!isEditable || isLoading}
             >
               <Text style={[styles.capsuleToggleText, frequency === 'Custom' && styles.capsuleToggleTextActive]}>
-                {`Custom (${customDays.length})`}
+                {`Custom (${daysOfWeekList.length})`}
               </Text>
             </TouchableOpacity>
           </View>
@@ -485,8 +493,8 @@ export default function CreateHabitScreen({ route, navigation }) {
             <Text style={styles.modalSubDescription}>Select the active practice days</Text>
             
             <View style={styles.modalDaysHorizontalRow}>
-              {daysOfWeek.map((day) => {
-                const isSelected = customDays.includes(day.id);
+              {daysOfWeekOptions.map((day) => {
+                const isSelected = daysOfWeekList.includes(day.id);
                 return (
                   <TouchableOpacity
                     key={day.id}
