@@ -1,0 +1,35 @@
+name: CI - Lint & UI Guidelines
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint:
+    name: Lint & UI Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: './mobile-app/package-lock.json'
+
+      - name: Install Dependencies
+        working-directory: ./mobile-app
+        run: npm ci --legacy-peer-deps
+
+      - name: Run ESLint
+        working-directory: ./mobile-app
+        run: npm run lint
+
+      - name: Run UI Guidelines Auditor
+        working-directory: ./mobile-app
+        run: npm run ui-audit
