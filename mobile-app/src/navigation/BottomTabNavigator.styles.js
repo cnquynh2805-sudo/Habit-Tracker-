@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-color-literals */
 import { StyleSheet } from "react-native";
 
 export const getTabStyles = (colors) =>
@@ -7,43 +8,43 @@ export const getTabStyles = (colors) =>
       bottom: 0,
       left: 0,
       right: 0,
-      backgroundColor: "transparent",
+      backgroundColor: "transparent", // eslint-disable-line react-native/no-color-literals
       elevation: 0,
     },
-    
+
     globalBottomTabBarExpanded: {
       backgroundColor: colors.surface,
       borderTopColor: colors.border,
       borderTopWidth: 1,
       height: 96,
       elevation: 10,
-      shadowColor: "#000",
+      shadowColor: "#000", // eslint-disable-line react-native/no-color-literals
       shadowOffset: { width: 0, height: -4 },
       shadowOpacity: 0.05,
       shadowRadius: 12,
     },
     tabBarItem: {
-      justifyContent: 'center',
-      alignItems: 'center',
-      height: '100%',
+      justifyContent: "center",
+      alignItems: "center",
+      height: "100%",
     },
     tabBarItemExpanded: {
-      justifyContent: 'flex-start',
-      alignItems: 'center',
-      height: '100%',
+      justifyContent: "flex-start",
+      alignItems: "center",
+      height: "100%",
       paddingTop: 12,
     },
     expandHandleWrapper: {
-      position: 'absolute',
+      position: "absolute",
       bottom: 60,
-      width: '100%',
-      alignItems: 'center',
+      width: "100%",
+      alignItems: "center",
     },
     collapseHandleWrapper: {
-      position: 'absolute',
+      position: "absolute",
       bottom: 96,
-      width: '100%',
-      alignItems: 'center',
+      width: "100%",
+      alignItems: "center",
       paddingBottom: 4,
     },
 
@@ -59,8 +60,8 @@ export const getTabStyles = (colors) =>
       flexDirection: "row",
     },
     expandHandleContainer: {
-      alignItems: 'center',
-      justifyContent: 'center',
+      alignItems: "center",
+      justifyContent: "center",
       marginBottom: -1,
       zIndex: 10,
     },
@@ -73,18 +74,35 @@ export const getTabStyles = (colors) =>
       borderWidth: 1,
       borderBottomWidth: 0,
       borderColor: colors.border,
-      alignItems: 'center',
-      justifyContent: 'center',
+      alignItems: "center",
+      justifyContent: "center",
       paddingTop: 4,
     },
-    arrowLineTop: { width: 10, height: 2, backgroundColor: colors.primary, borderRadius: 1, marginBottom: 2 },
-    arrowLineMid: { width: 14, height: 2, backgroundColor: colors.primary, borderRadius: 1, marginBottom: 2 },
-    arrowLineBot: { width: 18, height: 2, backgroundColor: colors.primary, borderRadius: 1 },
+    arrowLineTop: {
+      width: 10,
+      height: 2,
+      backgroundColor: colors.primary,
+      borderRadius: 1,
+      marginBottom: 2,
+    },
+    arrowLineMid: {
+      width: 14,
+      height: 2,
+      backgroundColor: colors.primary,
+      borderRadius: 1,
+      marginBottom: 2,
+    },
+    arrowLineBot: {
+      width: 18,
+      height: 2,
+      backgroundColor: colors.primary,
+      borderRadius: 1,
+    },
     helperPromptText: {
-      position: 'absolute',
+      position: "absolute",
       top: -24,
       fontSize: 10,
-      fontStyle: 'italic',
+      fontStyle: "italic",
       color: colors.textMuted,
       opacity: 0.8,
     },
@@ -210,5 +228,14 @@ export const getTabStyles = (colors) =>
       borderBottomLeftRadius: 2.5,
       borderBottomRightRadius: 2.5,
       marginTop: 1,
+    },
+    dummyScreenContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    dummyScreenText: {
+      fontSize: 16,
+      fontWeight: "bold",
     },
   });

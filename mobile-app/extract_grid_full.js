@@ -1,7 +1,13 @@
-const fs = require('fs');
-const path = require('path');
-const file = path.join(__dirname, 'src', 'screens', 'HabitList', 'HabitListScreen.js');
-let content = fs.readFileSync(file, 'utf8');
+const fs = require("fs");
+const path = require("path");
+const file = path.join(
+  __dirname,
+  "src",
+  "screens",
+  "HabitList",
+  "HabitListScreen.js",
+);
+let content = fs.readFileSync(file, "utf8");
 
 const targetContent = `              <View style={styles.cardBadgesRow}>
                 <View
@@ -210,27 +216,56 @@ const replacement = `<DynamicPriorityTagsGrid
 
 if (content.includes(targetContent)) {
   content = content.replace(targetContent, replacement);
-  
-  // Also fix the symbols and strings while we're at it!
-  content = content.replace(/<Text style=\{styles\.floatingActionButtonText\}>\+<\/Text>/g, "<Text style={styles.floatingActionButtonText}>{t('icons.plus')}</Text>");
-  content = content.replace(/<Text style=\{styles\.kebabMenuIconText\}>?<\/Text>/g, "<Text style={styles.kebabMenuIconText}>{t('icons.kebab')}</Text>");
-  content = content.replace(/<Text style=\{styles\.themeIconText\}>?<\/Text>/g, "<Text style={styles.themeIconText}>{t('icons.star')}</Text>");
-  content = content.replace(/<Text style=\{styles\.themeIconText\}>?<\/Text>/g, "<Text style={styles.themeIconText}>{t('icons.arrowLeft')}</Text>");
 
-  content = content.replace(/label: "Pause"/g, "label: t('habitList.contextMenu.pause')");
-  content = content.replace(/label: "Resume"/g, "label: t('habitList.contextMenu.resume')");
-  content = content.replace(/label: "Archive"/g, "label: t('habitList.contextMenu.archive')");
-  content = content.replace(/label: "Restore"/g, "label: t('habitList.contextMenu.restore')");
-  content = content.replace(/label: "Delete"/g, "label: t('habitList.contextMenu.delete')");
+  // Also fix the symbols and strings while we're at it!
+  content = content.replace(
+    /<Text style=\{styles\.floatingActionButtonText\}>\+<\/Text>/g,
+    "<Text style={styles.floatingActionButtonText}>{t('icons.plus')}</Text>",
+  );
+  content = content.replace(
+    /<Text style=\{styles\.kebabMenuIconText\}>?<\/Text>/g,
+    "<Text style={styles.kebabMenuIconText}>{t('icons.kebab')}</Text>",
+  );
+  content = content.replace(
+    /<Text style=\{styles\.themeIconText\}>?<\/Text>/g,
+    "<Text style={styles.themeIconText}>{t('icons.star')}</Text>",
+  );
+  content = content.replace(
+    /<Text style=\{styles\.themeIconText\}>?<\/Text>/g,
+    "<Text style={styles.themeIconText}>{t('icons.arrowLeft')}</Text>",
+  );
+
+  content = content.replace(
+    /label: "Pause"/g,
+    "label: t('habitList.contextMenu.pause')",
+  );
+  content = content.replace(
+    /label: "Resume"/g,
+    "label: t('habitList.contextMenu.resume')",
+  );
+  content = content.replace(
+    /label: "Archive"/g,
+    "label: t('habitList.contextMenu.archive')",
+  );
+  content = content.replace(
+    /label: "Restore"/g,
+    "label: t('habitList.contextMenu.restore')",
+  );
+  content = content.replace(
+    /label: "Delete"/g,
+    "label: t('habitList.contextMenu.delete')",
+  );
 
   content = content.replace(/defaultValue: "Medium Priority"/g, "");
   content = content.replace(/defaultValue: "High Priority"/g, "");
   content = content.replace(/defaultValue: "Low Priority"/g, "");
   content = content.replace(/, \{\s*\}/g, "");
 
-  content = content + '\n' + extractedComponent;
+  content = content + "\n" + extractedComponent;
   fs.writeFileSync(file, content);
-  console.log("Successfully extracted DynamicPriorityTagsGrid and fixed strings");
+  console.log(
+    "Successfully extracted DynamicPriorityTagsGrid and fixed strings",
+  );
 } else {
   console.log("Could not find target content");
 }

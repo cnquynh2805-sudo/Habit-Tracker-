@@ -29,7 +29,7 @@ export function Button({
       ]}
       {...props}
     >
-      <Text style={styles.text}>{title}</Text>
+      <Text style={[styles.text, { color: colors.onPrimary }]}>{title}</Text>
     </Pressable>
   );
 }
@@ -44,7 +44,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   text: {
-    color: "#FFFFFF", // Assuming text on primary/secondary buttons is white
     fontWeight: "600",
   },
 });

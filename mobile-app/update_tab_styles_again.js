@@ -1,7 +1,12 @@
-const fs = require('fs');
-const path = require('path');
-const file = path.join(__dirname, 'src', 'navigation', 'BottomTabNavigator.styles.js');
-let content = fs.readFileSync(file, 'utf8');
+const fs = require("fs");
+const path = require("path");
+const file = path.join(
+  __dirname,
+  "src",
+  "navigation",
+  "BottomTabNavigator.styles.js",
+);
+let content = fs.readFileSync(file, "utf8");
 
 // Ensure we have the required styles for the new BottomTabNavigator approach
 const missingStyles = `
@@ -42,8 +47,11 @@ const missingStyles = `
     },
 `;
 
-if (!content.includes('globalBottomTabBarExpanded')) {
-  content = content.replace('globalBottomTabBar: {', missingStyles + '\n    globalBottomTabBar: {');
+if (!content.includes("globalBottomTabBarExpanded")) {
+  content = content.replace(
+    "globalBottomTabBar: {",
+    missingStyles + "\n    globalBottomTabBar: {",
+  );
   fs.writeFileSync(file, content);
 }
 console.log("Updated styles.");

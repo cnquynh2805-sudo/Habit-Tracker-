@@ -1,7 +1,13 @@
-const fs = require('fs');
-const path = require('path');
-const file = path.join(__dirname, 'src', 'screens', 'HabitList', 'HabitListScreen.js');
-let content = fs.readFileSync(file, 'utf8');
+const fs = require("fs");
+const path = require("path");
+const file = path.join(
+  __dirname,
+  "src",
+  "screens",
+  "HabitList",
+  "HabitListScreen.js",
+);
+let content = fs.readFileSync(file, "utf8");
 
 const extractedComponent = `
 const DynamicPriorityTagsGrid = ({ item, currentStatus, categoryBadgeBg, categoryBadgeText, colors, styles, t, isDropdownVisible, setActiveDropdownId, priTheme }) => {
@@ -109,8 +115,8 @@ const DynamicPriorityTagsGrid = ({ item, currentStatus, categoryBadgeBg, categor
 };
 `;
 
-if (!content.includes('DynamicPriorityTagsGrid = ({')) {
-  content = content + '\n' + extractedComponent;
+if (!content.includes("DynamicPriorityTagsGrid = ({")) {
+  content = content + "\n" + extractedComponent;
   fs.writeFileSync(file, content);
   console.log("Appended extracted component");
 }

@@ -1,4 +1,4 @@
-const fs = require('fs');
+const fs = require("fs");
 
 const map = {
   "'#FAFBFB'": "colors.background",
@@ -24,23 +24,32 @@ const map = {
   "'#E8F2EE'": "colors.successLight",
   "'rgba(15, 23, 42, 0.4)'": "colors.border",
   "'rgba(15, 23, 42, 0.3)'": "colors.border",
-  "'transparent'": "'transparent'"
+  "'transparent'": "'transparent'",
 };
 
-let txt = fs.readFileSync('src/screens/CreateHabit/CreateHabitScreen.styles.js', 'utf8');
+let txt = fs.readFileSync(
+  "src/screens/CreateHabit/CreateHabitScreen.styles.js",
+  "utf8",
+);
 for (const [k, v] of Object.entries(map)) {
   txt = txt.split(k).join(v);
 }
 // Shadows
 txt = txt.replace(/shadowColor: '#000'/g, "shadowColor: colors.text");
-fs.writeFileSync('src/screens/CreateHabit/CreateHabitScreen.styles.js', txt);
+fs.writeFileSync("src/screens/CreateHabit/CreateHabitScreen.styles.js", txt);
 
-let txt2 = fs.readFileSync('src/screens/HabitList/HabitListScreen.styles.js', 'utf8');
+let txt2 = fs.readFileSync(
+  "src/screens/HabitList/HabitListScreen.styles.js",
+  "utf8",
+);
 txt2 = txt2.replace(/shadowColor: '#000'/g, "shadowColor: colors.text");
-fs.writeFileSync('src/screens/HabitList/HabitListScreen.styles.js', txt2);
+fs.writeFileSync("src/screens/HabitList/HabitListScreen.styles.js", txt2);
 
 // Fix CreateHabitScreen.js React hook dependencies error
-let txt3 = fs.readFileSync('src/screens/CreateHabit/CreateHabitScreen.js', 'utf8');
+let txt3 = fs.readFileSync(
+  "src/screens/CreateHabit/CreateHabitScreen.js",
+  "utf8",
+);
 // Fix loadHabitForEditing order
 const loadHabitFunc = `
   const loadHabitForEditing = async () => {
@@ -84,7 +93,13 @@ const loadHabitFunc = `
   };
 `;
 // Remove old declaration
-txt3 = txt3.replace(/const loadHabitForEditing = async \(\) => \{[\s\S]*?^  \};\n/m, '');
+txt3 = txt3.replace(
+  /const loadHabitForEditing = async \(\) => \{[\s\S]*?^  \};\n/m,
+  "",
+);
 // Insert above useEffect
-txt3 = txt3.replace('useEffect(() => {', loadHabitFunc + '\n  useEffect(() => {');
-fs.writeFileSync('src/screens/CreateHabit/CreateHabitScreen.js', txt3);
+txt3 = txt3.replace(
+  "useEffect(() => {",
+  loadHabitFunc + "\n  useEffect(() => {",
+);
+fs.writeFileSync("src/screens/CreateHabit/CreateHabitScreen.js", txt3);

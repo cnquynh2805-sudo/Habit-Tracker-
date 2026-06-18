@@ -20,7 +20,7 @@ import { useTheme } from "../../providers/ThemeProvider";
 
 export default function HabitListScreen({ navigation }) {
   const { t, i18n } = useTranslation();
-  const { isDark, setThemeMode, themeMode, colors } = useTheme();
+  const { setThemeMode, themeMode, colors } = useTheme();
   const styles = getStyles(colors);
 
   const handleLanguageChange = async (lang) => {
@@ -83,7 +83,6 @@ export default function HabitListScreen({ navigation }) {
     });
     return unsubscribe;
   }, [navigation]);
-
 
   // Update habit status (Active / Paused / Archived)
   const handleUpdateStatus = async (habitId, newStatus) => {
@@ -151,25 +150,32 @@ export default function HabitListScreen({ navigation }) {
     switch (currentStatus) {
       case "Active":
         options = [
-          { id: "Paused", label: t('habitList.contextMenu.pause') },
-          { id: "Archived", label: t('habitList.contextMenu.archive') },
+          { id: "Paused", label: t("habitList.contextMenu.pause") },
+          { id: "Archived", label: t("habitList.contextMenu.archive") },
         ];
         break;
       case "Paused":
         options = [
-          { id: "Active", label: t('habitList.contextMenu.resume') },
-          { id: "Archived", label: t('habitList.contextMenu.archive') },
+          { id: "Active", label: t("habitList.contextMenu.resume") },
+          { id: "Archived", label: t("habitList.contextMenu.archive") },
         ];
         break;
       case "Archived":
-        options = [{ id: "Active", label: t('habitList.contextMenu.restore') }];
+        options = [{ id: "Active", label: t("habitList.contextMenu.restore") }];
         break;
       default:
         options = [];
     }
 
     // Always append the Delete option at the end of the context dropdown
-    return [...options, { id: "delete", label: t('habitList.contextMenu.delete'), isDestructive: true }];
+    return [
+      ...options,
+      {
+        id: "delete",
+        label: t("habitList.contextMenu.delete"),
+        isDestructive: true,
+      },
+    ];
   };
 
   const filteredHabits = habits.filter((item) => {
@@ -625,51 +631,49 @@ export default function HabitListScreen({ navigation }) {
   );
 }
 
-
-const DynamicPriorityTagsGrid = ({ item, currentStatus, categoryBadgeBg, categoryBadgeText, colors, styles, t, isDropdownVisible, setActiveDropdownId, priTheme }) => {
+const DynamicPriorityTagsGrid = ({
+  item,
+  currentStatus,
+  categoryBadgeBg,
+  categoryBadgeText,
+  colors,
+  styles,
+  t,
+  isDropdownVisible,
+  setActiveDropdownId,
+  priTheme,
+}) => {
   const [topGroupWidth, setTopGroupWidth] = React.useState(null);
 
   return (
     <View style={styles.cardTagsGrid}>
       <View style={styles.cardTagsRow}>
         <View
-          style={{ flexDirection: 'row', gap: 8, alignSelf: 'flex-start' }}
+          style={styles.cardTagsTopGroup}
           onLayout={(e) => setTopGroupWidth(e.nativeEvent.layout.width)}
         >
           <View
-            style={[
-              styles.miniMetaBadge,
-              { backgroundColor: categoryBadgeBg },
-            ]}
+            style={[styles.miniMetaBadge, { backgroundColor: categoryBadgeBg }]}
           >
             <Text
-              style={[
-                styles.miniMetaBadgeText,
-                { color: categoryBadgeText },
-              ]}
+              style={[styles.miniMetaBadgeText, { color: categoryBadgeText }]}
               numberOfLines={1}
               ellipsizeMode="tail"
-              adjustsFontSizeToFit={true}
+              adjustsFontSizeToFit
             >
-              {t(`category.${(item.category || '').toLowerCase()}`)}
+              {t(`category.${(item.category || "").toLowerCase()}`)}
             </Text>
           </View>
           <View
-            style={[
-              styles.miniMetaBadge,
-              { backgroundColor: colors.border },
-            ]}
+            style={[styles.miniMetaBadge, { backgroundColor: colors.border }]}
           >
             <Text
-              style={[
-                styles.miniMetaBadgeText,
-                { color: colors.textMuted },
-              ]}
+              style={[styles.miniMetaBadgeText, { color: colors.textMuted }]}
               numberOfLines={1}
               ellipsizeMode="tail"
-              adjustsFontSizeToFit={true}
+              adjustsFontSizeToFit
             >
-              {t(`frequency.${(item.frequency || '').toLowerCase()}`)}
+              {t(`frequency.${(item.frequency || "").toLowerCase()}`)}
             </Text>
           </View>
         </View>
@@ -698,7 +702,7 @@ const DynamicPriorityTagsGrid = ({ item, currentStatus, categoryBadgeBg, categor
             ]}
             numberOfLines={1}
             ellipsizeMode="tail"
-            adjustsFontSizeToFit={true}
+            adjustsFontSizeToFit
           >
             {t(`status.${currentStatus.toLowerCase()}`)}
           </Text>
@@ -710,17 +714,14 @@ const DynamicPriorityTagsGrid = ({ item, currentStatus, categoryBadgeBg, categor
           style={[
             styles.figmaPriorityCapsuleBase,
             { backgroundColor: priTheme.bg },
-            topGroupWidth ? { width: topGroupWidth } : { flexShrink: 1 }
+            topGroupWidth ? { width: topGroupWidth } : { flexShrink: 1 },
           ]}
         >
           <Text
-            style={[
-              styles.figmaPriorityCapsuleText,
-              { color: priTheme.text },
-            ]}
+            style={[styles.figmaPriorityCapsuleText, { color: priTheme.text }]}
             numberOfLines={1}
             ellipsizeMode="tail"
-            adjustsFontSizeToFit={true}
+            adjustsFontSizeToFit
           >
             {priTheme.label}
           </Text>

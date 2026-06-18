@@ -1,5 +1,4 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getLocales } from "expo-localization";
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 
@@ -27,9 +26,6 @@ const languageDetector = {
       }
 
       // 2. Default to English ignoring system language
-      return callback("en");
-
-      // 3. Fallback to English
       return callback("en");
     } catch (error) {
       console.log("Error reading language", error);

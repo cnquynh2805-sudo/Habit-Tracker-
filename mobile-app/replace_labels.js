@@ -1,7 +1,13 @@
-const fs = require('fs');
-const path = require('path');
-const file = path.join(__dirname, 'src', 'screens', 'HabitList', 'HabitListScreen.js');
-let content = fs.readFileSync(file, 'utf8');
+const fs = require("fs");
+const path = require("path");
+const file = path.join(
+  __dirname,
+  "src",
+  "screens",
+  "HabitList",
+  "HabitListScreen.js",
+);
+let content = fs.readFileSync(file, "utf8");
 
 const targetStart = `<View style={styles.cardBadgesRow}>`;
 const targetEnd = `              <View style={styles.figmaChevronRightContainer}>
@@ -108,10 +114,10 @@ if (startIdx !== -1 && endIdx !== -1) {
                 <View style={styles.figmaChevronLineBottom} />
               </View>
             </View>`;
-            
+
   content = content.slice(0, startIdx) + replacement + content.slice(endIdx);
   fs.writeFileSync(file, content);
-  console.log('Successfully replaced labels block.');
+  console.log("Successfully replaced labels block.");
 } else {
-  console.log('Failed to find start or end index.');
+  console.log("Failed to find start or end index.");
 }

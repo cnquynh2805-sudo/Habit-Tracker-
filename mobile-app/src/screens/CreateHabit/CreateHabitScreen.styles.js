@@ -1,7 +1,7 @@
 /* eslint-disable react-native/no-color-literals, no-dupe-keys, react-native/no-inline-styles, i18next/no-literal-string, react-native-a11y/no-nested-touchables */
 import { StyleSheet, Dimensions } from "react-native";
 
-const { width, height } = Dimensions.get("window");
+const { width } = Dimensions.get("window");
 
 export const getStyles = (colors) =>
   StyleSheet.create({
@@ -21,21 +21,21 @@ export const getStyles = (colors) =>
     },
     headerCancelText: {
       fontSize: 16,
-      color: "#3D6A52",
+      color: colors.primary,
       fontWeight: "600",
     },
     headerDeleteText: {
       fontSize: 16,
-      color: "#EF4444",
+      color: colors.error,
       fontWeight: "600",
     },
     headerTitleText: {
       fontSize: 18,
       fontWeight: "700",
-      color: "#111827",
+      color: colors.text,
     },
     headerSaveCapsuleButton: {
-      backgroundColor: "#3D6A52",
+      backgroundColor: colors.primary,
       paddingHorizontal: 22,
       paddingVertical: 8,
       borderRadius: 100,
@@ -99,7 +99,7 @@ export const getStyles = (colors) =>
     },
     mascotBubbleText: {
       fontSize: 14,
-      color: "#475569",
+      color: colors.textMuted,
       lineHeight: 20,
       fontWeight: "500",
     },
@@ -127,7 +127,7 @@ export const getStyles = (colors) =>
     },
     customDaysValuePreviewText: {
       fontSize: 12,
-      color: "#3D6A52",
+      color: colors.primary,
       fontWeight: "600",
       textDecorationLine: "underline",
     },
@@ -137,7 +137,7 @@ export const getStyles = (colors) =>
       backgroundColor: "#FBFDFD",
       borderRadius: 24,
       borderWidth: 1,
-      borderColor: "#E2E8F0",
+      borderColor: colors.border,
       paddingHorizontal: 20,
       paddingVertical: 12,
       flexDirection: "row",
@@ -152,7 +152,7 @@ export const getStyles = (colors) =>
     mainInputField: {
       flex: 1,
       fontSize: 15,
-      color: "#111827",
+      color: colors.text,
       fontWeight: "500",
       paddingVertical: 0,
       marginRight: 10,
@@ -195,12 +195,12 @@ export const getStyles = (colors) =>
       maxWidth: "45%",
     },
     figmaCategoryChipActive: {
-      backgroundColor: "#3D6A52",
+      backgroundColor: colors.primary,
     },
     figmaCategoryChipText: {
       fontSize: 14,
       fontWeight: "600",
-      color: "#475569",
+      color: colors.textMuted,
     },
     figmaCategoryChipTextActive: {
       color: colors.surface,
@@ -220,12 +220,12 @@ export const getStyles = (colors) =>
       flexShrink: 1,
     },
     capsuleToggleButtonActive: {
-      backgroundColor: "#3D6A52",
+      backgroundColor: colors.primary,
     },
     capsuleToggleText: {
       fontSize: 13,
       fontWeight: "600",
-      color: "#475569",
+      color: colors.textMuted,
     },
     capsuleToggleTextActive: {
       color: colors.surface,
@@ -249,14 +249,14 @@ export const getStyles = (colors) =>
     counterBtnSymbol: {
       fontSize: 16,
       fontWeight: "700",
-      color: "#475569",
+      color: colors.textMuted,
     },
     counterValueInputNode: {
       width: 44,
       textAlign: "center",
       fontSize: 18,
       fontWeight: "700",
-      color: "#111827",
+      color: colors.text,
       padding: 0,
     },
     priorityFlexibleRow: {
@@ -272,7 +272,7 @@ export const getStyles = (colors) =>
       borderWidth: 1.5,
     },
     priorityBlockButtonInactive: {
-      backgroundColor: "#F8FAFC",
+      backgroundColor: colors.surfaceMuted,
       borderColor: colors.surfaceMuted,
     },
     lowPriorityActiveBorder: {
@@ -292,7 +292,7 @@ export const getStyles = (colors) =>
       fontWeight: "600",
     },
     priorityBlockTextInactive: {
-      color: "#475569",
+      color: colors.textMuted,
     },
     priorityBlockTextActive: {
       color: "#1E293B",
@@ -321,7 +321,7 @@ export const getStyles = (colors) =>
     proTipTextContent: {
       fontSize: 13,
       fontWeight: "600",
-      color: "#3D6A52",
+      color: colors.primary,
     },
 
     modalOverlayBackground: {
@@ -344,13 +344,13 @@ export const getStyles = (colors) =>
     modalHeaderTitle: {
       fontSize: 18,
       fontWeight: "700",
-      color: "#111827",
+      color: colors.text,
       marginBottom: 8,
       textAlign: "center",
     },
     modalSubDescription: {
       fontSize: 14,
-      color: "#64748B",
+      color: colors.textDisabled,
       textAlign: "center",
       lineHeight: 20,
       marginBottom: 20,
@@ -366,7 +366,7 @@ export const getStyles = (colors) =>
       height: 46,
       paddingHorizontal: 16,
       borderRadius: 14,
-      backgroundColor: "#F8FAFC",
+      backgroundColor: colors.surfaceMuted,
     },
     modalDayRowItemActive: {
       backgroundColor: "#E8F2EE",
@@ -374,19 +374,19 @@ export const getStyles = (colors) =>
     modalDayRowText: {
       fontSize: 15,
       fontWeight: "600",
-      color: "#475569",
+      color: colors.textMuted,
     },
     modalDayRowTextActive: {
-      color: "#3D6A52",
+      color: colors.primary,
       fontWeight: "700",
     },
     checkmarkIconSymbol: {
       fontSize: 16,
       fontWeight: "700",
-      color: "#3D6A52",
+      color: colors.primary,
     },
     modalDoneActionButton: {
-      backgroundColor: "#3D6A52",
+      backgroundColor: colors.primary,
       paddingVertical: 12,
       borderRadius: 25,
       justifyContent: "center",
@@ -418,12 +418,12 @@ export const getStyles = (colors) =>
     modalHeaderTitle: {
       fontSize: 18,
       fontWeight: "700",
-      color: "#111827",
+      color: colors.text,
       marginBottom: 4,
     },
     modalSubDescription: {
       fontSize: 13,
-      color: "#64748B",
+      color: colors.textDisabled,
       marginBottom: 20,
     },
     modalDaysHorizontalRow: {
@@ -440,23 +440,23 @@ export const getStyles = (colors) =>
       justifyContent: "center",
       alignItems: "center",
       borderWidth: 1,
-      borderColor: "#E2E8F0",
+      borderColor: colors.border,
     },
     ratioDayCircleButtonActive: {
-      backgroundColor: "#3D6A52",
+      backgroundColor: colors.primary,
       borderColor: "#3D6A52",
     },
     ratioDayCircleText: {
       fontSize: 13,
       fontWeight: "600",
-      color: "#64748B",
+      color: colors.textDisabled,
     },
     ratioDayCircleTextActive: {
       color: colors.surface,
       fontWeight: "700",
     },
     modalDoneActionButton: {
-      backgroundColor: "#3D6A52",
+      backgroundColor: colors.primary,
       width: "100%",
       height: 48,
       borderRadius: 24,

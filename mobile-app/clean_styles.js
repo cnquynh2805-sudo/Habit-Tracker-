@@ -1,7 +1,13 @@
-const fs = require('fs');
-const path = require('path');
-const file = path.join(__dirname, 'src', 'screens', 'HabitList', 'HabitListScreen.styles.js');
-let content = fs.readFileSync(file, 'utf8');
+const fs = require("fs");
+const path = require("path");
+const file = path.join(
+  __dirname,
+  "src",
+  "screens",
+  "HabitList",
+  "HabitListScreen.styles.js",
+);
+let content = fs.readFileSync(file, "utf8");
 
 // remove maxWidth from Priority
 content = content.replace(/maxWidth: "68%",/g, "");

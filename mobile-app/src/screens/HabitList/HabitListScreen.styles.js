@@ -1,7 +1,5 @@
 /* eslint-disable react-native/no-color-literals, no-dupe-keys, react-native/no-inline-styles, i18next/no-literal-string, react-native-a11y/no-nested-touchables */
-import { StyleSheet, Dimensions } from "react-native";
-
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
+import { StyleSheet } from "react-native";
 
 export const getStyles = (colors) =>
   StyleSheet.create({
@@ -57,7 +55,7 @@ export const getStyles = (colors) =>
       position: "absolute",
       top: 32,
       right: 0,
-      minWidth: 120,
+      minWidth: 48 + 72,
       backgroundColor: colors.surface,
       borderRadius: 12,
       paddingVertical: 4,
@@ -107,7 +105,7 @@ export const getStyles = (colors) =>
     listScrollContentBody: {
       paddingHorizontal: 20,
       gap: 12,
-      paddingBottom: 100,
+      paddingBottom: 120,
     },
     cardOuterContainer: {
       position: "relative",
@@ -169,6 +167,11 @@ export const getStyles = (colors) =>
       flexDirection: "column",
       gap: 6,
       marginTop: 4,
+    },
+    cardTagsTopGroup: {
+      flexDirection: "row",
+      gap: 8,
+      alignSelf: "flex-start",
     },
     cardTagsRow: {
       flexDirection: "row",
@@ -288,7 +291,7 @@ export const getStyles = (colors) =>
       color: colors.primary,
       fontWeight: "600",
     },
-    
+
     iconDropletBase: {
       alignItems: "center",
     },
@@ -386,10 +389,10 @@ export const getStyles = (colors) =>
     floatingActionButton: {
       position: "absolute",
       right: 24,
-      bottom: 32,
-      width: 56,
-      height: 56,
-      borderRadius: 28,
+      bottom: 116,
+      width: 48,
+      height: 48,
+      borderRadius: 24,
       backgroundColor: colors.primary,
       justifyContent: "center",
       alignItems: "center",

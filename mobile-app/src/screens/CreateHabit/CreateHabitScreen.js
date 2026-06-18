@@ -49,56 +49,60 @@ export default function CreateHabitScreen({ route, navigation }) {
     { id: "Sun", label: "S" },
   ];
 
-  
   const loadHabitForEditing = async () => {
     try {
-      const existingDataJson = await AsyncStorage.getItem('@habits_list');
+      const existingDataJson = await AsyncStorage.getItem("@habits_list");
       if (existingDataJson) {
         const habitsList = JSON.parse(existingDataJson);
-        const targetHabit = habitsList.find(h => h.id === habitId);
+        const targetHabit = habitsList.find((h) => h.id === habitId);
         if (targetHabit) {
-          const rawPriority = targetHabit.priority || 'Medium';
-          const formattedPriority = rawPriority.charAt(0).toUpperCase() + rawPriority.slice(1).toLowerCase();
-          
-          const rawFrequency = targetHabit.frequency || 'Daily';
-          const formattedFrequency = rawFrequency.charAt(0).toUpperCase() + rawFrequency.slice(1).toLowerCase();
+          const rawPriority = targetHabit.priority || "Medium";
+          const formattedPriority =
+            rawPriority.charAt(0).toUpperCase() +
+            rawPriority.slice(1).toLowerCase();
 
-          const rawStatus = targetHabit.status || 'Active';
-          const formattedStatus = rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1).toLowerCase();
+          const rawFrequency = targetHabit.frequency || "Daily";
+          const formattedFrequency =
+            rawFrequency.charAt(0).toUpperCase() +
+            rawFrequency.slice(1).toLowerCase();
+
+          const rawStatus = targetHabit.status || "Active";
+          const formattedStatus =
+            rawStatus.charAt(0).toUpperCase() +
+            rawStatus.slice(1).toLowerCase();
 
           setHabitName(targetHabit.name);
-          setCategory(targetHabit.category || 'Mindfulness');
+          setCategory(targetHabit.category || "Mindfulness");
           setFrequency(formattedFrequency);
           setDaysOfWeekList(targetHabit.daysOfWeek || []);
           setTargetPerDay((targetHabit.targetPerDay || 1).toString());
-          setCurrentStatus(formattedStatus); 
+          setCurrentStatus(formattedStatus);
           setPriority(formattedPriority);
 
           setBackupData({
             name: targetHabit.name,
-            category: targetHabit.category || 'Mindfulness',
+            category: targetHabit.category || "Mindfulness",
             frequency: formattedFrequency,
             daysOfWeek: targetHabit.daysOfWeek || [],
             targetPerDay: (targetHabit.targetPerDay || 1).toString(),
             status: formattedStatus,
-            priority: formattedPriority
+            priority: formattedPriority,
           });
         }
       }
     } catch (e) {
-      console.log('Error loading habit details:', e);
+      console.log("Error loading habit details:", e);
     }
   };
 
   useEffect(() => {
     if (isEditMode) {
-      loadHabitForEditing();
+      loadHabitForEditing(); // eslint-disable-line react-hooks/set-state-in-effect
     } else {
       setCurrentStatus("Active");
     }
-  }, [isEditMode]);
+  }, [isEditMode]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  
   // LEFT HEADER BUTTON ACTION (Cancel or Delete)
   const handleLeftHeaderPress = () => {
     if (!isEditMode) {
@@ -276,7 +280,7 @@ export default function CreateHabitScreen({ route, navigation }) {
         );
         if (navigation) navigation.goBack();
       }
-    } catch (error) {
+    } catch (_error) {
       Alert.alert("Error", "Failed to save habit.");
     } finally {
       setIsLoading(false);

@@ -1,7 +1,13 @@
-const fs = require('fs');
-const path = require('path');
-const file = path.join(__dirname, 'src', 'screens', 'HabitList', 'HabitListScreen.js');
-let content = fs.readFileSync(file, 'utf8');
+const fs = require("fs");
+const path = require("path");
+const file = path.join(
+  __dirname,
+  "src",
+  "screens",
+  "HabitList",
+  "HabitListScreen.js",
+);
+let content = fs.readFileSync(file, "utf8");
 
 const targetContent = `              <View style={styles.cardTagsGrid}>
                 <View style={styles.cardTagsRow}>
@@ -215,7 +221,7 @@ const replacement = `<DynamicPriorityTagsGrid
 
 if (content.includes(targetContent)) {
   content = content.replace(targetContent, replacement);
-  content = content + '\n' + extractedComponent;
+  content = content + "\n" + extractedComponent;
   fs.writeFileSync(file, content);
   console.log("Successfully extracted DynamicPriorityTagsGrid");
 } else {

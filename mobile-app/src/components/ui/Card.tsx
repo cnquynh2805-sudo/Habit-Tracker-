@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-color-literals */
 import React from "react";
 import { View, ViewProps, StyleSheet } from "react-native";
 
@@ -20,6 +21,7 @@ const styles = StyleSheet.create({
   card: {
     padding: 16,
     borderRadius: 12,
+    // eslint-disable-next-line react-native/no-color-literals
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
