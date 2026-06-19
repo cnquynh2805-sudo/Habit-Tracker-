@@ -1,0 +1,117 @@
+{
+  "common": {
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "save": "Speichern",
+    "edit": "Bearbeiten",
+    "done": "Fertig",
+    "required": "Erforderlich",
+    "error": "Fehler"
+  },
+  "action": {
+    "pause": "Pause",
+    "resume": "Fortsetzen",
+    "archive": "Archivieren",
+    "restore": "Wiederherstellen"
+  },
+  "status": {
+    "active": "Aktiv",
+    "paused": "Pausiert",
+    "archived": "Archiviert"
+  },
+  "category": {
+    "all": "Alle",
+    "health": "Gesundheit",
+    "study": "Studium",
+    "work": "Arbeit",
+    "mindfulness": "Achtsamkeit",
+    "other": "Andere",
+    "healthEmoji": "Gesundheit 💚",
+    "studyEmoji": "Studium 📘",
+    "workEmoji": "Arbeit 💼",
+    "mindfulnessEmoji": "Achtsamkeit 🧘",
+    "otherEmoji": "Andere ⭐"
+  },
+  "priority": {
+    "low": "Niedrig",
+    "medium": "Mittel",
+    "high": "Hoch",
+    "lowLong": "Niedrige Priorität",
+    "mediumLong": "Mittlere Priorität",
+    "highLong": "Hohe Priorität"
+  },
+  "frequency": {
+    "daily": "Täglich",
+    "custom": "Benutzerdefiniert",
+    "customWithCount": "Benutzerdefiniert ({{count}})"
+  },
+  "theme": {
+    "light": "Hell",
+    "dark": "Dunkel",
+    "system": "System"
+  },
+  "habitList": {
+    "title": "Meine Gewohnheiten",
+    "deleteTitle": "Löschen",
+    "deleteConfirm": "Möchten Sie diese Gewohnheit wirklich löschen?",
+    "filter": {
+      "active": "Aktive",
+      "paused": "Pausierte",
+      "archived": "Archivierte"
+    },
+    "a11y": {
+      "createHabit": "Neue Gewohnheit",
+      "switchLanguage": "Sprache wechseln",
+      "switchTheme": "Thema wechseln"
+    },
+    "contextMenu": {
+      "pause": "Pause",
+      "resume": "Resume",
+      "archive": "Archive",
+      "restore": "Restore",
+      "delete": "Delete"
+    }
+  },
+  "createHabit": {
+    "titleNew": "Neue Gewohnheit",
+    "titleEdit": "Bearbeiten",
+    "titleDetail": "Detail",
+    "mascotNew": "Eine neue Gewohnheit ist der erste Schritt!",
+    "mascotEdit": "Passen Sie hier Ihre Fortschritte an!",
+    "mascotDetail": "Überprüfen Sie Ihre Fortschritte.",
+    "habitNameLabel": "Name",
+    "habitNamePlaceholder": "z.B. 8 Gläser Wasser trinken",
+    "categoryLabel": "Kategorie",
+    "frequencyLabel": "Häufigkeit",
+    "targetLabel": "Ziel pro Tag",
+    "targetUnit": "Mal pro Tag",
+    "priorityLabel": "Priorität",
+    "proTip": "Tipp: Konsistenz vor Intensität.",
+    "modalCustomTitle": "Benutzerdefiniert",
+    "modalCustomDesc": "Wählen Sie aktive Tage",
+    "errorNoDays": "Wählen Sie mindestens einen Tag aus.",
+    "errorNoName": "Bitte einen Namen eingeben.",
+    "errorDuplicateTitle": "Doppelter Name",
+    "errorDuplicateDesc": "Existiert bereits.",
+    "errorSave": "Fehler beim Speichern."
+  },
+  "tabs": {
+    "today": "Heute",
+    "habits": "Gewohnheiten",
+    "stats": "Statistiken",
+    "goals": "Ziele",
+    "mascot": "Maskottchen",
+    "todayScreen": "Heute",
+    "statsScreen": "Statistiken",
+    "goalsScreen": "Ziele",
+    "mascotScreen": "Maskottchen",
+    "tapToSeeScreenNames": "Tap to see screen names"
+  },
+  "icons": {
+    "check": "?",
+    "star": "?",
+    "arrowLeft": "?",
+    "plus": "+",
+    "kebab": "?"
+  }
+}

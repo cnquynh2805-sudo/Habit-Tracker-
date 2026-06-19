@@ -1,0 +1,117 @@
+{
+  "common": {
+    "cancel": "取消",
+    "delete": "删除",
+    "save": "保存",
+    "edit": "编辑",
+    "done": "完成",
+    "required": "必填",
+    "error": "错误"
+  },
+  "action": {
+    "pause": "暂停",
+    "resume": "恢复",
+    "archive": "归档",
+    "restore": "还原"
+  },
+  "status": {
+    "active": "活跃",
+    "paused": "已暂停",
+    "archived": "已归档"
+  },
+  "category": {
+    "all": "全部",
+    "health": "健康",
+    "study": "学习",
+    "work": "工作",
+    "mindfulness": "正念",
+    "other": "其他",
+    "healthEmoji": "健康 💚",
+    "studyEmoji": "学习 📘",
+    "workEmoji": "工作 💼",
+    "mindfulnessEmoji": "正念 🧘",
+    "otherEmoji": "其他 ⭐"
+  },
+  "priority": {
+    "low": "低",
+    "medium": "中",
+    "high": "高",
+    "lowLong": "低优先级",
+    "mediumLong": "中优先级",
+    "highLong": "高优先级"
+  },
+  "frequency": {
+    "daily": "每天",
+    "custom": "自定义",
+    "customWithCount": "自定义 ({{count}})"
+  },
+  "theme": {
+    "light": "浅色",
+    "dark": "深色",
+    "system": "系统"
+  },
+  "habitList": {
+    "title": "我的习惯",
+    "deleteTitle": "删除习惯",
+    "deleteConfirm": "您确定要永久删除此习惯吗？",
+    "filter": {
+      "active": "活跃习惯",
+      "paused": "已暂停",
+      "archived": "已归档"
+    },
+    "a11y": {
+      "createHabit": "创建新习惯",
+      "switchLanguage": "切换语言",
+      "switchTheme": "切换主题"
+    },
+    "contextMenu": {
+      "pause": "Pause",
+      "resume": "Resume",
+      "archive": "Archive",
+      "restore": "Restore",
+      "delete": "Delete"
+    }
+  },
+  "createHabit": {
+    "titleNew": "新习惯",
+    "titleEdit": "编辑习惯",
+    "titleDetail": "习惯详情",
+    "mascotNew": "养成新习惯是迈向更好自己的第一步！",
+    "mascotEdit": "在这里调整您的进度以保持正轨！",
+    "mascotDetail": "查看您的进度。",
+    "habitNameLabel": "习惯名称",
+    "habitNamePlaceholder": "例如：喝8杯水",
+    "categoryLabel": "类别",
+    "frequencyLabel": "频率",
+    "targetLabel": "每天目标",
+    "targetUnit": "次/天",
+    "priorityLabel": "优先级",
+    "proTip": "提示：一致性胜过强度。",
+    "modalCustomTitle": "自定义频率",
+    "modalCustomDesc": "选择练习日期",
+    "errorNoDays": "请至少选择一天。",
+    "errorNoName": "请输入习惯名称。",
+    "errorDuplicateTitle": "名称重复",
+    "errorDuplicateDesc": "该名称的习惯已存在。",
+    "errorSave": "保存失败。"
+  },
+  "tabs": {
+    "today": "今天",
+    "habits": "习惯",
+    "stats": "统计",
+    "goals": "目标",
+    "mascot": "吉祥物",
+    "todayScreen": "今天",
+    "statsScreen": "统计",
+    "goalsScreen": "目标",
+    "mascotScreen": "吉祥物",
+    "tapToSeeScreenNames": "Tap to see screen names"
+  },
+  "icons": {
+    "check": "?",
+    "star": "?",
+    "arrowLeft": "?",
+    "plus": "+",
+    "kebab": "?"
+  }
+}

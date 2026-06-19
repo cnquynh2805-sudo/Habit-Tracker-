@@ -1,0 +1,117 @@
+{
+  "common": {
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "save": "Enregistrer",
+    "edit": "Modifier",
+    "done": "Terminé",
+    "required": "Requis",
+    "error": "Erreur"
+  },
+  "action": {
+    "pause": "Pause",
+    "resume": "Reprendre",
+    "archive": "Archiver",
+    "restore": "Restaurer"
+  },
+  "status": {
+    "active": "Actif",
+    "paused": "En pause",
+    "archived": "Archivé"
+  },
+  "category": {
+    "all": "Tout",
+    "health": "Santé",
+    "study": "Étude",
+    "work": "Travail",
+    "mindfulness": "Pleine conscience",
+    "other": "Autre",
+    "healthEmoji": "Santé 💚",
+    "studyEmoji": "Étude 📘",
+    "workEmoji": "Travail 💼",
+    "mindfulnessEmoji": "Pleine conscience 🧘",
+    "otherEmoji": "Autre ⭐"
+  },
+  "priority": {
+    "low": "Faible",
+    "medium": "Moyen",
+    "high": "Élevé",
+    "lowLong": "Priorité faible",
+    "mediumLong": "Priorité moyenne",
+    "highLong": "Priorité élevée"
+  },
+  "frequency": {
+    "daily": "Quotidien",
+    "custom": "Personnalisé",
+    "customWithCount": "Personnalisé ({{count}})"
+  },
+  "theme": {
+    "light": "Clair",
+    "dark": "Sombre",
+    "system": "Système"
+  },
+  "habitList": {
+    "title": "Mes Habitudes",
+    "deleteTitle": "Supprimer",
+    "deleteConfirm": "Voulez-vous vraiment supprimer cette habitude ?",
+    "filter": {
+      "active": "Habitudes Actives",
+      "paused": "En Pause",
+      "archived": "Archivées"
+    },
+    "a11y": {
+      "createHabit": "Créer une habitude",
+      "switchLanguage": "Changer de langue",
+      "switchTheme": "Changer de thème"
+    },
+    "contextMenu": {
+      "pause": "Pause",
+      "resume": "Resume",
+      "archive": "Archive",
+      "restore": "Restore",
+      "delete": "Delete"
+    }
+  },
+  "createHabit": {
+    "titleNew": "Nouvelle Habitude",
+    "titleEdit": "Modifier",
+    "titleDetail": "Détail",
+    "mascotNew": "Commencer une nouvelle habitude est le premier pas !",
+    "mascotEdit": "Ajustez vos progrès ici !",
+    "mascotDetail": "Examinez vos progrès ci-dessous.",
+    "habitNameLabel": "Nom",
+    "habitNamePlaceholder": "ex: Boire 8 verres d'eau",
+    "categoryLabel": "Catégorie",
+    "frequencyLabel": "Fréquence",
+    "targetLabel": "Objectif par jour",
+    "targetUnit": "fois par jour",
+    "priorityLabel": "Priorité",
+    "proTip": "Astuce : La constance avant l'intensité.",
+    "modalCustomTitle": "Fréquence",
+    "modalCustomDesc": "Sélectionnez les jours actifs",
+    "errorNoDays": "Sélectionnez au moins un jour.",
+    "errorNoName": "Veuillez entrer un nom.",
+    "errorDuplicateTitle": "Nom en double",
+    "errorDuplicateDesc": "Une habitude porte déjà ce nom.",
+    "errorSave": "Échec de la sauvegarde."
+  },
+  "tabs": {
+    "today": "Auj.",
+    "habits": "Habitudes",
+    "stats": "Stats",
+    "goals": "Objectifs",
+    "mascot": "Mascotte",
+    "todayScreen": "Aujourd'hui",
+    "statsScreen": "Statistiques",
+    "goalsScreen": "Objectifs",
+    "mascotScreen": "Mascotte",
+    "tapToSeeScreenNames": "Tap to see screen names"
+  },
+  "icons": {
+    "check": "?",
+    "star": "?",
+    "arrowLeft": "?",
+    "plus": "+",
+    "kebab": "?"
+  }
+}

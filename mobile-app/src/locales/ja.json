@@ -1,0 +1,117 @@
+{
+  "common": {
+    "cancel": "キャンセル",
+    "delete": "削除",
+    "save": "保存",
+    "edit": "編集",
+    "done": "完了",
+    "required": "必須",
+    "error": "エラー"
+  },
+  "action": {
+    "pause": "一時停止",
+    "resume": "再開",
+    "archive": "アーカイブ",
+    "restore": "復元"
+  },
+  "status": {
+    "active": "アクティブ",
+    "paused": "一時停止",
+    "archived": "アーカイブ済み"
+  },
+  "category": {
+    "all": "すべて",
+    "health": "健康",
+    "study": "勉強",
+    "work": "仕事",
+    "mindfulness": "マインドフルネス",
+    "other": "その他",
+    "healthEmoji": "健康 💚",
+    "studyEmoji": "勉強 📘",
+    "workEmoji": "仕事 💼",
+    "mindfulnessEmoji": "マインドフルネス 🧘",
+    "otherEmoji": "その他 ⭐"
+  },
+  "priority": {
+    "low": "低",
+    "medium": "中",
+    "high": "高",
+    "lowLong": "優先度：低",
+    "mediumLong": "優先度：中",
+    "highLong": "優先度：高"
+  },
+  "frequency": {
+    "daily": "毎日",
+    "custom": "カスタム",
+    "customWithCount": "カスタム ({{count}})"
+  },
+  "theme": {
+    "light": "ライト",
+    "dark": "ダーク",
+    "system": "システム"
+  },
+  "habitList": {
+    "title": "私の習慣",
+    "deleteTitle": "削除する",
+    "deleteConfirm": "この習慣を完全に削除してもよろしいですか？",
+    "filter": {
+      "active": "アクティブ",
+      "paused": "一時停止",
+      "archived": "アーカイブ"
+    },
+    "a11y": {
+      "createHabit": "新しい習慣を作成",
+      "switchLanguage": "言語を切り替え",
+      "switchTheme": "テーマを切り替え"
+    },
+    "contextMenu": {
+      "pause": "Pause",
+      "resume": "Resume",
+      "archive": "Archive",
+      "restore": "Restore",
+      "delete": "Delete"
+    }
+  },
+  "createHabit": {
+    "titleNew": "新しい習慣",
+    "titleEdit": "習慣を編集",
+    "titleDetail": "詳細",
+    "mascotNew": "新しい習慣を始めることは、より良い自分への第一歩です！",
+    "mascotEdit": "目標達成のためにここで調整しましょう！",
+    "mascotDetail": "以下の進捗を確認してください。",
+    "habitNameLabel": "習慣名",
+    "habitNamePlaceholder": "例：水を8杯飲む",
+    "categoryLabel": "カテゴリー",
+    "frequencyLabel": "頻度",
+    "targetLabel": "1日の目標",
+    "targetUnit": "回/日",
+    "priorityLabel": "優先度",
+    "proTip": "ヒント：強度よりも一貫性が重要です。",
+    "modalCustomTitle": "カスタム頻度",
+    "modalCustomDesc": "実践する日を選択",
+    "errorNoDays": "少なくとも1日を選択してください。",
+    "errorNoName": "習慣名を入力してください。",
+    "errorDuplicateTitle": "名前の重複",
+    "errorDuplicateDesc": "この名前の習慣は既に存在します。",
+    "errorSave": "保存に失敗しました。"
+  },
+  "tabs": {
+    "today": "今日",
+    "habits": "習慣",
+    "stats": "統計",
+    "goals": "目標",
+    "mascot": "マスコット",
+    "todayScreen": "今日",
+    "statsScreen": "統計",
+    "goalsScreen": "目標",
+    "mascotScreen": "マスコット",
+    "tapToSeeScreenNames": "Tap to see screen names"
+  },
+  "icons": {
+    "check": "?",
+    "star": "?",
+    "arrowLeft": "?",
+    "plus": "+",
+    "kebab": "?"
+  }
+}

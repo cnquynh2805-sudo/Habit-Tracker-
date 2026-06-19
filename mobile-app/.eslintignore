@@ -1,0 +1,9 @@
+node_modules/
+dist/
+build/
+coverage/
+*.config.js
+*.setup.js
+scripts/
+*.js
+!src/**/*.js

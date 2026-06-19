@@ -1,0 +1,117 @@
+{
+  "common": {
+    "cancel": "Hủy",
+    "delete": "Xóa",
+    "save": "Lưu",
+    "edit": "Sửa",
+    "done": "Xong",
+    "required": "Bắt buộc",
+    "error": "Lỗi"
+  },
+  "action": {
+    "pause": "Tạm dừng",
+    "resume": "Tiếp tục",
+    "archive": "Lưu trữ",
+    "restore": "Khôi phục"
+  },
+  "status": {
+    "active": "Hoạt động",
+    "paused": "Đã tạm dừng",
+    "archived": "Đã lưu trữ"
+  },
+  "category": {
+    "all": "Tất cả",
+    "health": "Sức khỏe",
+    "study": "Học tập",
+    "work": "Công việc",
+    "mindfulness": "Chánh niệm",
+    "other": "Khác",
+    "healthEmoji": "Sức khỏe 💚",
+    "studyEmoji": "Học tập 📘",
+    "workEmoji": "Công việc 💼",
+    "mindfulnessEmoji": "Chánh niệm 🧘",
+    "otherEmoji": "Khác ⭐"
+  },
+  "priority": {
+    "low": "Thấp",
+    "medium": "Trung bình",
+    "high": "Cao",
+    "lowLong": "Ưu tiên thấp",
+    "mediumLong": "Ưu tiên trung bình",
+    "highLong": "Ưu tiên cao"
+  },
+  "frequency": {
+    "daily": "Hàng ngày",
+    "custom": "Tùy chỉnh",
+    "customWithCount": "Tùy chỉnh ({{count}})"
+  },
+  "theme": {
+    "light": "Sáng",
+    "dark": "Tối",
+    "system": "Hệ thống"
+  },
+  "habitList": {
+    "title": "Thói quen của tôi",
+    "deleteTitle": "Xóa thói quen",
+    "deleteConfirm": "Bạn có chắc chắn muốn xóa thói quen này vĩnh viễn không?",
+    "filter": {
+      "active": "Hoạt động",
+      "paused": "Tạm dừng",
+      "archived": "Lưu trữ"
+    },
+    "a11y": {
+      "createHabit": "Tạo thói quen mới",
+      "switchLanguage": "Đổi ngôn ngữ",
+      "switchTheme": "Đổi giao diện"
+    },
+    "contextMenu": {
+      "pause": "Pause",
+      "resume": "Resume",
+      "archive": "Archive",
+      "restore": "Restore",
+      "delete": "Delete"
+    }
+  },
+  "createHabit": {
+    "titleNew": "Thói quen mới",
+    "titleEdit": "Sửa thói quen",
+    "titleDetail": "Chi tiết",
+    "mascotNew": "Bắt đầu thói quen mới là bước đầu tiên để tốt hơn! Hôm nay chúng ta làm gì nào?",
+    "mascotEdit": "Tinh chỉnh tiến độ của bạn ở đây để bám sát mục tiêu!",
+    "mascotDetail": "Xem lại tiến độ của bạn dưới đây.",
+    "habitNameLabel": "Tên thói quen",
+    "habitNamePlaceholder": "VD: Uống 8 ly nước",
+    "categoryLabel": "Danh mục",
+    "frequencyLabel": "Tần suất",
+    "targetLabel": "Mục tiêu mỗi ngày",
+    "targetUnit": "lần mỗi ngày",
+    "priorityLabel": "Độ ưu tiên",
+    "proTip": "Mẹo: Sự kiên trì quan trọng hơn cường độ.",
+    "modalCustomTitle": "Tần suất tùy chỉnh",
+    "modalCustomDesc": "Chọn các ngày thực hiện",
+    "errorNoDays": "Vui lòng chọn ít nhất một ngày.",
+    "errorNoName": "Vui lòng nhập tên thói quen.",
+    "errorDuplicateTitle": "Trùng tên",
+    "errorDuplicateDesc": "Đã có thói quen với tên này. Vui lòng chọn tên khác!",
+    "errorSave": "Lỗi lưu thói quen."
+  },
+  "tabs": {
+    "today": "Hôm nay",
+    "habits": "Thói quen",
+    "stats": "Thống kê",
+    "goals": "Mục tiêu",
+    "mascot": "Linh vật",
+    "todayScreen": "Hôm nay",
+    "statsScreen": "Thống kê",
+    "goalsScreen": "Mục tiêu",
+    "mascotScreen": "Linh vật",
+    "tapToSeeScreenNames": "Tap to see screen names"
+  },
+  "icons": {
+    "check": "?",
+    "star": "?",
+    "arrowLeft": "?",
+    "plus": "+",
+    "kebab": "?"
+  }
+}
