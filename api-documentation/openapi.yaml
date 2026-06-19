@@ -615,6 +615,9 @@ components:
           type: ["string", "null"]
           enum: [Active, Paused, Archived]
           default: Active
+        nfcTagId:
+          type: ["string", "null"]
+          description: "Optional NFC tag ID linked to this habit for quick check-ins."
 
     HabitUpdateInput:
       type: object
@@ -723,6 +726,9 @@ components:
         targetValue:
           type: integer
           minimum: 1
+        rewardItemId:
+          type: ["string", "null"]
+          description: "Optional ID of a RewardItem to unlock when this goal is achieved."
 
     Goal:
       allOf:
@@ -791,6 +797,21 @@ components:
         type:
           type: string
           example: "Hat"
+
+    MascotProfile:
+      type: object
+      properties:
+        id:
+          type: string
+        equippedItems:
+          type: array
+          items:
+            type: string
+            description: "IDs of equipped RewardItems"
+        level:
+          type: integer
+        experience:
+          type: integer
 
   responses:
     StandardError:
