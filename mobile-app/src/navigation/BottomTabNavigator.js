@@ -12,8 +12,8 @@ import {
 } from "react-native";
 
 import { getTabStyles } from "./BottomTabNavigator.styles";
+import HabitListScreen from "../features/habits/screens/HabitList/HabitListScreen";
 import { useTheme } from "../providers/ThemeProvider";
-import HabitListScreen from "../screens/HabitList/HabitListScreen";
 
 if (
   Platform.OS === "android" &&

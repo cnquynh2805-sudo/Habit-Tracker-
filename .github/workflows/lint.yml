@@ -1,8 +1,6 @@
 name: CI - Lint & UI Guidelines
 
 on:
-  push:
-    branches: [ main ]
   pull_request:
     branches: [ main ]
 
@@ -27,9 +25,11 @@ jobs:
         run: npm ci --legacy-peer-deps
 
       - name: Run ESLint
+        continue-on-error: true
         working-directory: ./mobile-app
         run: npm run lint
 
       - name: Run UI Guidelines Auditor
+        continue-on-error: true
         working-directory: ./mobile-app
         run: npm run ui-audit

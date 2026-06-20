@@ -7,6 +7,7 @@ module.exports = {
   ],
   plugins: ["react-native-a11y", "react-native", "i18next"],
   rules: {
+    "prettier/prettier": ["warn", { endOfLine: "auto" }],
     "i18next/no-literal-string": ["error", { markupOnly: true }],
     "react-native/no-raw-text": ["error", { skip: ["Button"] }],
     "react-native/no-inline-styles": "error",
