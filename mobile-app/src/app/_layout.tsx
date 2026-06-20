@@ -3,7 +3,7 @@ import { Stack } from "expo-router";
 import { QueryProvider } from "../providers/QueryProvider";
 import { ThemeProvider } from "../providers/ThemeProvider";
 
-import "../i18n";
+import "../shared/i18n";
 
 export default function RootLayout() {
   return (
