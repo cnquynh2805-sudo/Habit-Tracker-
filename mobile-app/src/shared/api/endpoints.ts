@@ -7,5 +7,4 @@ export const endpoints = {
     update: (id: string) => `/habits/${id}`,
     remove: (id: string) => `/habits/${id}`,
   },
-  
 } as const;

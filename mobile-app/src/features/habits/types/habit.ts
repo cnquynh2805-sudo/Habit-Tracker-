@@ -1,14 +1,7 @@
 export type HabitFrequency = "Daily" | "Weekly" | "Custom";
 export type HabitPriority = "Low" | "Medium" | "High";
 export type HabitStatus = "Active" | "Paused" | "Archived";
-export type DayOfWeek =
-  | "Mon"
-  | "Tue"
-  | "Wed"
-  | "Thu"
-  | "Fri"
-  | "Sat"
-  | "Sun";
+export type DayOfWeek = "Mon" | "Tue" | "Wed" | "Thu" | "Fri" | "Sat" | "Sun";
 
 export interface Habit {
   id: string;

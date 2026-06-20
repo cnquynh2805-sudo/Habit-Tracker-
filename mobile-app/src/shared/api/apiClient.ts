@@ -11,7 +11,6 @@ const apiClient = axios.create({
   },
 });
 
-
 // Unwrap the response so callers receive the payload directly.
 apiClient.interceptors.response.use(
   (response) => response.data,
