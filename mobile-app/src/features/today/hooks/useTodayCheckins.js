@@ -12,15 +12,12 @@ import {
   CHECKIN_STATUS,
   deriveStatus,
   getTodayKey,
+  isScheduledOn,
 } from "../utils/today";
 
 const UNDO_WINDOW_MS = 8000;
 const HAPPY_MS = 2500;
 const HABITS_CACHE_KEY = "@today_habits_cache";
-
-// Client-only status: a habit whose day ended without completion. The server
-// enum has no "missed", so it is mapped back to "Not Started" when syncing.
-export const STATUS_MISSED = "missed";
 
 // Mascot states map 1:1 to the gif assets in src/assets/mascot.
 export const MASCOT = {
@@ -44,9 +41,14 @@ function buildCheckin(habit) {
   };
 }
 
-// Only Active, checkin-able habits belong on the Today screen.
+// A habit shows on Today if it's Active, checkin-able, and scheduled for the
+// current weekday (daysOfWeek includes today, or it's a daily habit).
 function isTodayHabit(habit) {
-  return (habit.status || "Active") === "Active" && habit.canCheckin !== false;
+  return (
+    (habit.status || "Active") === "Active" &&
+    habit.canCheckin !== false &&
+    isScheduledOn(habit)
+  );
 }
 
 export function useTodayCheckins() {
@@ -131,15 +133,15 @@ export function useTodayCheckins() {
             dayKey: todayKey,
           };
         } else if (cached && cached.dayKey && cached.dayKey !== todayKey) {
-          // The day rolled over: start fresh, keep streak only if yesterday
-          // was completed, otherwise flag the habit as missed.
+          // The day rolled over: reset to a fresh "Not Started" day, keeping the
+          // streak only if the previous day was completed.
           const wasCompleted = (cached.completedCount || 0) >= target;
           next[h.id] = {
             serverId,
             habit_id: habitId,
             date: wasCompleted ? cached.date || 0 : 0,
             completedCount: 0,
-            status: wasCompleted ? CHECKIN_STATUS.notStarted : STATUS_MISSED,
+            status: CHECKIN_STATUS.notStarted,
             dayKey: todayKey,
           };
         } else {
@@ -204,11 +206,7 @@ export function useTodayCheckins() {
           habit_id: entry.habit_id,
           date: entry.date,
           completedCount: entry.completedCount,
-          // "missed" is client-only; send a valid enum to the server.
-          status:
-            entry.status === STATUS_MISSED
-              ? CHECKIN_STATUS.notStarted
-              : entry.status,
+          status: entry.status,
         };
         // Resolve the server id from the latest state, not the captured
         // closure: a superseded action may have created the record already.
@@ -359,7 +357,8 @@ export function useTodayCheckins() {
         habit: h,
         checkin,
         target,
-        overdue: checkin.status === STATUS_MISSED,
+        // Any not-yet-started habit shows the Overdue (light red) style.
+        overdue: checkin.status === CHECKIN_STATUS.notStarted,
         streak: checkin.date || 0,
       };
       if (checkin.completedCount >= target) doneList.push(item);

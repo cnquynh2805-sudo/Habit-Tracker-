@@ -15,6 +15,22 @@ export function getTodayKey(date = new Date()) {
   return `${y}-${m}-${d}`;
 }
 
+// Today's weekday as the short code used by Habit.daysOfWeek (Mon..Sun).
+const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+export function getWeekday(date = new Date()) {
+  return WEEKDAYS[date.getDay()];
+}
+
+// Whether a habit is scheduled for the given day. Daily habits (no daysOfWeek)
+// run every day; otherwise the weekday must be in the habit's daysOfWeek list.
+export function isScheduledOn(habit, date = new Date()) {
+  const dow = habit?.daysOfWeek;
+  if (Array.isArray(dow) && dow.length > 0) {
+    return dow.includes(getWeekday(date));
+  }
+  return true;
+}
+
 // Start-of-day timestamp (ms) sent to the API as the check-in `date`.
 export function getStartOfDay(date = new Date()) {
   const d = new Date(date);

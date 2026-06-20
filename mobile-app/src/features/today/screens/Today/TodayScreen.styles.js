@@ -165,8 +165,9 @@ export const getStyles = (colors) =>
       borderColor: colors.border,
     },
     habitCardOverdue: {
-      backgroundColor: colors.priorityHighBg,
-      borderColor: colors.priorityHighStripe,
+      // Solid light-red (opaque so the card behind it doesn't show through).
+      backgroundColor: "#FCEBEA",
+      borderColor: "#F3C9C5",
     },
     cardTopRow: {
       flexDirection: "row",
@@ -199,7 +200,7 @@ export const getStyles = (colors) =>
       marginTop: 3,
     },
     habitMetaOverdue: {
-      color: colors.warningDark,
+      color: "#C0392B",
       fontWeight: "700",
     },
     checkinButton: {

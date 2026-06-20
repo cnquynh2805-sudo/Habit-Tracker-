@@ -410,6 +410,8 @@ export default function BottomTabNavigator() {
         screenOptions={{
           headerShown: false,
           tabBarShowLabel: false,
+          // Slide the screens left/right when switching tabs (incl. via swipe).
+          animation: "shift",
           tabBarStyle: isExpanded
             ? tabStyles.globalBottomTabBarExpanded
             : tabStyles.globalBottomTabBar,
