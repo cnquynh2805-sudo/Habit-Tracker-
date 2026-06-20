@@ -58,5 +58,7 @@ coverage/
 # build
 build/
 
-#secrets
-docs/
+#irrelevant
+mobile-app/docs/
+mobile-app/scripts/
+*.docx
