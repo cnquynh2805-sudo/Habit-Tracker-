@@ -5,7 +5,7 @@ import {
   StyleSheet,
 } from "react-native";
 
-import { useTheme } from "../../providers/ThemeProvider";
+import { useTheme } from "../../../providers/ThemeProvider";
 
 export interface TextProps extends RNTextProps {
   variant?: "body" | "title" | "caption";

@@ -16,7 +16,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { getStyles } from "./HabitListScreen.styles";
-import { useTheme } from "../../providers/ThemeProvider";
+import { useTheme } from "../../../../providers/ThemeProvider";
 
 export default function HabitListScreen({ navigation }) {
   const { t, i18n } = useTranslation();

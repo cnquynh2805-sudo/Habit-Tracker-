@@ -6,8 +6,8 @@ import React from "react";
 import BottomTabNavigator from "./src/navigation/BottomTabNavigator"; // Path to the newly created Tab Navigator file
 import { QueryProvider } from "./src/providers/QueryProvider"; // React Query provider
 import { ThemeProvider, useTheme } from "./src/providers/ThemeProvider"; // Theme provider
-import CreateHabitScreen from "./src/screens/CreateHabit/CreateHabitScreen"; // Habit creation/modification screen
-import "./src/i18n"; // Initialize i18n
+import CreateHabitScreen from "./src/features/habits/screens/CreateHabit/CreateHabitScreen"; // Habit creation/modification screen
+import "./src/shared/i18n"; // Initialize i18n
 
 const Stack = createNativeStackNavigator();
 

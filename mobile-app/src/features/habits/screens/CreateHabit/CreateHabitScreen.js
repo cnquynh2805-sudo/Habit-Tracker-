@@ -14,7 +14,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { getStyles } from "./CreateHabitScreen.styles";
-import { useTheme } from "../../providers/ThemeProvider";
+import { useTheme } from "../../../../providers/ThemeProvider";
 
 export default function CreateHabitScreen({ route, navigation }) {
   const { colors } = useTheme();

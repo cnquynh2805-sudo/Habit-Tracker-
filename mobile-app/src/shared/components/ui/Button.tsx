@@ -2,7 +2,7 @@ import React from "react";
 import { Pressable, PressableProps, StyleSheet } from "react-native";
 
 import { Text } from "./Text";
-import { useTheme } from "../../providers/ThemeProvider";
+import { useTheme } from "../../../providers/ThemeProvider";
 
 interface ButtonProps extends PressableProps {
   title: string;

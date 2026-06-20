@@ -5,7 +5,7 @@ import {
   StyleSheet,
 } from "react-native";
 
-import { useTheme } from "../../providers/ThemeProvider";
+import { useTheme } from "../../../providers/ThemeProvider";
 
 export interface TextInputProps extends RNTextInputProps {
   // Add custom props if needed

@@ -13,7 +13,7 @@ import {
 
 import { getTabStyles } from "./BottomTabNavigator.styles";
 import { useTheme } from "../providers/ThemeProvider";
-import HabitListScreen from "../screens/HabitList/HabitListScreen";
+import HabitListScreen from "../features/habits/screens/HabitList/HabitListScreen";
 
 if (
   Platform.OS === "android" &&
