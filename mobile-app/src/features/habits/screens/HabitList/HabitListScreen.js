@@ -17,6 +17,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { getStyles } from "./HabitListScreen.styles";
 import { useTheme } from "../../../../providers/ThemeProvider";
+import { listHabits, updateHabit, deleteHabit } from "../../services/habitsApi";
+
+const HABITS_CACHE_KEY = "@habits_list";
 
 export default function HabitListScreen({ navigation }) {
   const { t, i18n } = useTranslation();
@@ -58,14 +61,22 @@ export default function HabitListScreen({ navigation }) {
   const loadOriginalHabits = async () => {
     setIsLoading(true);
     try {
-      const cachedData = await AsyncStorage.getItem("@habits_list");
-      if (cachedData) {
-        setHabits(JSON.parse(cachedData));
-      } else {
+      // Source of truth is the API; cache the result for offline display.
+      const apiHabits = await listHabits();
+      setHabits(apiHabits);
+      await AsyncStorage.setItem(HABITS_CACHE_KEY, JSON.stringify(apiHabits));
+    } catch (error) {
+      console.log(
+        "Error loading habits from API, falling back to cache:",
+        error,
+      );
+      try {
+        const cachedData = await AsyncStorage.getItem(HABITS_CACHE_KEY);
+        setHabits(cachedData ? JSON.parse(cachedData) : []);
+      } catch (cacheError) {
+        console.log("Error reading storage:", cacheError);
         setHabits([]);
       }
-    } catch (error) {
-      console.log("Error reading storage:", error);
     } finally {
       setIsLoading(false);
     }
@@ -86,27 +97,24 @@ export default function HabitListScreen({ navigation }) {
 
   // Update habit status (Active / Paused / Archived)
   const handleUpdateStatus = async (habitId, newStatus) => {
+    const target = habits.find((h) => h.id === habitId);
+    if (!target) return;
+
     try {
-      const cachedData = await AsyncStorage.getItem("@habits_list");
-      let allHabits = cachedData ? JSON.parse(cachedData) : [];
+      // PATCH /habits/{id} requires the full habit payload, not just status.
+      await updateHabit(habitId, { ...target, status: newStatus });
 
-      allHabits = allHabits.map((h) => {
-        if (h.id === habitId) {
-          return {
-            ...h,
-            status: newStatus, // Receives normalized 'Active' / 'Paused' / 'Archived' values
-            canCheckin: newStatus === "Active", // Structuring local key mapping to camelCase
-            isSynced: false,
-          };
-        }
-        return h;
-      });
-
+      const allHabits = habits.map((h) =>
+        h.id === habitId
+          ? { ...h, status: newStatus, canCheckin: newStatus === "Active" }
+          : h,
+      );
       setHabits(allHabits);
-      await AsyncStorage.setItem("@habits_list", JSON.stringify(allHabits));
+      await AsyncStorage.setItem(HABITS_CACHE_KEY, JSON.stringify(allHabits));
       setActiveDropdownId(null);
     } catch (error) {
       console.log("Error updating status:", error);
+      Alert.alert("Error", "Failed to update habit status.");
     }
   };
 
@@ -122,19 +130,18 @@ export default function HabitListScreen({ navigation }) {
           style: "destructive",
           onPress: async () => {
             try {
-              const cachedData = await AsyncStorage.getItem("@habits_list");
-              const allHabits = cachedData ? JSON.parse(cachedData) : [];
+              await deleteHabit(habitId);
 
-              const updatedList = allHabits.filter((h) => h.id !== habitId);
-
+              const updatedList = habits.filter((h) => h.id !== habitId);
               setHabits(updatedList);
               await AsyncStorage.setItem(
-                "@habits_list",
+                HABITS_CACHE_KEY,
                 JSON.stringify(updatedList),
               );
               setActiveDropdownId(null);
             } catch (error) {
               console.log("Error deleting habit:", error);
+              Alert.alert("Error", "Failed to delete habit.");
             }
           },
         },
@@ -393,7 +400,7 @@ export default function HabitListScreen({ navigation }) {
         <View style={styles.flexContainer}>
           {/* TOP HEADER */}
           <View style={styles.globalTopNavigationHeader}>
-            <TouchableOpacity
+            {/* <TouchableOpacity
               accessible
               accessibilityRole="button"
               accessibilityLabel="Interactive element"
@@ -401,7 +408,7 @@ export default function HabitListScreen({ navigation }) {
               onPress={() => navigation && navigation.goBack()}
             >
               <Text style={styles.headerArrowSymbol}>←</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
 
             <Text style={styles.headerMainTitleText}>
               {t("habitList.title")}
@@ -659,7 +666,6 @@ const DynamicPriorityTagsGrid = ({
               style={[styles.miniMetaBadgeText, { color: categoryBadgeText }]}
               numberOfLines={1}
               ellipsizeMode="tail"
-              adjustsFontSizeToFit
             >
               {t(`category.${(item.category || "").toLowerCase()}`)}
             </Text>
@@ -671,7 +677,6 @@ const DynamicPriorityTagsGrid = ({
               style={[styles.miniMetaBadgeText, { color: colors.textMuted }]}
               numberOfLines={1}
               ellipsizeMode="tail"
-              adjustsFontSizeToFit
             >
               {t(`frequency.${(item.frequency || "").toLowerCase()}`)}
             </Text>
