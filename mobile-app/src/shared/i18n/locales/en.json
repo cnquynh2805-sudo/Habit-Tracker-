@@ -95,6 +95,47 @@
     "errorDuplicateDesc": "A habit with this name already exists. Please choose a unique name!",
     "errorSave": "Failed to save habit."
   },
+  "today": {
+    "greeting": {
+      "morning": "Good morning",
+      "afternoon": "Good afternoon",
+      "evening": "Good evening",
+      "night": "Good night"
+    },
+    "dailyProgress": "Daily Progress",
+    "habitsDone": "{{done}} / {{total}} habits done today",
+    "completed": "Completed",
+    "atRisk": "{{count}} habits at risk of breaking streak",
+    "toDo": "To Do",
+    "done": "Done ({{count}})",
+    "allDone": "All habits done for today. Great job! 🎉",
+    "noHabits": "No habits for today.",
+    "noMatch": "No habits match this filter.",
+    "filter": {
+      "title": "Filter",
+      "category": "Category",
+      "status": "Status",
+      "all": "All",
+      "onTime": "On time",
+      "done": "Done"
+    },
+    "checkin": "Check in",
+    "progress": "Progress",
+    "markDone": "Done",
+    "overdue": "Overdue",
+    "dayStreak": "{{count}} day streak",
+    "confirmDoneTitle": "Mark as done?",
+    "confirmDoneMsg": "Have you completed \"{{name}}\" today?",
+    "confirmYes": "Yes, done",
+    "editCount": "Edit completed count",
+    "targetTimes": "{{count}}x",
+    "undo": "UNDO",
+    "undoMsg": {
+      "checkedIn": "Checked in!",
+      "progressSaved": "Progress saved!",
+      "markedDone": "Habit marked as done!"
+    }
+  },
   "tabs": {
     "today": "Today",
     "habits": "Habits",
