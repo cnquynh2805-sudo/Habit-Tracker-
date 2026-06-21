@@ -1,3 +1,4 @@
+/* eslint-disable i18next/no-literal-string */
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
@@ -17,6 +18,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { getStyles } from "./CreateHabitScreen.styles";
 import { useTheme } from "../../../../providers/ThemeProvider";
 import { CATEGORIES, CATEGORY_ICONS } from "../../constants";
+import { createCheckin } from "../../services/checkinsApi";
+import {
+  createHabit,
+  updateHabit,
+  deleteHabit,
+} from "../../services/habitsApi";
+
+const HABITS_CACHE_KEY = "@habits_list";
 
 export default function CreateHabitScreen({ route, navigation }) {
   const { colors } = useTheme();
@@ -53,7 +62,7 @@ export default function CreateHabitScreen({ route, navigation }) {
 
   const loadHabitForEditing = async () => {
     try {
-      const existingDataJson = await AsyncStorage.getItem("@habits_list");
+      const existingDataJson = await AsyncStorage.getItem(HABITS_CACHE_KEY);
       if (existingDataJson) {
         const habitsList = JSON.parse(existingDataJson);
         const targetHabit = habitsList.find((h) => h.id === habitId);
@@ -200,7 +209,7 @@ export default function CreateHabitScreen({ route, navigation }) {
 
     setIsLoading(true);
     try {
-      const existingHabitsJson = await AsyncStorage.getItem("@habits_list");
+      const existingHabitsJson = await AsyncStorage.getItem(HABITS_CACHE_KEY);
       let currentHabits = existingHabitsJson
         ? JSON.parse(existingHabitsJson)
         : [];
@@ -225,59 +234,54 @@ export default function CreateHabitScreen({ route, navigation }) {
 
       // Ensure standard Active state behavior or retain strict localized derived structures
       const finalStatus = isEditMode ? currentStatus : "Active";
-      const canCheckIn = finalStatus === "Active";
+
+      const habitPayload = {
+        name: cleanedName,
+        category,
+        frequency,
+        daysOfWeek: frequency === "Custom" ? daysOfWeekList : null,
+        targetPerDay: parseInt(targetPerDay, 10) || 1,
+        priority,
+        status: finalStatus,
+      };
 
       if (isEditMode) {
-        currentHabits = currentHabits.map((habit) => {
-          if (habit.id === habitId) {
-            return {
-              ...habit,
-              name: cleanedName,
-              category,
-              frequency,
-              daysOfWeek: frequency === "Custom" ? daysOfWeekList : null,
-              targetPerDay: parseInt(targetPerDay, 10) || 1,
-              priority,
-              status: finalStatus,
-              canCheckin: canCheckIn,
-              isSynced: false,
-            };
-          }
-          return habit;
-        });
+        // PATCH /habits/{id}
+        const updated = await updateHabit(habitId, habitPayload);
+
+        currentHabits = currentHabits.map((habit) =>
+          habit.id === habitId ? { ...habit, ...updated } : habit,
+        );
 
         setBackupData({
-          name: cleanedName,
-          category,
-          frequency,
-          daysOfWeek: frequency === "Custom" ? daysOfWeekList : [],
-          targetPerDay,
-          status: finalStatus,
-          priority,
+          name: updated.name,
+          category: updated.category,
+          frequency: updated.frequency,
+          daysOfWeek: updated.daysOfWeek || [],
+          targetPerDay: updated.targetPerDay.toString(),
+          status: updated.status,
+          priority: updated.priority,
         });
 
         await AsyncStorage.setItem(
-          "@habits_list",
+          HABITS_CACHE_KEY,
           JSON.stringify(currentHabits),
         );
         setIsEditable(false);
       } else {
-        const newHabit = {
-          id: Date.now().toString(),
-          name: cleanedName,
-          category,
-          frequency,
-          daysOfWeek: frequency === "Custom" ? daysOfWeekList : null,
-          targetPerDay: parseInt(targetPerDay, 10) || 1,
-          priority,
-          status: "Active",
-          canCheckin: true,
-          isSynced: false,
-          createdAt: new Date().toISOString(), // Structured matching standard specification
-        };
-        currentHabits.unshift(newHabit);
+        // POST /habits, then seed an "In Progress" check-in for the new habit.
+        const created = await createHabit(habitPayload);
+
+        try {
+          await createCheckin({ habitId: created.id, status: "In Progress" });
+        } catch (checkinError) {
+          // The habit was created successfully; a failed check-in shouldn't block it.
+          console.log("Failed to create initial check-in:", checkinError);
+        }
+
+        currentHabits.unshift(created);
         await AsyncStorage.setItem(
-          "@habits_list",
+          HABITS_CACHE_KEY,
           JSON.stringify(currentHabits),
         );
         if (navigation) navigation.goBack();
@@ -301,21 +305,24 @@ export default function CreateHabitScreen({ route, navigation }) {
           onPress: async () => {
             setIsLoading(true);
             try {
+              await deleteHabit(habitId);
+
               const existingHabitsJson =
-                await AsyncStorage.getItem("@habits_list");
+                await AsyncStorage.getItem(HABITS_CACHE_KEY);
               if (existingHabitsJson) {
                 const currentHabits = JSON.parse(existingHabitsJson);
                 const updatedList = currentHabits.filter(
                   (h) => h.id !== habitId,
                 );
                 await AsyncStorage.setItem(
-                  "@habits_list",
+                  HABITS_CACHE_KEY,
                   JSON.stringify(updatedList),
                 );
-                if (navigation) navigation.goBack();
               }
+              if (navigation) navigation.goBack();
             } catch (e) {
               console.log("Error deleting habit:", e);
+              Alert.alert("Error", "Failed to delete habit.");
             } finally {
               setIsLoading(false);
             }
@@ -328,36 +335,11 @@ export default function CreateHabitScreen({ route, navigation }) {
   return (
     <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
       <View style={styles.topHeaderContainer}>
+
+        {/* LEFT */}
         <TouchableOpacity
           accessible
           accessibilityRole="button"
-          accessibilityLabel="Interactive element"
-          onPress={handleLeftHeaderPress}
-          disabled={isLoading}
-        >
-          <Text
-            style={
-              !isEditMode || isEditable
-                ? styles.headerCancelText
-                : styles.headerDeleteText
-            }
-          >
-            {!isEditMode ? "Cancel" : isEditable ? "Cancel" : "Delete"}
-          </Text>
-        </TouchableOpacity>
-
-        <Text style={styles.headerTitleText}>
-          {!isEditMode
-            ? "New Habit"
-            : isEditable
-              ? "Edit Habit"
-              : "Habit Detail"}
-        </Text>
-
-        <TouchableOpacity
-          accessible
-          accessibilityRole="button"
-          accessibilityLabel="Interactive element"
           style={styles.headerSaveCapsuleButton}
           onPress={handleRightHeaderPress}
           disabled={isLoading}
@@ -370,8 +352,29 @@ export default function CreateHabitScreen({ route, navigation }) {
             </Text>
           )}
         </TouchableOpacity>
-      </View>
 
+        {/* CENTER */}
+        <Text style={styles.headerTitleText}>
+          {!isEditMode
+            ? "New Habit"
+            : isEditable
+              ? "Edit Habit"
+              : "Habit Detail"}
+        </Text>
+
+        {/* RIGHT */}
+        <TouchableOpacity
+          accessible
+          accessibilityRole="button"
+          accessibilityLabel="Close"
+          style={styles.headerCloseButton}
+          onPress={() => navigation && navigation.goBack()}
+          disabled={isLoading}
+        >
+          <Text style={styles.headerCloseText}>X</Text>
+        </TouchableOpacity>
+
+      </View>
       <ScrollView
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
@@ -631,6 +634,22 @@ export default function CreateHabitScreen({ route, navigation }) {
             </Text>
           </View>
         </View>
+
+        <View>
+          {isEditMode && (
+            <TouchableOpacity
+              accessible
+              accessibilityRole="button"
+              accessibilityLabel="Interactive element"
+              style={styles.deleteButton}
+              onPress={handleDeleteAction}
+              disabled={isLoading}
+            >
+              <Text style={styles.deleteButtonText}>Delete Habit</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+        
       </ScrollView>
 
       {/* CUSTOM FREQUENCY DAY SELECTION MODAL POPUP */}

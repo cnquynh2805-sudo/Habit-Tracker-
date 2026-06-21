@@ -110,7 +110,7 @@ export const getStyles = (colors) =>
     cardOuterContainer: {
       position: "relative",
       width: "100%",
-      paddingVertical: 16,
+      paddingVertical: 4,
     },
     habitCardWrapper: {
       width: "100%",
@@ -189,14 +189,14 @@ export const getStyles = (colors) =>
       marginBottom: 4,
     },
     miniMetaBadge: {
-      maxWidth: "33.33%",
-      paddingHorizontal: 10,
-      paddingVertical: 3,
+      maxWidth: "55%",
+      paddingHorizontal: 12,
+      paddingVertical: 5,
       borderRadius: 100,
     },
     miniMetaBadgeText: {
-      fontSize: 12,
-      fontWeight: "500",
+      fontSize: 13,
+      fontWeight: "600",
     },
     priorityCapsuleRow: {
       flexDirection: "row",
@@ -405,7 +405,7 @@ export const getStyles = (colors) =>
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.25,
       shadowRadius: 3.84,
-      zIndex: 100,
+      zIndex: 9999,
     },
     fabPlusSignHorizontal: {
       width: 20,
