@@ -95,6 +95,47 @@
     "errorDuplicateDesc": "Đã có thói quen với tên này. Vui lòng chọn tên khác!",
     "errorSave": "Lỗi lưu thói quen."
   },
+  "today": {
+    "greeting": {
+      "morning": "Chào buổi sáng",
+      "afternoon": "Chào buổi chiều",
+      "evening": "Chào buổi tối",
+      "night": "Chúc ngủ ngon"
+    },
+    "dailyProgress": "Tiến độ hôm nay",
+    "habitsDone": "Đã hoàn thành {{done}} / {{total}} thói quen",
+    "completed": "Hoàn thành",
+    "atRisk": "{{count}} thói quen có nguy cơ đứt chuỗi",
+    "toDo": "Cần làm",
+    "done": "Đã xong ({{count}})",
+    "allDone": "Đã hoàn thành mọi thói quen hôm nay. Tuyệt vời! 🎉",
+    "noHabits": "Không có thói quen nào trong ngày hôm đó.",
+    "noMatch": "Không có thói quen nào khớp bộ lọc.",
+    "filter": {
+      "title": "Bộ lọc",
+      "category": "Danh mục",
+      "status": "Trạng thái",
+      "all": "Tất cả",
+      "onTime": "Còn hạn",
+      "done": "Xong"
+    },
+    "checkin": "Điểm danh",
+    "progress": "Tiến độ",
+    "markDone": "Xong",
+    "overdue": "Quá hạn",
+    "dayStreak": "Chuỗi {{count}} ngày",
+    "confirmDoneTitle": "Đánh dấu hoàn thành?",
+    "confirmDoneMsg": "Bạn đã hoàn thành \"{{name}}\" hôm nay chưa?",
+    "confirmYes": "Đã xong",
+    "editCount": "Sửa số lần đã làm",
+    "targetTimes": "{{count}} lần",
+    "undo": "HOÀN TÁC",
+    "undoMsg": {
+      "checkedIn": "Đã điểm danh!",
+      "progressSaved": "Đã lưu tiến độ!",
+      "markedDone": "Đã đánh dấu hoàn thành!"
+    }
+  },
   "tabs": {
     "today": "Hôm nay",
     "habits": "Thói quen",

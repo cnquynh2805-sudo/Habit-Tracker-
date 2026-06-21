@@ -12,7 +12,9 @@ import {
 } from "react-native";
 
 import { getTabStyles } from "./BottomTabNavigator.styles";
+import withSwipeTabs from "./withSwipeTabs";
 import HabitListScreen from "../features/habits/screens/HabitList/HabitListScreen";
+import TodayScreen from "../features/today/screens/Today/TodayScreen";
 import { useTheme } from "../providers/ThemeProvider";
 
 if (
@@ -23,30 +25,6 @@ if (
 }
 
 // --- CLEAN DUMMY SCREENS ---
-const TodayScreen = () => {
-  const { t } = useTranslation();
-  const { colors } = useTheme();
-  return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: colors.background,
-      }}
-    >
-      <Text
-        style={[
-          getTabStyles(colors).dummyScreenText,
-          { color: colors.primary },
-        ]}
-      >
-        {t("tabs.todayScreen")}
-      </Text>
-    </View>
-  );
-};
-
 const StatsScreen = () => {
   const { t } = useTranslation();
   const { colors } = useTheme();
@@ -118,6 +96,13 @@ const MascotScreen = () => {
     </View>
   );
 };
+
+// Wrap each screen so a horizontal swipe moves to the adjacent tab.
+const SwipeToday = withSwipeTabs(TodayScreen);
+const SwipeHabits = withSwipeTabs(HabitListScreen);
+const SwipeStats = withSwipeTabs(StatsScreen);
+const SwipeGoals = withSwipeTabs(GoalsScreen);
+const SwipeMascot = withSwipeTabs(MascotScreen);
 
 // --- ICON SUB-COMPONENTS ---
 const TodayIcon = ({ focused, t, isExpanded }) => {
@@ -421,10 +406,12 @@ export default function BottomTabNavigator() {
   return (
     <View style={{ flex: 1 }}>
       <Tab.Navigator
-        initialRouteName="Habits"
+        initialRouteName="Today"
         screenOptions={{
           headerShown: false,
           tabBarShowLabel: false,
+          // Slide the screens left/right when switching tabs (incl. via swipe).
+          animation: "shift",
           tabBarStyle: isExpanded
             ? tabStyles.globalBottomTabBarExpanded
             : tabStyles.globalBottomTabBar,
@@ -435,7 +422,7 @@ export default function BottomTabNavigator() {
       >
         <Tab.Screen
           name="Today"
-          component={TodayScreen}
+          component={SwipeToday}
           options={{
             tabBarIcon: (props) => (
               <TodayIcon {...props} t={t} isExpanded={isExpanded} />
@@ -445,7 +432,7 @@ export default function BottomTabNavigator() {
 
         <Tab.Screen
           name="Habits"
-          component={HabitListScreen}
+          component={SwipeHabits}
           options={{
             tabBarIcon: (props) => (
               <HabitsIcon {...props} t={t} isExpanded={isExpanded} />
@@ -455,7 +442,7 @@ export default function BottomTabNavigator() {
 
         <Tab.Screen
           name="Stats"
-          component={StatsScreen}
+          component={SwipeStats}
           options={{
             tabBarIcon: (props) => (
               <StatsIcon {...props} t={t} isExpanded={isExpanded} />
@@ -465,7 +452,7 @@ export default function BottomTabNavigator() {
 
         <Tab.Screen
           name="Goals"
-          component={GoalsScreen}
+          component={SwipeGoals}
           options={{
             tabBarIcon: (props) => (
               <GoalsIcon {...props} t={t} isExpanded={isExpanded} />
@@ -475,7 +462,7 @@ export default function BottomTabNavigator() {
 
         <Tab.Screen
           name="Mascot"
-          component={MascotScreen}
+          component={SwipeMascot}
           options={{
             tabBarIcon: (props) => (
               <MascotIcon {...props} t={t} isExpanded={isExpanded} />
