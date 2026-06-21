@@ -1,5 +1,8 @@
 const XANO_BASE_URL = 'https://x8ki-letl-twmt.n7.xano.io/api:EDyDyMOI';
 
+const delay = ms => new Promise(res => setTimeout(res, ms));
+//avoid violating Xano free tier rate (10 req/20sec)
+
 async function runTests() {
     console.log('Starting automated tests for Xano endpoints...');
 
@@ -22,6 +25,8 @@ async function runTests() {
         const habitId = habitData.id;
         console.log('✅ Created Habit ID:', habitId);
 
+        await delay(5000);
+
         // 2. Get today's habits
         console.log('\n--- Test 2: GET /habits/today ---');
         const todayResponse = await fetch(`${XANO_BASE_URL}/habits-today?timezone=Asia/Ho_Chi_Minh`);
@@ -31,6 +36,8 @@ async function runTests() {
         } else {
             console.log('✅ Got today habits. Count:', todayData.length);
         }
+
+        await delay(5000);
 
         // 3. Create a goal for the habit
         console.log('\n--- Test 3: POST /habits/{id}/goals ---');
@@ -46,6 +53,8 @@ async function runTests() {
         const goalId = goalData.id;
         console.log('✅ Created Goal ID:', goalId);
 
+        await delay(5000);
+
         // 4. Record a check-in
         console.log('\n--- Test 4: POST /habits/{id}/checkins ---');
         const checkinResponse = await fetch(`${XANO_BASE_URL}/habits/${habitId}/checkins`, {
@@ -60,6 +69,8 @@ async function runTests() {
         const checkinId = checkinData.id;
         console.log('✅ Created Checkin ID:', checkinId);
 
+        await delay(5000);
+
         // 5. Update check-in
         console.log('\n--- Test 5: PATCH /habits/{id}/checkins/{cid} ---');
         const patchCheckinResponse = await fetch(`${XANO_BASE_URL}/habits/${habitId}/checkins/${checkinId}`, {
@@ -72,11 +83,15 @@ async function runTests() {
         const patchData = await patchCheckinResponse.json();
         console.log('✅ Updated Checkin Status:', patchData.status);
 
+        await delay(5000);
+
         // 6. Get Dashboard summary
         console.log('\n--- Test 6: GET /dashboard/summary ---');
         const summaryResponse = await fetch(`${XANO_BASE_URL}/dashboard/summary?date=2026-06-15`);
         const summaryData = await summaryResponse.json();
         console.log('✅ Dashboard Summary:', summaryData);
+
+        await delay(5000);
 
         // 7. System Reset (Moved to the end)
         console.log('\n--- Test 7: GET /dashboard/goals ---');
@@ -87,26 +102,39 @@ async function runTests() {
             console.log('✅ Dashboard Goals OK:', await goalsDashResponse.json());
         }
 
-        console.log('\n--- Test 8: GET /dashboard/heatmap ---');
-        const heatmapResponse = await fetch(`${XANO_BASE_URL}/dashboard/heatmap`);
-        if (heatmapResponse.status === 404) {
-            console.log('⚠️ /dashboard/heatmap not implemented yet.');
+        await delay(5000);
+
+        console.log('\n--- Test 8: GET /dashboard/simple-heatmap ---');
+        const simpleHeatmapResponse = await fetch(`${XANO_BASE_URL}/dashboard/simple-heatmap`);
+        if (simpleHeatmapResponse.status === 404) {
+            console.log('⚠️ /dashboard/simple-heatmap not implemented yet.');
         } else {
-            console.log('✅ Dashboard Heatmap OK:', (await heatmapResponse.json()).length, 'days');
+            const data = await simpleHeatmapResponse.json();
+            console.log(`✅ Dashboard Simple Heatmap OK: ${data.length} days.`);
+            if (data.length > 0) {
+                console.log('   Sample:', data[0]);
+            }
         }
 
-        console.log('\n--- Test 9: GET /dashboard/weekly-progress ---');
+        await delay(5000);
+
+        console.log('\n--- Test 9: GET /dashboard/meaningful-heatmap ---');
+        const meaningfulHeatmapResponse = await fetch(`${XANO_BASE_URL}/dashboard/meaningful-heatmap`);
+        if (meaningfulHeatmapResponse.status === 404) {
+            console.log('⚠️ /dashboard/meaningful-heatmap not implemented yet.');
+        } else {
+            console.log('✅ Dashboard Meaningful Heatmap OK:', (await meaningfulHeatmapResponse.json()).length, 'days');
+        }
+
+        await delay(5000);
+
+        console.log('\n--- Test 10: GET /dashboard/weekly-progress ---');
         const weeklyResponse = await fetch(`${XANO_BASE_URL}/dashboard/weekly-progress`);
         if (weeklyResponse.status === 404) {
             console.log('⚠️ /dashboard/weekly-progress not implemented yet.');
         } else {
             console.log('✅ Dashboard Weekly Progress OK:', (await weeklyResponse.json()).length, 'days');
         }
-
-        console.log('\n--- Test 10: POST /system/reset ---');
-        const resetResponse = await fetch(`${XANO_BASE_URL}/system/reset`, { method: 'POST' });
-        const resetData = await resetResponse.json();
-        console.log('✅ System Reset successful:', resetData);
 
         console.log('\n🎉 ALL TESTS PASSED SUCCESSFULLY!');
     } catch (error) {

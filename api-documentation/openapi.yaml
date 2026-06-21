@@ -532,11 +532,42 @@ paths:
         '400':
           $ref: '#/components/responses/StandardError'
 
-  /dashboard/heatmap:
+  /dashboard/simple-heatmap:
     get:
       tags:
         - Dashboard
-      summary: Get 3-month consistency heatmap data
+      summary: Get 3-month consistency heatmap data (Frequency based)
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+        - name: endDate
+          in: query
+          schema:
+            type: string
+        - name: timezone
+          in: query
+          schema:
+            type: string
+            default: "Asia/Ho_Chi_Minh"
+      responses:
+        '200':
+          description: Heatmap data array
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SimpleHeatmapData'
+        '400':
+          $ref: '#/components/responses/StandardError'
+
+  /dashboard/meaningful-heatmap:
+    get:
+      tags:
+        - Dashboard
+      summary: Get 3-month consistency heatmap data (Completion Percentage based)
       parameters:
         - name: startDate
           in: query
@@ -548,7 +579,7 @@ paths:
             type: string
       responses:
         '200':
-          description: Heatmap data array
+          description: Heatmap data array based on snapshots
           content:
             application/json:
               schema:
@@ -967,6 +998,15 @@ components:
         Mindfulness:
           type: integer
         Other:
+          type: integer
+
+    SimpleHeatmapData:
+      type: object
+      properties:
+        checkins_date:
+          type: string
+          format: date
+        checkins_completedCount:
           type: integer
 
   responses:
