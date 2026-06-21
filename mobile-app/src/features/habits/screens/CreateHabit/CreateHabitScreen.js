@@ -15,28 +15,27 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { getStyles } from "./CreateHabitScreen.styles";
 import { useTheme } from "../../../../providers/ThemeProvider";
+import * as habitsManager from "./services/habitsManager";
 
 export default function CreateHabitScreen({ route, navigation }) {
   const { colors } = useTheme();
   const styles = getStyles(colors);
   const { t } = useTranslation();
   const habitId = route?.params?.habitId;
-  const isEditMode = !!habitId; // Currently in view/edit flow for an existing habit
+  const isEditMode = !!habitId;
 
-  // Standard Editable Logic: If creating new, open immediately; if viewing existing, lock initially (false)
   const [isEditable, setIsEditable] = useState(!isEditMode);
   const [habitName, setHabitName] = useState("");
   const [category, setCategory] = useState("Mindfulness");
   const [frequency, setFrequency] = useState("Daily");
-  const [currentStatus, setCurrentStatus] = useState("Active"); // Capitalized to match OpenAPI specification
-  const [daysOfWeekList, setDaysOfWeekList] = useState([]); // Map fields: custom_days -> daysOfWeek
+  const [currentStatus, setCurrentStatus] = useState("Active");
+  const [daysOfWeekList, setDaysOfWeekList] = useState([]);
   const [targetPerDay, setTargetPerDay] = useState("1");
   const [priority, setPriority] = useState("Medium");
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
-  // Backup state to restore original data if the user presses "Cancel" while editing
+  const [syncStatus, setSyncStatus] = useState("");
   const [backupData, setBackupData] = useState(null);
 
   const daysOfWeekOptions = [
@@ -49,46 +48,54 @@ export default function CreateHabitScreen({ route, navigation }) {
     { id: "Sun", label: "S" },
   ];
 
+  // ===== LOAD HABIT FOR EDIT =====
   const loadHabitForEditing = async () => {
     try {
-      const existingDataJson = await AsyncStorage.getItem("@habits_list");
-      if (existingDataJson) {
-        const habitsList = JSON.parse(existingDataJson);
-        const targetHabit = habitsList.find((h) => h.id === habitId);
-        if (targetHabit) {
-          const rawPriority = targetHabit.priority || "Medium";
-          const formattedPriority =
-            rawPriority.charAt(0).toUpperCase() +
-            rawPriority.slice(1).toLowerCase();
+      const targetHabit = await habitsManager.getHabitById(habitId);
+      if (targetHabit) {
+        const rawPriority = targetHabit.priority || "Medium";
+        const formattedPriority =
+          rawPriority.charAt(0).toUpperCase() +
+          rawPriority.slice(1).toLowerCase();
 
-          const rawFrequency = targetHabit.frequency || "Daily";
-          const formattedFrequency =
-            rawFrequency.charAt(0).toUpperCase() +
-            rawFrequency.slice(1).toLowerCase();
+        const rawFrequency = targetHabit.frequency || "Daily";
+        const formattedFrequency =
+          rawFrequency.charAt(0).toUpperCase() +
+          rawFrequency.slice(1).toLowerCase();
 
-          const rawStatus = targetHabit.status || "Active";
-          const formattedStatus =
-            rawStatus.charAt(0).toUpperCase() +
-            rawStatus.slice(1).toLowerCase();
+        const rawStatus = targetHabit.status || "Active";
+        const formattedStatus =
+          rawStatus.charAt(0).toUpperCase() +
+          rawStatus.slice(1).toLowerCase();
 
-          setHabitName(targetHabit.name);
-          setCategory(targetHabit.category || "Mindfulness");
-          setFrequency(formattedFrequency);
-          setDaysOfWeekList(targetHabit.daysOfWeek || []);
-          setTargetPerDay((targetHabit.targetPerDay || 1).toString());
-          setCurrentStatus(formattedStatus);
-          setPriority(formattedPriority);
+        setHabitName(targetHabit.name);
+        setCategory(targetHabit.category || "Mindfulness");
+        setFrequency(formattedFrequency);
+        setDaysOfWeekList(targetHabit.daysOfWeek || []);
+        setTargetPerDay((targetHabit.targetPerDay || 1).toString());
+        setCurrentStatus(formattedStatus);
+        setPriority(formattedPriority);
 
-          setBackupData({
-            name: targetHabit.name,
-            category: targetHabit.category || "Mindfulness",
-            frequency: formattedFrequency,
-            daysOfWeek: targetHabit.daysOfWeek || [],
-            targetPerDay: (targetHabit.targetPerDay || 1).toString(),
-            status: formattedStatus,
-            priority: formattedPriority,
-          });
+        // Hiển thị trạng thái đồng bộ chính xác theo SyncStatus
+        if (targetHabit.syncStatus === "synced") {
+          setSyncStatus("✅ Synced");
+        } else if (targetHabit.syncStatus === "pending") {
+          setSyncStatus("⏳ Pending sync...");
+        } else if (targetHabit.syncStatus === "failed") {
+          setSyncStatus("❌ Sync failed");
+        } else {
+          setSyncStatus("");
         }
+
+        setBackupData({
+          name: targetHabit.name,
+          category: targetHabit.category || "Mindfulness",
+          frequency: formattedFrequency,
+          daysOfWeek: targetHabit.daysOfWeek || [],
+          targetPerDay: (targetHabit.targetPerDay || 1).toString(),
+          status: formattedStatus,
+          priority: formattedPriority,
+        });
       }
     } catch (e) {
       console.log("Error loading habit details:", e);
@@ -97,13 +104,14 @@ export default function CreateHabitScreen({ route, navigation }) {
 
   useEffect(() => {
     if (isEditMode) {
-      loadHabitForEditing(); // eslint-disable-line react-hooks/set-state-in-effect
+      loadHabitForEditing();
     } else {
       setCurrentStatus("Active");
+      setSyncStatus("");
     }
-  }, [isEditMode]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isEditMode]);
 
-  // LEFT HEADER BUTTON ACTION (Cancel or Delete)
+  // ===== HEADER HANDLERS =====
   const handleLeftHeaderPress = () => {
     if (!isEditMode) {
       if (navigation) navigation.goBack();
@@ -125,7 +133,6 @@ export default function CreateHabitScreen({ route, navigation }) {
     }
   };
 
-  // RIGHT HEADER BUTTON ACTION (Save or Edit)
   const handleRightHeaderPress = () => {
     if (isEditable) {
       handleSaveAction();
@@ -134,6 +141,7 @@ export default function CreateHabitScreen({ route, navigation }) {
     }
   };
 
+  // ===== FORM HANDLERS =====
   const handleFrequencyPress = (type) => {
     setFrequency(type);
     if (type === "Custom" && isEditable) {
@@ -181,7 +189,9 @@ export default function CreateHabitScreen({ route, navigation }) {
     else setTargetPerDay("1");
   };
 
+  // ===== SAVE ACTION =====
   const handleSaveAction = async () => {
+    console.log("👉 [UI CLICK]: Người dùng bấm nút SAVE/EDIT trên Header!");
     const cleanedName = habitName.trim();
     if (!cleanedName) {
       Alert.alert("Error", "Please enter a habit name.");
@@ -197,17 +207,15 @@ export default function CreateHabitScreen({ route, navigation }) {
     }
 
     setIsLoading(true);
-    try {
-      const existingHabitsJson = await AsyncStorage.getItem("@habits_list");
-      let currentHabits = existingHabitsJson
-        ? JSON.parse(existingHabitsJson)
-        : [];
+    setSyncStatus("💾 Saving...");
 
-      const isNameDuplicate = currentHabits.some((habit) => {
+    try {
+      const allHabits = await habitsManager.getHabits();
+      const isNameDuplicate = allHabits.some((habit) => {
         const isSameName =
           habit.name.trim().toLowerCase() === cleanedName.toLowerCase();
         if (isEditMode) {
-          return isSameName && habit.id !== habitId;
+          return isSameName && String(habit.id) !== String(habitId);
         }
         return isSameName;
       });
@@ -218,102 +226,132 @@ export default function CreateHabitScreen({ route, navigation }) {
           "A habit with this name already exists. Please choose a unique name!",
         );
         setIsLoading(false);
+        setSyncStatus("");
         return;
       }
 
-      // Ensure standard Active state behavior or retain strict localized derived structures
+      const targetPerDayInt = parseInt(targetPerDay, 10) || 1;
       const finalStatus = isEditMode ? currentStatus : "Active";
-      const canCheckIn = finalStatus === "Active";
+
+      const payload = {
+        name: cleanedName,
+        category,
+        frequency,
+        daysOfWeek: frequency === "Custom" ? daysOfWeekList : null,
+        targetPerDay: targetPerDayInt,
+        priority,
+        status: finalStatus,
+      };
 
       if (isEditMode) {
-        currentHabits = currentHabits.map((habit) => {
-          if (habit.id === habitId) {
-            return {
-              ...habit,
-              name: cleanedName,
-              category,
-              frequency,
-              daysOfWeek: frequency === "Custom" ? daysOfWeekList : null,
-              targetPerDay: parseInt(targetPerDay, 10) || 1,
-              priority,
-              status: finalStatus,
-              canCheckin: canCheckIn,
-              isSynced: false,
-            };
-          }
-          return habit;
-        });
+        // ===== UPDATE HABIT =====
+        console.log(`👉 [UI ACTION]: Chế độ SỬA - Chuẩn bị gọi habitsManager.updateHabit cho ID: ${habitId}`);
+        const updatedResult = await habitsManager.updateHabit(habitId, payload);
 
         setBackupData({
           name: cleanedName,
           category,
           frequency,
           daysOfWeek: frequency === "Custom" ? daysOfWeekList : [],
-          targetPerDay,
+          targetPerDay: targetPerDay,
           status: finalStatus,
           priority,
         });
-
-        await AsyncStorage.setItem(
-          "@habits_list",
-          JSON.stringify(currentHabits),
-        );
         setIsEditable(false);
+
+        // Kiểm tra xem đồng bộ trực tiếp lên Xano thành công hay phải đưa vào hàng đợi offline
+        if (updatedResult && updatedResult.syncStatus === "synced") {
+          setSyncStatus("✅ Synced");
+        } else {
+          setSyncStatus("⏳ Pending sync...");
+        }
+
+        Alert.alert("Success", "Habit updated");
+        await loadHabitForEditing();
       } else {
-        const newHabit = {
-          id: Date.now().toString(),
-          name: cleanedName,
-          category,
-          frequency,
-          daysOfWeek: frequency === "Custom" ? daysOfWeekList : null,
-          targetPerDay: parseInt(targetPerDay, 10) || 1,
-          priority,
-          status: "Active",
-          canCheckin: true,
-          isSynced: false,
-          createdAt: new Date().toISOString(), // Structured matching standard specification
-        };
-        currentHabits.unshift(newHabit);
-        await AsyncStorage.setItem(
-          "@habits_list",
-          JSON.stringify(currentHabits),
-        );
-        if (navigation) navigation.goBack();
+        // ===== CREATE HABIT =====
+        console.log("👉 [UI ACTION]: Chế độ TẠO MỚI - Chuẩn bị gọi habitsManager.createHabit");
+        const newHabit = await habitsManager.createHabit(payload);
+
+        if (newHabit) {
+          if (newHabit.syncStatus === "synced") {
+            setSyncStatus("✅ Synced");
+          } else {
+            setSyncStatus("⏳ Pending sync...");
+          }
+          Alert.alert("Success", "Habit created");
+
+          setTimeout(() => {
+            if (navigation) navigation.goBack();
+          }, 800);
+        } else {
+          setSyncStatus("❌ Failed to save");
+          Alert.alert("Error", "Failed to create habit");
+        }
       }
-    } catch (_error) {
-      Alert.alert("Error", "Failed to save habit.");
+    } catch (error) {
+      console.error("Error saving habit on UI:", error);
+      setSyncStatus("❌ Error");
+      
+      if (error.message === "DUPLICATE_NAME") {
+        Alert.alert("Duplicate Name", "A habit with this name already exists. Please choose a unique name!");
+      } else {
+        Alert.alert("Error", error.message || "Failed to save habit");
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
+  // ===== DELETE ACTION 1 (Nút bấm từ Header) =====
   const handleDeleteAction = () => {
+    console.log("👉 [UI CLICK]: Người dùng vừa bấm nút 'Delete' trên thanh Header!");
+    
+    if (!habitId) {
+      Alert.alert("Error", "Cannot delete: Habit ID is missing.");
+      return;
+    }
+
+    const currentHabitName = habitName.trim() || "this habit";
+    
     Alert.alert(
       "Delete Habit",
-      "Are you sure you want to delete this habit permanently?",
+      `Are you sure you want to delete "${currentHabitName}" permanently?`,
       [
         { text: "Cancel", style: "cancel" },
         {
           text: "Delete",
           style: "destructive",
           onPress: async () => {
+            console.log(`👉 [UI CONFIRM]: Đã xác nhận cảnh báo. Kích hoạt hàm xóa cho ID: ${habitId}`);
             setIsLoading(true);
+            setSyncStatus("🗑️ Deleting...");
+
             try {
-              const existingHabitsJson =
-                await AsyncStorage.getItem("@habits_list");
-              if (existingHabitsJson) {
-                const currentHabits = JSON.parse(existingHabitsJson);
-                const updatedList = currentHabits.filter(
-                  (h) => h.id !== habitId,
+              const isDeleted = await habitsManager.deleteHabit(habitId);
+              if (isDeleted) {
+                Alert.alert(
+                  "Success", 
+                  "Habit deleted successfully",
+                  [
+                    { 
+                      text: "OK", 
+                      onPress: () => {
+                        if (navigation) {
+                          console.log("➡️ [UI NAVIGATE]: Đóng màn hình, quay lại danh sách chính.");
+                          navigation.goBack();
+                        }
+                      } 
+                    }
+                  ]
                 );
-                await AsyncStorage.setItem(
-                  "@habits_list",
-                  JSON.stringify(updatedList),
-                );
-                if (navigation) navigation.goBack();
+              } else {
+                Alert.alert("Error", "Failed to delete habit");
               }
             } catch (e) {
-              console.log("Error deleting habit:", e);
+              console.error("Error deleting habit on UI:", e);
+              setSyncStatus("❌ Delete failed");
+              Alert.alert("Error", "Failed to delete habit");
             } finally {
               setIsLoading(false);
             }
@@ -323,6 +361,58 @@ export default function CreateHabitScreen({ route, navigation }) {
     );
   };
 
+  // ===== DELETE ACTION 2 (Hàm xóa phụ từ các phần UI khác nếu có) =====
+  const handleDeleteHabit = async () => {
+    if (!habitId) return;
+
+    console.log(`👉 [UI ACTION]: Kích hoạt hàm handleDeleteHabit phụ cho ID: ${habitId}`);
+    setIsLoading(true);
+    try {
+      const success = await habitsManager.deleteHabit(habitId);
+      if (success) {
+        Alert.alert(
+          "Success", 
+          "Habit deleted successfully",
+          [
+            { 
+              text: "OK", 
+              onPress: () => {
+                if (navigation) navigation.goBack();
+              } 
+            }
+          ]
+        );
+      } else {
+        Alert.alert("Error", "Xóa habit thất bại");
+      }
+    } catch (error) {
+      console.warn("Delete habit failed", error);
+      Alert.alert("Error", "Xóa habit thất bại");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // ===== UPDATE STATUS QUICK ROW =====
+  const handleUpdateStatus = async (newStatus) => {
+    if (!habitId) return;
+    setIsLoading(true);
+    try {
+      const updatedHabit = await habitsManager.updateHabit(habitId, {
+        status: newStatus,
+      });
+      if (updatedHabit) {
+        await loadHabitForEditing();
+      }
+    } catch (error) {
+      console.warn("Update habit failed", error);
+      Alert.alert("Error", "Cập nhật trạng thái thất bại");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // ===== RENDER =====
   return (
     <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
       <View style={styles.topHeaderContainer}>
@@ -369,6 +459,29 @@ export default function CreateHabitScreen({ route, navigation }) {
           )}
         </TouchableOpacity>
       </View>
+
+      {/* SYNC STATUS INDICATOR */}
+      {syncStatus ? (
+        <View
+          style={{
+            backgroundColor: colors.surfaceVariant,
+            padding: 8,
+            marginHorizontal: 16,
+            marginTop: 8,
+            borderRadius: 8,
+          }}
+        >
+          <Text
+            style={{
+              color: colors.onSurfaceVariant,
+              fontSize: 12,
+              textAlign: "center",
+            }}
+          >
+            {syncStatus}
+          </Text>
+        </View>
+      ) : null}
 
       <ScrollView
         contentContainerStyle={styles.scrollContainer}

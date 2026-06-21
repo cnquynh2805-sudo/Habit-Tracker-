@@ -7,10 +7,13 @@ import BottomTabNavigator from "./src/navigation/BottomTabNavigator"; // Path to
 import { QueryProvider } from "./src/providers/QueryProvider"; // React Query provider
 import { ThemeProvider, useTheme } from "./src/providers/ThemeProvider"; // Theme provider
 import CreateHabitScreen from "./src/features/habits/screens/CreateHabit/CreateHabitScreen"; // Habit creation/modification screen
+
+// === DÒNG SỬA 1: IMPORT MÀN HÌNH NFC MỚI VÀO ĐÂY ===
+import NfcSettingsScreen from "./src/features/nfc/setting/NfcSettingsScreen"; 
+
 import "./src/shared/i18n"; // Initialize i18n
 
 const Stack = createNativeStackNavigator();
-
 
 function AppNavigator() {
   const { colors, isDark } = useTheme();
@@ -45,6 +48,16 @@ function AppNavigator() {
             animation: "slide_from_bottom",
           }}
         />
+
+        {/* === DÒNG SỬA 2: ĐĂNG KÝ ĐỊNH DANH "NfcSettings" TẠI ĐÂY === */}
+        <Stack.Screen
+          name="NfcSettings"
+          component={NfcSettingsScreen}
+          options={{
+            animation: "slide_from_right", // Hiệu ứng lướt từ phải sang trái giống chuẩn native
+          }}
+        />
+
       </Stack.Navigator>
     </NavigationContainer>
   );

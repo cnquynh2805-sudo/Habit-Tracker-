@@ -14,17 +14,44 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "runtimeVersion": {
+        "policy": "appVersion"
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "permissions": [
+        "NFC",
+        "NFC"
+      ],
+      "usesFeatures": [
+        {
+          "android:name": "android.hardware.nfc",
+          "android:required": true
+        },
+        {
+          "android:name": "android.hardware.nfc",
+          "android:required": true
+        }
+      ],
+      "package": "com.asterchu.mobileapp",
+      "runtimeVersion": "1.0.0"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "0ba77e10-b6ab-455b-a7fe-4c0ab6b88008"
+      }
+    },
+    "updates": {
+      "url": "https://u.expo.dev/0ba77e10-b6ab-455b-a7fe-4c0ab6b88008"
     }
   }
 }
