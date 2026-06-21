@@ -5,10 +5,10 @@ const headers = {
   "Content-Type": "application/json",
 };
 
-// Hàm đóng gói dữ liệu sạch để đẩy lên Server Xano
+// Formats clean payload data to send to the Xano server
 function makeHabitPayload(habit: Partial<Habit>) {
   return {
-    // Vẫn gửi ID gốc lên, nhưng vì Xano tự tăng nên nó sẽ bỏ qua hoặc lưu tùy cấu hình của họ
+    // Keep sending the original ID, but Xano will ignore or store it based on its auto-increment config
     id: String(habit.id), 
     name: habit.name,
     category: habit.category,
@@ -47,47 +47,42 @@ export async function getHabitsRemote() {
   });
 }
 
-// 1. TẠO MỚI: Đẩy lên Xano và "bốc" lấy con số tự tăng (47) nhét vào serverId
+// 1. CREATE: Post to Xano and capture the auto-incremented server ID into 'serverId'
 export async function createHabitRemote(habit: Habit) {
   const responseData = await apiRequest("/habits", {
     method: "POST",
     body: JSON.stringify(makeHabitPayload(habit)),
   });
 
-  // 👉 CHỐT CHẶN: Ép response trả về phải giữ nguyên ID chuỗi Local của bạn,
-  // và cất số 47 của server vào trường 'serverId' trả về cho habitsManager lưu xuống máy
+  // Ensure the response maintains your local string ID,
+  // and assigns the generated server ID to 'serverId' for habitsManager to save locally
   if (responseData && responseData.id) {
-    const serverGeneratedId = responseData.id; // số 47, 48... của Xano
-    responseData.id = String(habit.id);        // Giữ lại chuỗi "178207..."
-    responseData.serverId = String(serverGeneratedId); // Gán biến serverId
+    const serverGeneratedId = responseData.id; 
+    responseData.id = String(habit.id);        
+    responseData.serverId = String(serverGeneratedId); 
   }
 
   return responseData;
 }
 
-// 2. CẬP NHẬT: Ưu tiên dùng serverId (số 47), nếu chưa có (offline) thì dùng id local
+// 2. UPDATE: Prioritize using 'serverId', fallback to local 'id' if offline/not synced yet
 export async function updateHabitRemote(habit: any) {
-  // Check xem object trong máy có serverId (đã sync) chưa, nếu chưa có thì lấy id gốc
   const remoteId = habit.serverId || String(habit.id);
   
   if (!remoteId) {
-    throw new Error("Không thể cập nhật từ xa thói quen không có mã ID hợp lệ");
+    throw new Error("Cannot update remote habit without a valid ID");
   }
   
-  console.log(`📡 [API PATCH]: Đang gửi lệnh UPDATE lên Server Xano cho ID thực tế: ${remoteId}`);
   return apiRequest(`/habits/${remoteId}`, {
     method: "PATCH",
     body: JSON.stringify(makeHabitPayload(habit)),
   });
 }
 
-// 3. XÓA: Hàm này nhận vào object habit (hoặc string id), ta chỉnh lại nhận object để bốc serverId cho chuẩn
+// 3. DELETE: Extract 'serverId' or 'id' properly from either a habit object or a string ID
 export async function deleteHabitRemote(habit: any) {
-  // Nếu truyền vào cả object (từ manager mới), ta bốc serverId hoặc id. 
-  // Nếu truyền vào string (code cũ), nó sẽ lấy chính nó làm id.
   const remoteId = typeof habit === "object" ? (habit.serverId || String(habit.id)) : String(habit);
 
-  console.log(`📡 [API DELETE]: Đang gửi lệnh DELETE lên Server cho thói quen ID: ${remoteId}`);
   return apiRequest(`/habits/${remoteId}`, {
     method: "DELETE",
   });

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   View,
   Text,
@@ -11,6 +11,31 @@ import {
 import NfcManager, { NfcTech, Ndef } from "react-native-nfc-manager";
 import styles from "./NfcSettingsScreen.styles";
 import useNfcMappings from "./hooks/useNfcMappings";
+
+// Tách nhỏ UI hiển thị danh sách thẻ đã cấu hình để tránh re-render lãng phí
+const ConfiguredTagRow = React.memo(({ tagId, mapping, habitLabel, onUnlink }) => {
+  return (
+    <View style={styles.mappingRow}>
+      <View style={styles.mappingInfo}>
+        <Text style={styles.mappingTitle}>
+          {mapping.tagName?.trim() || "Unnamed Tag"}
+        </Text>
+        <Text style={styles.mappingSubtitle}>
+          {mapping.type === "MULTIPLE"
+            ? "MULTIPLE tag"
+            : `SINGLE: ${habitLabel}`}
+        </Text>
+        <Text style={styles.mappingId}>ID: {tagId}</Text>
+      </View>
+      <TouchableOpacity
+        style={styles.btnDanger}
+        onPress={() => onUnlink(tagId)}
+      >
+        <Text style={styles.btnDangerText}>Unlink</Text>
+      </TouchableOpacity>
+    </View>
+  );
+});
 
 export default function NfcSettingsScreen() {
   const [scanState, setScanState] = useState("ready");
@@ -65,18 +90,13 @@ export default function NfcSettingsScreen() {
         return;
       }
 
-      // ==================== KHU VỰC SỬA ĐỔI CHÍ MẠNG ====================
-      // BƯỚC 1: Tìm kiếm Habit tương ứng để bốc ra đúng serverId (số của Xano)
       const targetHabit = allHabits.find((h) => String(h.id) === String(habitId));
       const finalServerId = targetHabit?.serverId || "null";
 
-      // BƯỚC 2: Chuyển đổi URL ghi vào thẻ thành dạng Deep Link của App (Thay vì gọi thẳng API Xano)
-      // Cấu trúc: myhabitapp://nfc?type=...
       const urlToRecord =
         type === "MULTIPLE"
           ? `Bloom://nfc?type=multiple`
           : `Bloom://nfc?type=single&serverId=${finalServerId}&localId=${habitId}`;
-      // ==================================================================
 
       const bytes = Ndef.encodeMessage([Ndef.uriRecord(urlToRecord)]);
       await NfcManager.ndefHandler.writeNdefMessage(bytes);
@@ -87,18 +107,13 @@ export default function NfcSettingsScreen() {
           ? "Multi-Habit Tag"
           : `Tag #${tag.id.slice(-4)}`);
 
-      console.log("⏳ [API Sync]: Đang đẩy dữ liệu cấu hình thẻ lên Xano Server...");
-
-      // Vẫn gọi hàm đồng bộ lưu trữ cấu trúc lên Xano để backup
       await saveMappingAndSync({
         tagId: tag.id,
         type,
         habitId,
         tagName: finalTagName,
-        ndefUrl: urlToRecord, // Đồng bộ luôn link Deep Link này lên DB mây
+        ndefUrl: urlToRecord,
       });
-
-      console.log(`✅ [API Sync Thành Công]: Đã lưu thẻ ${finalTagName} lên cơ sở dữ liệu API!`);
 
       Alert.alert(
         "Success",
@@ -106,7 +121,6 @@ export default function NfcSettingsScreen() {
       );
       setTagName("");
     } catch (err) {
-      console.warn("NFC write error", err);
       Alert.alert(
         "Write Error",
         "Failed to write data onto the NFC tag. Please try again."
@@ -118,10 +132,11 @@ export default function NfcSettingsScreen() {
     }
   };
 
-  const handleRemoveMapping = async (tagId) => {
+  const handleRemoveMapping = useCallback((tagId) => {
+    const currentTagName = nfcMappings?.[tagId]?.tagName || tagId;
     Alert.alert(
       "Remove Tag",
-      `Are you sure you want to unlink "${nfcMappings[tagId]?.tagName || tagId}"?`,
+      `Are you sure you want to unlink "${currentTagName}"?`,
       [
         { text: "Cancel", style: "cancel" },
         {
@@ -129,9 +144,7 @@ export default function NfcSettingsScreen() {
           style: "destructive",
           onPress: async () => {
             try {
-              console.log(`⏳ [API Sync]: Đang yêu cầu xóa thẻ khỏi API...`);
               await removeMapping(tagId);
-              console.log(`✅ [API Sync Thành Công]: Thẻ đã được gỡ đồng bộ hoàn toàn khỏi hệ thống API.`);
               loadData();
             } catch (err) {
               Alert.alert("Error", "Failed to unlink tag.");
@@ -140,14 +153,26 @@ export default function NfcSettingsScreen() {
         },
       ]
     );
-  };
+  }, [nfcMappings, removeMapping, loadData]);
 
-  const getHabitLabel = (habitId) => {
+  const getHabitLabel = useCallback((habitId) => {
     if (!allHabits) return "Loading habit...";
     const habit = allHabits.find((h) => h.id === habitId);
     if (!habit) return "Linked habit deleted";
     return habit.name;
-  };
+  }, [allHabits]);
+
+  const safeNfcMappings = useMemo(() => nfcMappings || {}, [nfcMappings]);
+  const tagKeys = useMemo(() => Object.keys(safeNfcMappings), [safeNfcMappings]);
+
+  const visibleHabits = useMemo(() => {
+    const list = unconfiguredHabits || [];
+    return showAllHabits ? list : list.slice(0, 3);
+  }, [unconfiguredHabits, showAllHabits]);
+
+  const visibleTags = useMemo(() => {
+    return showAllTags ? tagKeys : tagKeys.slice(0, 3);
+  }, [tagKeys, showAllTags]);
 
   if (loading) {
     return (
@@ -156,17 +181,6 @@ export default function NfcSettingsScreen() {
       </View>
     );
   }
-
-  const safeNfcMappings = nfcMappings || {};
-  const tagKeys = Object.keys(safeNfcMappings);
-
-  const visibleHabits = showAllHabits 
-    ? (unconfiguredHabits || []) 
-    : (unconfiguredHabits || []).slice(0, 3);
-
-  const visibleTags = showAllTags 
-    ? tagKeys 
-    : tagKeys.slice(0, 3);
 
   return (
     <ScrollView style={styles.container}>
@@ -239,25 +253,13 @@ export default function NfcSettingsScreen() {
       ) : (
         <>
           {visibleTags.map((tagId) => (
-            <View key={tagId} style={styles.mappingRow}>
-              <View style={styles.mappingInfo}>
-                <Text style={styles.mappingTitle}>
-                  {safeNfcMappings[tagId].tagName?.trim() || "Unnamed Tag"}
-                </Text>
-                <Text style={styles.mappingSubtitle}>
-                  {safeNfcMappings[tagId].type === "MULTIPLE"
-                    ? "MULTIPLE tag"
-                    : `SINGLE: ${getHabitLabel(safeNfcMappings[tagId].habitId)}`}
-                </Text>
-                <Text style={styles.mappingId}>ID: {tagId}</Text>
-              </View>
-              <TouchableOpacity
-                style={styles.btnDanger}
-                onPress={() => handleRemoveMapping(tagId)}
-              >
-                <Text style={styles.btnDangerText}>Unlink</Text>
-              </TouchableOpacity>
-            </View>
+            <ConfiguredTagRow
+              key={tagId}
+              tagId={tagId}
+              mapping={safeNfcMappings[tagId]}
+              habitLabel={getHabitLabel(safeNfcMappings[tagId].habitId)}
+              onUnlink={handleRemoveMapping}
+            />
           ))}
 
           {tagKeys.length > 3 && (

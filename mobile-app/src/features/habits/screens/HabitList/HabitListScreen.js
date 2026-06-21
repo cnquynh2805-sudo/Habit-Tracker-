@@ -1,4 +1,3 @@
-/* eslint-disable react-native/no-color-literals, no-dupe-keys, react-native/no-inline-styles, i18next/no-literal-string, react-native-a11y/no-nested-touchables */
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Globe, Palette, SlidersHorizontal } from "lucide-react-native";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
@@ -19,10 +18,8 @@ import { useTheme } from "../../../../providers/ThemeProvider";
 import { API_BASE_URL } from "../CreateHabit/services/config";
 import * as habitsManager from "../CreateHabit/services/habitsManager";
 
-// Đưa các mảng tĩnh ra ngoài component để tránh khởi tạo lại mỗi lần render
 const CATEGORIES = ["All", "Health", "Study", "Work", "Mindfulness", "Other"];
 
-// Đưa helper ra ngoài để tối ưu
 const renderCategoryIcon = (categoryType, styles) => {
   switch (categoryType?.toLowerCase()) {
     case "health":
@@ -158,7 +155,6 @@ export default function HabitListScreen({ navigation }) {
   const loadOriginalHabits = async () => {
     setIsLoading(true);
     try {
-      // Luôn ưu tiên đồng bộ lấy từ habitsManager để đảm bảo nhất quán dữ liệu Client-Server
       const localHabits = await habitsManager.getHabits();
       if (localHabits && localHabits.length > 0) {
         setHabits(localHabits);
@@ -206,9 +202,6 @@ export default function HabitListScreen({ navigation }) {
 
   const handleUpdateStatus = async (habitId, newStatus) => {
     try {
-      console.log(`👉 [UI ACTION]: Cập nhật trạng thái habit ${habitId} thành ${newStatus}`);
-      
-      // SỬA: Gọi API thông qua habitsManager với payload chuẩn
       await habitsManager.updateHabit(habitId, { status: newStatus });
 
       setHabits((prevHabits) =>
@@ -242,11 +235,8 @@ export default function HabitListScreen({ navigation }) {
           style: "destructive",
           onPress: async () => {
             const targetId = item.id || item.serverId;
-            console.log(`👉 [UI CONFIRM]: Kích hoạt hàm xóa cho ID/ServerID: ${targetId}`);
             try {
-              // SỬA CHÍNH: Thay thế item.name bằng targetId để hàm deleteHabit thực hiện đúng logic tìm kiếm
               const isDeleted = await habitsManager.deleteHabit(targetId);
-              
               if (isDeleted) {
                 setHabits((prevHabits) => prevHabits.filter((h) => String(h.id) !== String(targetId) && String(h.serverId) !== String(targetId)));
                 setActiveDropdownId(null);
@@ -264,7 +254,6 @@ export default function HabitListScreen({ navigation }) {
     );
   };
 
-  // ✅ Loại bỏ các habit không có ID ngay từ khâu tính toán Filter
   const filteredHabits = useMemo(() => {
     return habits.filter((item) => {
       if (!item || (!item.id && !item.serverId)) {
@@ -284,7 +273,7 @@ export default function HabitListScreen({ navigation }) {
     });
   }, [habits, selectedCategory, currentViewStatus]);
 
-  const renderHabitItem = ({ item }) => {
+  const renderHabitItem = useCallback(({ item }) => {
     const rawStatus = item.status || "Active";
     const currentStatus = rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1).toLowerCase();
 
@@ -373,7 +362,7 @@ export default function HabitListScreen({ navigation }) {
         )}
       </View>
     );
-  };
+  }, [activeDropdownId, colors, t, styles, navigation, closeAllMenus]);
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
@@ -636,7 +625,7 @@ export default function HabitListScreen({ navigation }) {
   );
 }
 
-const DynamicPriorityTagsGrid = ({
+const DynamicPriorityTagsGrid = React.memo(({
   item,
   currentStatus,
   categoryBadgeBg,
@@ -705,4 +694,4 @@ const DynamicPriorityTagsGrid = ({
       </View>
     </View>
   );
-};
+});

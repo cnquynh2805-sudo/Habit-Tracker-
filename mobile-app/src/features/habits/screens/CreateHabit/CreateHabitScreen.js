@@ -76,7 +76,7 @@ export default function CreateHabitScreen({ route, navigation }) {
         setCurrentStatus(formattedStatus);
         setPriority(formattedPriority);
 
-        // Hiển thị trạng thái đồng bộ chính xác theo SyncStatus
+        // Display accurate sync status according to SyncStatus
         if (targetHabit.syncStatus === "synced") {
           setSyncStatus("✅ Synced");
         } else if (targetHabit.syncStatus === "pending") {
@@ -98,7 +98,7 @@ export default function CreateHabitScreen({ route, navigation }) {
         });
       }
     } catch (e) {
-      console.log("Error loading habit details:", e);
+      // Gracefully handle local load errors
     }
   };
 
@@ -191,7 +191,6 @@ export default function CreateHabitScreen({ route, navigation }) {
 
   // ===== SAVE ACTION =====
   const handleSaveAction = async () => {
-    console.log("👉 [UI CLICK]: Người dùng bấm nút SAVE/EDIT trên Header!");
     const cleanedName = habitName.trim();
     if (!cleanedName) {
       Alert.alert("Error", "Please enter a habit name.");
@@ -245,7 +244,6 @@ export default function CreateHabitScreen({ route, navigation }) {
 
       if (isEditMode) {
         // ===== UPDATE HABIT =====
-        console.log(`👉 [UI ACTION]: Chế độ SỬA - Chuẩn bị gọi habitsManager.updateHabit cho ID: ${habitId}`);
         const updatedResult = await habitsManager.updateHabit(habitId, payload);
 
         setBackupData({
@@ -259,7 +257,7 @@ export default function CreateHabitScreen({ route, navigation }) {
         });
         setIsEditable(false);
 
-        // Kiểm tra xem đồng bộ trực tiếp lên Xano thành công hay phải đưa vào hàng đợi offline
+        // Check if remote synchronization succeeded or falls back to background pending state
         if (updatedResult && updatedResult.syncStatus === "synced") {
           setSyncStatus("✅ Synced");
         } else {
@@ -270,7 +268,6 @@ export default function CreateHabitScreen({ route, navigation }) {
         await loadHabitForEditing();
       } else {
         // ===== CREATE HABIT =====
-        console.log("👉 [UI ACTION]: Chế độ TẠO MỚI - Chuẩn bị gọi habitsManager.createHabit");
         const newHabit = await habitsManager.createHabit(payload);
 
         if (newHabit) {
@@ -290,7 +287,6 @@ export default function CreateHabitScreen({ route, navigation }) {
         }
       }
     } catch (error) {
-      console.error("Error saving habit on UI:", error);
       setSyncStatus("❌ Error");
       
       if (error.message === "DUPLICATE_NAME") {
@@ -303,10 +299,8 @@ export default function CreateHabitScreen({ route, navigation }) {
     }
   };
 
-  // ===== DELETE ACTION 1 (Nút bấm từ Header) =====
+  // ===== DELETE ACTION 1 (Header Button Trigger) =====
   const handleDeleteAction = () => {
-    console.log("👉 [UI CLICK]: Người dùng vừa bấm nút 'Delete' trên thanh Header!");
-    
     if (!habitId) {
       Alert.alert("Error", "Cannot delete: Habit ID is missing.");
       return;
@@ -323,7 +317,6 @@ export default function CreateHabitScreen({ route, navigation }) {
           text: "Delete",
           style: "destructive",
           onPress: async () => {
-            console.log(`👉 [UI CONFIRM]: Đã xác nhận cảnh báo. Kích hoạt hàm xóa cho ID: ${habitId}`);
             setIsLoading(true);
             setSyncStatus("🗑️ Deleting...");
 
@@ -338,7 +331,6 @@ export default function CreateHabitScreen({ route, navigation }) {
                       text: "OK", 
                       onPress: () => {
                         if (navigation) {
-                          console.log("➡️ [UI NAVIGATE]: Đóng màn hình, quay lại danh sách chính.");
                           navigation.goBack();
                         }
                       } 
@@ -349,7 +341,6 @@ export default function CreateHabitScreen({ route, navigation }) {
                 Alert.alert("Error", "Failed to delete habit");
               }
             } catch (e) {
-              console.error("Error deleting habit on UI:", e);
               setSyncStatus("❌ Delete failed");
               Alert.alert("Error", "Failed to delete habit");
             } finally {
@@ -361,11 +352,10 @@ export default function CreateHabitScreen({ route, navigation }) {
     );
   };
 
-  // ===== DELETE ACTION 2 (Hàm xóa phụ từ các phần UI khác nếu có) =====
+  // ===== DELETE ACTION 2 (Fallback handler for alternative UI integrations) =====
   const handleDeleteHabit = async () => {
     if (!habitId) return;
 
-    console.log(`👉 [UI ACTION]: Kích hoạt hàm handleDeleteHabit phụ cho ID: ${habitId}`);
     setIsLoading(true);
     try {
       const success = await habitsManager.deleteHabit(habitId);
@@ -383,11 +373,10 @@ export default function CreateHabitScreen({ route, navigation }) {
           ]
         );
       } else {
-        Alert.alert("Error", "Xóa habit thất bại");
+        Alert.alert("Error", "Failed to delete habit");
       }
     } catch (error) {
-      console.warn("Delete habit failed", error);
-      Alert.alert("Error", "Xóa habit thất bại");
+      Alert.alert("Error", "Failed to delete habit");
     } finally {
       setIsLoading(false);
     }
@@ -405,8 +394,7 @@ export default function CreateHabitScreen({ route, navigation }) {
         await loadHabitForEditing();
       }
     } catch (error) {
-      console.warn("Update habit failed", error);
-      Alert.alert("Error", "Cập nhật trạng thái thất bại");
+      Alert.alert("Error", "Failed to update status");
     } finally {
       setIsLoading(false);
     }
