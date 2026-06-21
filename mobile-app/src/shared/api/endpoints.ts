@@ -10,9 +10,9 @@ export const endpoints = {
   checkins: {
     today: "/habits-today?timezone=Asia%2FHo_Chi_Minh",
     list: "/checkins",
-    detail: (id: number) => `/checkins/${id}`,
+    detail: (id: string) => `/checkins/${id}`,
     create: "/checkins",
-    update: (id: number) => `/checkins/${id}`,
-    remove: (id: number) => `/checkins/${id}`,
+    update: (id: string) => `/checkins/${id}`,
+    remove: (id: string) => `/checkins/${id}`,
   },
 } as const;
