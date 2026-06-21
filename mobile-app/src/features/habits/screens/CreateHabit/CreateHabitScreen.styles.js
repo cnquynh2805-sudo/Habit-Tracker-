@@ -19,6 +19,25 @@ export const getStyles = (colors) =>
       borderBottomWidth: 1,
       borderBottomColor: colors.border,
     },
+    headerLeftGroup: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 14,
+    },
+    headerCloseButton: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      backgroundColor: colors.surfaceMuted,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    headerCloseText: {
+      fontSize: 16,
+      lineHeight: 18,
+      color: colors.text,
+      fontWeight: "700",
+    },
     headerCancelText: {
       fontSize: 16,
       color: colors.primary,
@@ -467,5 +486,20 @@ export const getStyles = (colors) =>
       fontSize: 15,
       fontWeight: "700",
       color: colors.surface,
+    },
+    deleteButton: {
+      marginTop: 32,
+      marginBottom: 40,
+      height: 56,
+      borderRadius: 28,
+      backgroundColor: "#FF4D4F",
+      justifyContent: "center",
+      alignItems: "center",
+    },
+
+    deleteButtonText: {
+      color: "#FFFFFF",
+      fontSize: 18,
+      fontWeight: "700",
     },
   });
