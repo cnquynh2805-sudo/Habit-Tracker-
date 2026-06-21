@@ -16,6 +16,7 @@ import withSwipeTabs from "./withSwipeTabs";
 import HabitListScreen from "../features/habits/screens/HabitList/HabitListScreen";
 import TodayScreen from "../features/today/screens/Today/TodayScreen";
 import { useTheme } from "../providers/ThemeProvider";
+import MascotScreen from "@/features/mascot/screens/MascotScreen";
 
 if (
   Platform.OS === "android" &&
@@ -73,29 +74,29 @@ const GoalsScreen = () => {
   );
 };
 
-const MascotScreen = () => {
-  const { t } = useTranslation();
-  const { colors } = useTheme();
-  return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: colors.background,
-      }}
-    >
-      <Text
-        style={[
-          getTabStyles(colors).dummyScreenText,
-          { color: colors.primary },
-        ]}
-      >
-        {t("tabs.mascotScreen")}
-      </Text>
-    </View>
-  );
-};
+// const MascotScreen = () => {
+//   const { t } = useTranslation();
+//   const { colors } = useTheme();
+//   return (
+//     <View
+//       style={{
+//         flex: 1,
+//         justifyContent: "center",
+//         alignItems: "center",
+//         backgroundColor: colors.background,
+//       }}
+//     >
+//       <Text
+//         style={[
+//           getTabStyles(colors).dummyScreenText,
+//           { color: colors.primary },
+//         ]}
+//       >
+//         {t("tabs.mascotScreen")}
+//       </Text>
+//     </View>
+//   );
+// };
 
 // Wrap each screen so a horizontal swipe moves to the adjacent tab.
 const SwipeToday = withSwipeTabs(TodayScreen);

@@ -8,6 +8,7 @@ export const endpoints = {
     remove: (id: string) => `/habits/${id}`,
   },
   checkins: {
+    today: "/habits-today?timezone=Asia%2FHo_Chi_Minh",
     list: "/checkins",
     detail: (id: number) => `/checkins/${id}`,
     create: "/checkins",
