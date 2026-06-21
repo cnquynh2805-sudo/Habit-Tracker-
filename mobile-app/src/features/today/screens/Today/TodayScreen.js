@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   UIManager,
   View,
+  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -24,6 +25,7 @@ import TodoHabitCard from "../../components/TodoHabitCard";
 import UndoSnackbar from "../../components/UndoSnackbar";
 import { useTodayCheckins } from "../../hooks/useTodayCheckins";
 import { getGreetingKey } from "../../utils/today";
+import { CATEGORY_ICONS } from "../../../habits/constants";
 
 if (
   Platform.OS === "android" &&
@@ -213,10 +215,10 @@ export default function TodayScreen({ navigation }) {
             {doneExpanded &&
               done.map(({ habit, streak }) => (
                 <View key={habit.id} style={styles.doneRow}>
-                  <Text style={styles.doneEmoji}>
-                    {CATEGORY_EMOJI[(habit.category || "").toLowerCase()] ||
-                      "⭐"}
-                  </Text>
+                  <Image
+                    source={CATEGORY_ICONS[(habit.category || "other").toLowerCase()]}
+                    style={styles.doneEmoji}
+                  />
                   <Text style={styles.doneName} numberOfLines={1}>
                     {habit.name}
                   </Text>

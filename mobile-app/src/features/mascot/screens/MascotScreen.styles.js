@@ -24,6 +24,22 @@ export const createStyles = (colors) =>
       paddingBottom: 16,
     },
 
+    headerRow: {
+      paddingTop: 8,
+      paddingBottom: 16,
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "flex-start",
+    },
+
+    settingsButton: {
+      padding: 8,
+      borderRadius: 12,
+      backgroundColor: colors.surface || "#f5f5f5",
+      justifyContent: "center",
+      alignItems: "center",
+    },
+
     title: {
       fontSize: 24,
       fontWeight: "800",

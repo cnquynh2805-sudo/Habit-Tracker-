@@ -191,8 +191,15 @@ export const getStyles = (colors) =>
       backgroundColor: "#EEF1F0",
       justifyContent: "center",
       alignItems: "center",
+      flexDirection: "row",
+      gap: 8,
       flexShrink: 1,
       maxWidth: "45%",
+    },
+    categoryChipIcon: {
+      width: 20,
+      height: 20,
+      resizeMode: "contain",
     },
     figmaCategoryChipActive: {
       backgroundColor: colors.primary,

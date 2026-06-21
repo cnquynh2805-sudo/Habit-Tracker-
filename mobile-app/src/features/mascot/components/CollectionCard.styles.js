@@ -49,11 +49,11 @@ const styles = StyleSheet.create({
   },
 
   equippedButton: {
-    backgroundColor: "#4B8B6B",
+    backgroundColor: "#c0c0c0",
   },
 
   unequippedButton: {
-    backgroundColor: "#c0c0c0",
+    backgroundColor: "#4B8B6B",
   },
 
   buttonText: {
@@ -63,11 +63,11 @@ const styles = StyleSheet.create({
   },
 
   equippedButtonText: {
-    color: "#fff",
+    color: "#666",
   },
 
   unequippedButtonText: {
-    color: "#666",
+    color: "#fff",
   },
 });
 

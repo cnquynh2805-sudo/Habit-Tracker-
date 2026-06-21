@@ -9,6 +9,8 @@ import {
   Dimensions,
 } from "react-native";
 
+import { Settings } from "lucide-react-native";
+
 import MascotPreview from "../components/MascotPreview";
 
 import CollectionCard from "../components/CollectionCard";
@@ -43,14 +45,20 @@ export default function MascotScreen() {
       style={styles.container}
       contentContainerStyle={styles.content}
     >
-      <View style={styles.header}>
-        <Text style={styles.title}>
-          My Room
-        </Text>
+      <View style={styles.headerRow}>
+        <View>
+          <Text style={styles.title}>
+            My Room
+          </Text>
 
-        <Text style={styles.subtitle}>
-          Take care of Barnaby today
-        </Text>
+          <Text style={styles.subtitle}>
+            Take care of Barnaby today
+          </Text>
+        </View>
+        
+        <TouchableOpacity style={styles.settingsButton}>
+          <Settings size={24} color={colors.primary} />
+        </TouchableOpacity>
       </View>
 
       <MascotPreview />

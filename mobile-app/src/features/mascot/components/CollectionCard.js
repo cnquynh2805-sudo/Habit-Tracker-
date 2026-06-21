@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 
-import styles from "./CollectionCard.styles";
+import styles from "./CollectionCard.styles.js";
 import LottieView from "lottie-react-native";
 import { useMascotStore } from "../store/mascotStore";
 
@@ -34,14 +34,14 @@ export default function CollectionCard({
 
   const getButtonLabel = () => {
     if (!item.unlocked) {
-      return "Locked";
+      return `${item.unlockCondition.value} day streak`;
     }
-    return isEquipped ? "Unequip" : "Equip";
+    return isEquipped ? "Equipped" : "Equip";
   };
   
   return (
     <View style={styles.card}>
-      <View style={styles.animationContainer}>
+      <View style={{opacity: item.unlocked ? 1 : 0.35, ...styles.animationContainer}} >
         <LottieView
           source={item.animation}
           autoPlay

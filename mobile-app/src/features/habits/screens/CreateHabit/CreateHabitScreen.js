@@ -10,11 +10,13 @@ import {
   Alert,
   ActivityIndicator,
   Modal,
+  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { getStyles } from "./CreateHabitScreen.styles";
 import { useTheme } from "../../../../providers/ThemeProvider";
+import { CATEGORIES, CATEGORY_ICONS } from "../../constants";
 
 export default function CreateHabitScreen({ route, navigation }) {
   const { colors } = useTheme();
@@ -427,13 +429,7 @@ export default function CreateHabitScreen({ route, navigation }) {
             {t("createHabit.categoryLabel")}
           </Text>
           <View style={styles.categoryChipsMatrix}>
-            {[
-              { id: "Health", label: "Health 💚" },
-              { id: "Study", label: "Study 📘" },
-              { id: "Work", label: "Work 💼" },
-              { id: "Mindfulness", label: "Mindfulness 🧘" },
-              { id: "Other", label: "Other ⭐" },
-            ].map((chip) => {
+            {CATEGORIES.map((chip) => {
               const isSelected = category === chip.id;
               return (
                 <TouchableOpacity
@@ -448,14 +444,18 @@ export default function CreateHabitScreen({ route, navigation }) {
                   onPress={() => setCategory(chip.id)}
                   disabled={!isEditable || isLoading}
                 >
+                  <Image
+                    source={CATEGORY_ICONS[chip.key]}
+                    style={styles.categoryChipIcon}
+                  />
                   <Text
                     style={[
                       styles.figmaCategoryChipText,
                       isSelected && styles.figmaCategoryChipTextActive,
                     ]}
                   >
-                    {t("category." + chip.id.toLowerCase() + "Emoji", {
-                      defaultValue: chip.label,
+                    {t("category." + chip.key, {
+                      defaultValue: chip.id,
                     })}
                   </Text>
                 </TouchableOpacity>
