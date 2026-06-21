@@ -43,6 +43,8 @@ export default function MascotPreview() {
     )
   ];
 
+console.log("Current equip:", equippedRewardId);
+
   return (
     <>
       <View style={styles.messageBubbleContainer}>

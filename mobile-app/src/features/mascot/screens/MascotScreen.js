@@ -27,7 +27,7 @@ import { chunkArray } from "../../../shared/helper/chunkArray";
 
 export default function MascotScreen() {
   const [activeTab, setActiveTab] = useState("collection");
-  const { profile, equipItem } = useMascotStore();
+  const { equippedRewardId, equipItem } = useMascotStore();
   const { colors } = useTheme();
   const styles = createStyles(colors);
   const SCREEN_WIDTH = Dimensions.get("window").width;
@@ -128,14 +128,20 @@ export default function MascotScreen() {
                 justifyContent: "space-between",
               }}
             >
-              {pageItems.map((reward) => (
-                <View key={reward.id} style={styles.cardWrapper}>
-                  <CollectionCard
-                    item={reward}
-                    onEquip={equipItem}
-                  />
-                </View>
-              ))}
+              {pageItems.map((reward) => {
+                const isEquipped =
+                  equippedRewardId === reward.id;
+
+                return (
+                  <View key={reward.id} style={styles.cardWrapper}>
+                    <CollectionCard
+                      item={reward}
+                      isEquipped={isEquipped}
+                      onEquip={equipItem}
+                    />
+                  </View>
+                );
+              })}
             </View>
           )}
           style={styles.horizontalList}

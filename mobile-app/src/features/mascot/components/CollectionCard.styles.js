@@ -55,6 +55,9 @@ const styles = StyleSheet.create({
   unequippedButton: {
     backgroundColor: "#4B8B6B",
   },
+  lockedButton: {
+    backgroundColor: "#658676",
+  },
 
   buttonText: {
     textAlign: "center",
@@ -69,6 +72,11 @@ const styles = StyleSheet.create({
   unequippedButtonText: {
     color: "#fff",
   },
+
+  lockedButtonText: {
+    color: "#a7a7a7",
+  },
 });
+
 
 export default styles;
