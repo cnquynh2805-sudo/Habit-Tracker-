@@ -138,6 +138,31 @@ paths:
         '422':
           $ref: '#/components/responses/StandardError'
 
+  /habits-today:
+    get:
+      tags:
+        - Habits
+      summary: Get habits scheduled for today
+      description: Returns an aggregated list of habits active for today based on the client's timezone, including their check-in status for today.
+      parameters:
+        - name: timezone
+          in: query
+          description: "Client timezone (e.g., 'Asia/Ho_Chi_Minh' or 'UTC')"
+          schema:
+            type: string
+            default: "UTC"
+      responses:
+        '200':
+          description: List of habits for the given date
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TodayHabit'
+        '400':
+          $ref: '#/components/responses/StandardError'
+
   /habits/{id}:
     get:
       tags:
@@ -492,6 +517,64 @@ paths:
         '400':
           $ref: '#/components/responses/StandardError'
 
+  /dashboard/goals:
+    get:
+      tags:
+        - Dashboard
+      summary: Get all habits with their goals and overall progress
+      responses:
+        '200':
+          description: Overall goal progress and list of habits with goal status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardGoalsResponse'
+        '400':
+          $ref: '#/components/responses/StandardError'
+
+  /dashboard/heatmap:
+    get:
+      tags:
+        - Dashboard
+      summary: Get 3-month consistency heatmap data
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+        - name: endDate
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Heatmap data array
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/HeatmapData'
+        '400':
+          $ref: '#/components/responses/StandardError'
+
+  /dashboard/weekly-progress:
+    get:
+      tags:
+        - Dashboard
+      summary: Get weekly progress grouped by category
+      responses:
+        '200':
+          description: Stacked bar chart data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WeeklyProgressData'
+        '400':
+          $ref: '#/components/responses/StandardError'
+
   /rewards:
     get:
       tags:
@@ -604,7 +687,6 @@ components:
           type: ["array", "null"]
           items:
             type: string
-            enum: [Mon, Tue, Wed, Thu, Fri, Sat, Sun]
         targetPerDay:
           type: integer
           minimum: 1
@@ -701,6 +783,11 @@ components:
           type: string
         habitId:
           type: string
+        daysOfWeek:
+          type: array
+          description: "Days active"
+          items:
+            type: string
         date:
           type: string
           format: date-time
@@ -791,6 +878,96 @@ components:
         type:
           type: string
           example: "Hat"
+
+    TodayHabit:
+      type: object
+      properties:
+        habit:
+          $ref: '#/components/schemas/Habit'
+        todayCheckin:
+          anyOf:
+            - type: "null"
+            - $ref: '#/components/schemas/Checkin'
+
+    DashboardGoalsResponse:
+      type: object
+      properties:
+        overallProgress:
+          type: object
+          properties:
+            totalHabits:
+              type: integer
+            habitsWithGoals:
+              type: integer
+            percentage:
+              type: number
+        goalsList:
+          type: array
+          items:
+            $ref: '#/components/schemas/DashboardGoalItem'
+
+    DashboardGoalItem:
+      type: object
+      properties:
+        habitId:
+          type: string
+        habitName:
+          type: string
+        category:
+          type: string
+        goal:
+          anyOf:
+            - type: "null"
+            - type: object
+              properties:
+                id:
+                  type: string
+                targetType:
+                  type: string
+                  enum: [Streak, TotalCompletions]
+                targetValue:
+                  type: integer
+                currentProgress:
+                  type: integer
+                progressPercent:
+                  type: number
+                goalStatus:
+                  type: string
+                  enum: [Normal, Encouragement, Achieved]
+                remainingValue:
+                  type: integer
+
+    HeatmapData:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        intensity:
+          type: integer
+          minimum: 0
+          maximum: 4
+        totalCompleted:
+          type: integer
+        totalTarget:
+          type: integer
+
+    WeeklyProgressData:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        Health:
+          type: integer
+        Study:
+          type: integer
+        Work:
+          type: integer
+        Mindfulness:
+          type: integer
+        Other:
+          type: integer
 
   responses:
     StandardError:
