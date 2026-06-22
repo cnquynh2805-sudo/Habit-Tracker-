@@ -236,10 +236,16 @@ export const getStyles = (colors) =>
     },
 
     cardRightActionBlock: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 12,
+      flexDirection: "column",
+      justifyContent: "space-between",
+      alignItems: "flex-end",
+      alignSelf: "stretch",
       marginLeft: 4,
+      paddingVertical: 2,
+    },
+    moreOptionsButton: {
+      padding: 4,
+      marginRight: -4,
     },
     
     // --- TĂNG SIZE NÚT ACTIVE / CAPSULE TRẠNG THÁI CHUẨN ---
@@ -249,7 +255,6 @@ export const getStyles = (colors) =>
       borderRadius: 100,
       alignItems: "center",
       justifyContent: "center",
-      marginLeft: "auto",
     },
     statusCapsuleActive: {
       backgroundColor: colors.successLight,
@@ -274,25 +279,7 @@ export const getStyles = (colors) =>
     statusTextArchived: {
       color: colors.textMuted,
     },
-    figmaChevronRightContainer: {
-      width: 8,
-      height: 14,
-      justifyContent: "center",
-      alignItems: "center",
-    },
-    figmaChevronLineTop: {
-      width: 6,
-      height: 2,
-      backgroundColor: colors.textMuted,
-      transform: [{ rotate: "45deg" }],
-      marginBottom: 2,
-    },
-    figmaChevronLineBottom: {
-      width: 6,
-      height: 2,
-      backgroundColor: colors.textMuted,
-      transform: [{ rotate: "-45deg" }],
-    },
+    // (Chevron styles removed in favor of MoreVertical icon)
     cardDropdownListMenu: {
       position: "absolute",
       top: 56,

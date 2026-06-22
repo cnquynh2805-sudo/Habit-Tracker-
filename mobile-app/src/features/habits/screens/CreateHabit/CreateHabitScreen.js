@@ -17,17 +17,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { getStyles } from "./CreateHabitScreen.styles";
 import { useTheme } from "../../../../providers/ThemeProvider";
-import * as habitsManager from "./services/habitsManager";
 import { CATEGORIES, CATEGORY_ICONS } from "../../constants";
-import { createCheckin } from "../../services/checkinsApi";
-import {
-  createHabit,
-  updateHabit,
-  deleteHabit,
-} from "../../services/habitsApi";
 import { X } from "lucide-react-native";
-
-const HABITS_CACHE_KEY = "@habits_list";
+import * as habitsManager from "./services/habitsManager";
 
 export default function CreateHabitScreen({ route, navigation }) {
   const { colors } = useTheme();
@@ -343,6 +335,7 @@ export default function CreateHabitScreen({ route, navigation }) {
                       text: "OK", 
                       onPress: () => {
                         if (navigation) {
+                          console.log("-> [UI NAVIGATE]: Dong man hinh, quay lai danh sach chinh.");
                           navigation.goBack();
                         }
                       } 
@@ -352,8 +345,8 @@ export default function CreateHabitScreen({ route, navigation }) {
               } else {
                 Alert.alert("Error", "Failed to delete habit");
               }
-              if (navigation) navigation.goBack();
             } catch (e) {
+              console.error("Error deleting habit on UI:", e);
               setSyncStatus("❌ Delete failed");
               Alert.alert("Error", "Failed to delete habit");
             } finally {
@@ -456,6 +449,8 @@ export default function CreateHabitScreen({ route, navigation }) {
           <Text style={styles.headerCloseText}><X /></Text>
         </TouchableOpacity>
 
+      </View>
+
       {/* SYNC STATUS INDICATOR */}
       {syncStatus ? (
         <View
@@ -478,7 +473,6 @@ export default function CreateHabitScreen({ route, navigation }) {
           </Text>
         </View>
       ) : null}
-
       <ScrollView
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}

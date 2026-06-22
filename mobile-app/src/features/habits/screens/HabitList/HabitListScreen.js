@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Globe, Palette, SlidersHorizontal } from "lucide-react-native";
+import { Globe, Palette, SlidersHorizontal, MoreVertical } from "lucide-react-native";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -49,6 +49,7 @@ const renderCategoryIcon = (categoryType, styles) => {
       return (
         <View style={styles.iconWorkBriefcase}>
           <View style={styles.iconBriefcaseHandle} />
+          <View style={styles.iconBriefcaseBox} />
         </View>
       );
     default:
@@ -202,7 +203,12 @@ export default function HabitListScreen({ navigation }) {
   }, [navigation, closeAllMenus]);
 
   const handleUpdateStatus = async (habitId, newStatus) => {
+    const target = habits.find((h) => h.id === habitId);
+    if (!target) return;
+
     try {
+      console.log(`[UI ACTION]: Cap nhat trang thai habit ${habitId} thanh ${newStatus}`);
+      // Goi API thong qua habitsManager voi payload chuan
       await habitsManager.updateHabit(habitId, { status: newStatus });
 
       setHabits((prevHabits) =>
@@ -322,17 +328,41 @@ export default function HabitListScreen({ navigation }) {
                 colors={colors}
                 styles={styles}
                 t={t}
-                isDropdownVisible={isDropdownVisible}
-                setActiveDropdownId={setActiveDropdownId}
                 priTheme={priTheme}
               />
             </View>
 
             <View style={styles.cardRightActionBlock}>
-              <View style={styles.figmaChevronRightContainer}>
-                <View style={styles.figmaChevronLineTop} />
-                <View style={styles.figmaChevronLineBottom} />
+              <View style={[
+                styles.statusCapsule,
+                currentStatus === "Active" && styles.statusCapsuleActive,
+                currentStatus === "Paused" && styles.statusCapsulePaused,
+                currentStatus === "Archived" && styles.statusCapsuleArchived,
+              ]}>
+                <Text
+                  style={[
+                    styles.statusCapsuleText,
+                    currentStatus === "Active" && styles.statusTextActive,
+                    currentStatus === "Paused" && styles.statusTextPaused,
+                    currentStatus === "Archived" && styles.statusTextArchived,
+                  ]}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                >
+                  {t(`status.${currentStatus.toLowerCase()}`)}
+                </Text>
               </View>
+
+              <TouchableOpacity
+                accessible
+                accessibilityRole="button"
+                accessibilityLabel="Open Context Menu"
+                style={styles.moreOptionsButton}
+                onPress={() => setActiveDropdownId(isDropdownVisible ? null : currentId)}
+                activeOpacity={0.7}
+              >
+                <MoreVertical size={20} color={colors.textSecondary || "#666"} />
+              </TouchableOpacity>
             </View>
           </View>
         </TouchableOpacity>
@@ -634,8 +664,6 @@ const DynamicPriorityTagsGrid = React.memo(({
   colors,
   styles,
   t,
-  isDropdownVisible,
-  setActiveDropdownId,
   priTheme,
 }) => {
   const [topGroupWidth, setTopGroupWidth] = React.useState(null);
@@ -646,44 +674,17 @@ const DynamicPriorityTagsGrid = React.memo(({
       <View style={styles.cardTagsRow}>
         <View style={styles.cardTagsTopGroup} onLayout={(e) => setTopGroupWidth(e.nativeEvent.layout.width)}>
           <View style={[styles.miniMetaBadge, { backgroundColor: categoryBadgeBg }]}>
-            <Text style={[styles.miniMetaBadgeText, { color: categoryBadgeText }]} numberOfLines={1} ellipsizeMode="tail" adjustsFontSizeToFit>
+            <Text style={[styles.miniMetaBadgeText, { color: categoryBadgeText }]} numberOfLines={1} ellipsizeMode="tail">
               {t(`category.${(item.category || "").toLowerCase()}`)}
             </Text>
           </View>
           <View style={[styles.miniMetaBadge, { backgroundColor: colors.border }]}>
-            <Text style={[styles.miniMetaBadgeText, { color: colors.textMuted }]} numberOfLines={1} ellipsizeMode="tail" adjustsFontSizeToFit>
+            <Text style={[styles.miniMetaBadgeText, { color: colors.textMuted }]} numberOfLines={1} ellipsizeMode="tail">
               {t(`frequency.${(item.frequency || "").toLowerCase()}`)}
             </Text>
           </View>
         </View>
 
-        <TouchableOpacity
-          accessible
-          accessibilityRole="button"
-          accessibilityLabel="Interactive element"
-          style={[
-            styles.statusCapsule,
-            currentStatus === "Active" && styles.statusCapsuleActive,
-            currentStatus === "Paused" && styles.statusCapsulePaused,
-            currentStatus === "Archived" && styles.statusCapsuleArchived,
-          ]}
-          onPress={() => setActiveDropdownId(isDropdownVisible ? null : currentId)}
-          activeOpacity={0.7}
-        >
-          <Text
-            style={[
-              styles.statusCapsuleText,
-              currentStatus === "Active" && styles.statusTextActive,
-              currentStatus === "Paused" && styles.statusTextPaused,
-              currentStatus === "Archived" && styles.statusTextArchived,
-            ]}
-            numberOfLines={1}
-            ellipsizeMode="tail"
-            adjustsFontSizeToFit
-          >
-            {t(`status.${currentStatus.toLowerCase()}`)}
-          </Text>
-        </TouchableOpacity>
       </View>
 
       <View style={styles.cardTagsRow}>
