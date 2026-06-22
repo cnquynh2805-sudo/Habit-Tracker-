@@ -192,7 +192,11 @@ export function useTodayCheckins() {
   useEffect(() => {
     reload(); // eslint-disable-line react-hooks/set-state-in-effect
     return () => {
-      if (pendingRef.current?.timer) clearTimeout(pendingRef.current.timer);
+      if (pendingRef.current) {
+        const pending = pendingRef.current;
+        if (pending.timer) clearTimeout(pending.timer);
+        flushToServer(pending.habitId, pending.entry);
+      }
       if (happyTimerRef.current) clearTimeout(happyTimerRef.current);
       if (setCountTimeoutRef.current) clearTimeout(setCountTimeoutRef.current);
     };
@@ -212,7 +216,7 @@ export function useTodayCheckins() {
 
         payload = {
           habit_id: entry.habit_id,
-          date: entry.date,
+          date: Date.now(),
           date_only: dateOnly,
           completedCount: entry.completedCount,
           status: entry.status,
@@ -330,13 +334,13 @@ export function useTodayCheckins() {
       const current = checkinsRef.current[habit.id]?.completedCount || 0;
       if (finalValue === current) return;
 
+      applyChange(habit, finalValue, "today.undoMsg.progressSaved");
+
       if (finalValue >= target) {
         if (setCountTimeoutRef.current) clearTimeout(setCountTimeoutRef.current);
         setCountTimeoutRef.current = setTimeout(() => {
           setConfirmHabit(habit);
-        }, 500);
-      } else {
-        applyChange(habit, finalValue, "today.undoMsg.progressSaved");
+        }, 300);
       }
     },
     [applyChange],
