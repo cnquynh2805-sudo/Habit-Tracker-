@@ -10,9 +10,9 @@ import {
   Pressable,
   Platform,
   ActivityIndicator,
-  Alert,
 } from "react-native";
 import { useGoalMutations } from "../hooks/useGoalMutations";
+import { useAppStore } from "../../../shared/stores/useAppStore";
 
 export default function GoalSettingModal({ visible, onClose, habit, colors }) {
   const { t } = useTranslation();
@@ -55,7 +55,10 @@ export default function GoalSettingModal({ visible, onClose, habit, colors }) {
   // Save changes
   const handleSave = async () => {
     if (targetValue <= 0) {
-      Alert.alert(t("common.error"), t("goals.invalidTargetValue"));
+      useAppStore.getState().showGlobalAlert({
+        title: t("common.error"),
+        message: t("goals.invalidTargetValue"),
+      });
       return;
     }
     try {
@@ -65,7 +68,10 @@ export default function GoalSettingModal({ visible, onClose, habit, colors }) {
           goalId: habit.goal.id,
           targetValue,
         });
-        Alert.alert(t("common.done"), t("goals.goalSaved"));
+        useAppStore.getState().showGlobalAlert({
+          title: t("common.done"),
+          message: t("goals.goalSaved"),
+        });
       } else {
         await createGoal({
           habitId: habit.id,
@@ -74,12 +80,18 @@ export default function GoalSettingModal({ visible, onClose, habit, colors }) {
           targetType,
           targetValue,
         });
-        Alert.alert(t("common.done"), t("goals.goalSaved"));
+        useAppStore.getState().showGlobalAlert({
+          title: t("common.done"),
+          message: t("goals.goalSaved"),
+        });
       }
       onClose();
     } catch (error) {
       const debugInfo = __DEV__ ? `\nDetails: ${error?.message || String(error)}` : "";
-      Alert.alert(t("common.error"), t("goals.goalSaveFailed") + debugInfo);
+      useAppStore.getState().showGlobalAlert({
+        title: t("common.error"),
+        message: t("goals.goalSaveFailed") + debugInfo,
+      });
     }
   };
 

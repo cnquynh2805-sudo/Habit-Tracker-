@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
-  Alert,
   LayoutAnimation,
   Platform,
   RefreshControl,
@@ -15,6 +14,8 @@ import {
   Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+import { useAppStore } from "../../../../shared/stores/useAppStore";
 
 import { getStyles } from "./TodayScreen.styles";
 import { useTheme } from "../../../../providers/ThemeProvider";
@@ -105,7 +106,10 @@ export default function TodayScreen({ navigation }) {
   const handleUndo = () => {
     const success = undoLast();
     if (!success) {
-      Alert.alert(t("common.error"), t("today.nothingToUndo"));
+      useAppStore.getState().showGlobalAlert({
+        title: t("common.error"),
+        message: t("today.nothingToUndo"),
+      });
     }
   };
 

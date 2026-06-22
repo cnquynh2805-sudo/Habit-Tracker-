@@ -1,7 +1,7 @@
 import axios, { AxiosError } from "axios";
-import { Alert } from "react-native";
 
 import i18n from "../i18n";
+import { useAppStore } from "../stores/useAppStore";
 
 export const AUTH_TOKEN_KEY = "@auth_token";
 
@@ -42,11 +42,11 @@ apiClient.interceptors.response.use(
         rateLimitResetTime = Date.now() + 60000; // 60 seconds halt
         console.log("Xano Rate Limit (429) hit. Halting subsequent API requests for 60 seconds.");
         
-        // Show user-facing alert
-        Alert.alert(
-          i18n.t("common.error") || "Error",
-          i18n.t("common.rateLimitError") || "Rate limit exceeded. API requests are temporarily paused. Actions will be saved locally."
-        );
+        // Show user-facing custom alert
+        useAppStore.getState().showGlobalAlert({
+          title: i18n.t("common.error") || "Error",
+          message: i18n.t("common.rateLimitError") || "Rate limit exceeded. API requests are temporarily paused. Actions will be saved locally.",
+        });
       }
     }
     return Promise.reject(error);
