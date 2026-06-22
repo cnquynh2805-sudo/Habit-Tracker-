@@ -70,8 +70,17 @@
       "resume": "Resume",
       "archive": "Archive",
       "restore": "Restore",
-      "delete": "Delete"
+      "delete": "Delete",
+      "history": "Lịch sử"
     }
+  },
+  "history": {
+    "title": "Lịch sử Điểm danh",
+    "empty": "Chưa ghi nhận điểm danh nào",
+    "streak": "Chuỗi hiện tại",
+    "longest": "Chuỗi dài nhất",
+    "total": "Tổng hoàn thành",
+    "back": "Quay lại"
   },
   "createHabit": {
     "titleNew": "Thói quen mới",

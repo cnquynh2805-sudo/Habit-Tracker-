@@ -10,6 +10,7 @@ import CreateHabitScreen from "./src/features/habits/screens/CreateHabit/CreateH
 
 // === DÒNG SỬA 1: IMPORT MÀN HÌNH NFC MỚI VÀO ĐÂY ===
 import NfcSettingsScreen from "./src/features/nfc/setting/NfcSettingsScreen"; 
+import HistoryScreen from "./src/features/habits/screens/HistoryScreen";
 
 import "./src/shared/i18n"; // Initialize i18n
 
@@ -55,6 +56,14 @@ function AppNavigator() {
           component={NfcSettingsScreen}
           options={{
             animation: "slide_from_right", // Hiệu ứng lướt từ phải sang trái giống chuẩn native
+          }}
+        />
+
+        <Stack.Screen
+          name="History"
+          component={HistoryScreen}
+          options={{
+            animation: "slide_from_right",
           }}
         />
 

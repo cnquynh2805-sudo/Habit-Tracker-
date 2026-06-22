@@ -70,8 +70,17 @@
       "resume": "Resume",
       "archive": "Archive",
       "restore": "Restore",
-      "delete": "Delete"
+      "delete": "Delete",
+      "history": "History"
     }
+  },
+  "history": {
+    "title": "Check-in History",
+    "empty": "No check-ins recorded yet",
+    "streak": "Current Streak",
+    "longest": "Longest Streak",
+    "total": "Total Completions",
+    "back": "Back"
   },
   "createHabit": {
     "titleNew": "New Habit",

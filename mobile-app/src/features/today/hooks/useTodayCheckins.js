@@ -361,7 +361,9 @@ export function useTodayCheckins() {
       const checkin = checkins[h.id] || buildCheckin(h);
       const target = Math.max(1, h.targetPerDay || 1);
 
-      const isCreatedToday = h.created_at ? getTodayKey(new Date(h.created_at)) === todayStr : false;
+      // Xano's created_at is typically a Unix timestamp in milliseconds.
+      const createdDate = h.createdAt ? new Date(h.createdAt) : null;
+      const isCreatedToday = createdDate ? getTodayKey(createdDate) === todayStr : false;
       const isLate = currentHour >= 22;
 
       const item = {
