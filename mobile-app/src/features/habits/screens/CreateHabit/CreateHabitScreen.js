@@ -24,6 +24,7 @@ import {
   updateHabit,
   deleteHabit,
 } from "../../services/habitsApi";
+import { X } from "lucide-react-native";
 
 const HABITS_CACHE_KEY = "@habits_list";
 
@@ -371,7 +372,7 @@ export default function CreateHabitScreen({ route, navigation }) {
           onPress={() => navigation && navigation.goBack()}
           disabled={isLoading}
         >
-          <Text style={styles.headerCloseText}>X</Text>
+          <Text style={styles.headerCloseText}><X /></Text>
         </TouchableOpacity>
 
       </View>

@@ -26,6 +26,7 @@ import UndoSnackbar from "../../components/UndoSnackbar";
 import { useTodayCheckins } from "../../hooks/useTodayCheckins";
 import { getGreetingKey } from "../../utils/today";
 import { CATEGORY_ICONS } from "../../../habits/constants";
+import { ChevronDown, ChevronUp } from "lucide-react-native";
 
 if (
   Platform.OS === "android" &&
@@ -208,7 +209,7 @@ export default function TodayScreen({ navigation }) {
                 {t("today.done", { count: done.length })}
               </Text>
               <Text style={styles.sectionKebab}>
-                {doneExpanded ? "˅" : "˄"}
+                {doneExpanded ? <ChevronDown /> : <ChevronUp />}
               </Text>
             </TouchableOpacity>
 
