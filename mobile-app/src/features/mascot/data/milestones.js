@@ -20,4 +20,22 @@ export const milestones = [
 
     completed: false,
   },
+  {
+    id: "3",
+    title: "Habit Explorer",
+    description: "Create 5 different habits.",
+    completed: false,
+  },
+  {
+    id: "4",
+    title: "Focused Mind",
+    description: "Complete 50 habit check-ins.",
+    completed: false,
+  },
+  {
+    id: "5",
+    title: "One Month Strong",
+    description: "Reach a 30-day streak on any habit.",
+    completed: false,
+  },
 ];

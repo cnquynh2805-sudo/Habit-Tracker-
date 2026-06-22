@@ -24,6 +24,9 @@
  */
 function toDateOnly(rawDate) {
   if (!rawDate) return null;
+  if (typeof rawDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(rawDate)) {
+    return rawDate;
+  }
   try {
     const d = rawDate instanceof Date ? rawDate : new Date(rawDate);
     if (isNaN(d.getTime())) return null;
@@ -54,13 +57,20 @@ function getDayOfWeek(d) {
  */
 function parseDaysOfWeek(daysOfWeek) {
   const MAP = {
-    sun: 0, sunday: 0,
-    mon: 1, monday: 1,
-    tue: 2, tuesday: 2,
-    wed: 3, wednesday: 3,
-    thu: 4, thursday: 4,
-    fri: 5, friday: 5,
-    sat: 6, saturday: 6,
+    sun: 0,
+    sunday: 0,
+    mon: 1,
+    monday: 1,
+    tue: 2,
+    tuesday: 2,
+    wed: 3,
+    wednesday: 3,
+    thu: 4,
+    thursday: 4,
+    fri: 5,
+    friday: 5,
+    sat: 6,
+    saturday: 6,
   };
   const set = new Set();
   (daysOfWeek || []).forEach((d) => {
@@ -94,8 +104,10 @@ function computeStreak(completedDates, habit) {
   }
 
   const completedSet = new Set(completedDates);
-  const isSpecific = (habit?.frequency || "").toLowerCase().includes("specific") ||
-    (habit?.daysOfWeek?.length > 0 && (habit?.frequency || "").toLowerCase() !== "daily");
+  const isSpecific =
+    (habit?.frequency || "").toLowerCase().includes("specific") ||
+    (habit?.daysOfWeek?.length > 0 &&
+      (habit?.frequency || "").toLowerCase() !== "daily");
   const scheduledDays = isSpecific ? parseDaysOfWeek(habit.daysOfWeek) : null;
 
   const todayStr = toDateOnly(new Date());
@@ -113,7 +125,7 @@ function computeStreak(completedDates, habit) {
   const limit = new Date(oldestDate);
   limit.setDate(limit.getDate() - 1);
 
-  let cursor = new Date(todayDate);
+  const cursor = new Date(todayDate);
   let currentStreakFinished = false;
 
   while (cursor > limit) {
@@ -154,7 +166,8 @@ function computeStreak(completedDates, habit) {
  */
 function computeTotalCompletions(checkins, targetPerDay) {
   const target = Math.max(1, targetPerDay || 1);
-  return (checkins || []).filter((c) => (c.completedCount || 0) >= target).length;
+  return (checkins || []).filter((c) => (c.completedCount || 0) >= target)
+    .length;
 }
 
 /**
@@ -172,7 +185,12 @@ function computeTotalCompletions(checkins, targetPerDay) {
  */
 export function calculateGoalProgress(goal, habit, checkins) {
   if (!goal || !habit) {
-    return { progress: 0, percentage: 0, isEncouraged: false, isAchieved: false };
+    return {
+      progress: 0,
+      percentage: 0,
+      isEncouraged: false,
+      isAchieved: false,
+    };
   }
 
   const targetPerDay = Math.max(1, habit.targetPerDay || 1);
@@ -180,7 +198,7 @@ export function calculateGoalProgress(goal, habit, checkins) {
 
   // Filter checkins to only those that hit the daily target.
   const completedCheckins = (checkins || []).filter(
-    (c) => (c.completedCount || 0) >= targetPerDay
+    (c) => (c.completedCount || 0) >= targetPerDay,
   );
 
   // Build a sorted DESC list of completion dates.
@@ -192,8 +210,7 @@ export function calculateGoalProgress(goal, habit, checkins) {
 
   let progress = 0;
 
-  const isStreak =
-    (goal.targetType || "").toLowerCase() === "streak";
+  const isStreak = (goal.targetType || "").toLowerCase() === "streak";
 
   if (isStreak) {
     const { currentStreak } = computeStreak(completedDates, habit);

@@ -1,5 +1,6 @@
 /* eslint-disable i18next/no-literal-string */
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { X } from "lucide-react-native";
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -18,9 +19,11 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { getStyles } from "./CreateHabitScreen.styles";
 import { useTheme } from "../../../../providers/ThemeProvider";
 import { CATEGORIES, CATEGORY_ICONS } from "../../constants";
-import { X } from "lucide-react-native";
 import * as habitsManager from "./services/habitsManager";
-import { useAppStore } from "@/shared/stores/useAppStore";
+import { useAppStore } from "../../../../shared/stores/useAppStore";
+
+import ConfirmModal from "@/shared/components/ConfirmModal";
+import SuccessModal from "@/shared/components/successModal/SuccessModal";
 
 const HABITS_CACHE_KEY = "@habits_list";
 
@@ -41,6 +44,9 @@ export default function CreateHabitScreen({ route, navigation }) {
   const [priority, setPriority] = useState("Medium");
 
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [syncStatus, setSyncStatus] = useState("");
   const [backupData, setBackupData] = useState(null);
@@ -72,8 +78,7 @@ export default function CreateHabitScreen({ route, navigation }) {
 
         const rawStatus = targetHabit.status || "Active";
         const formattedStatus =
-          rawStatus.charAt(0).toUpperCase() +
-          rawStatus.slice(1).toLowerCase();
+          rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1).toLowerCase();
 
         setHabitName(targetHabit.name);
         setCategory(targetHabit.category || "Mindfulness");
@@ -111,11 +116,12 @@ export default function CreateHabitScreen({ route, navigation }) {
 
   useEffect(() => {
     if (isEditMode) {
-      loadHabitForEditing();
+      loadHabitForEditing(); // eslint-disable-line react-hooks/set-state-in-effect
     } else {
       setCurrentStatus("Active");
       setSyncStatus("");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEditMode]);
 
   // ===== HEADER HANDLERS =====
@@ -199,7 +205,10 @@ export default function CreateHabitScreen({ route, navigation }) {
   const handleSaveAction = async () => {
     const cleanedName = habitName.trim();
     if (!cleanedName) {
-      useAppStore.getState().showGlobalAlert({ title: "Error", message: "Please enter a habit name." });
+      useAppStore.getState().showGlobalAlert({
+        title: "Error",
+        message: "Please enter a habit name.",
+      });
       return;
     }
 
@@ -228,7 +237,8 @@ export default function CreateHabitScreen({ route, navigation }) {
       if (isNameDuplicate) {
         useAppStore.getState().showGlobalAlert({
           title: "Duplicate Name",
-          message: "A habit with this name already exists. Please choose a unique name!",
+          message:
+            "A habit with this name already exists. Please choose a unique name!",
         });
         setIsLoading(false);
         setSyncStatus("");
@@ -257,7 +267,7 @@ export default function CreateHabitScreen({ route, navigation }) {
           category,
           frequency,
           daysOfWeek: frequency === "Custom" ? daysOfWeekList : [],
-          targetPerDay: targetPerDay,
+          targetPerDay,
           status: finalStatus,
           priority,
         });
@@ -270,7 +280,8 @@ export default function CreateHabitScreen({ route, navigation }) {
           setSyncStatus("⏳ Pending sync...");
         }
 
-        useAppStore.getState().showGlobalAlert({ title: "Success", message: "Habit updated" });
+        setSuccessMessage("Habit updated successfully");
+        setShowSuccessModal(true);
         await loadHabitForEditing();
       } else {
         // ===== CREATE HABIT =====
@@ -282,94 +293,57 @@ export default function CreateHabitScreen({ route, navigation }) {
           } else {
             setSyncStatus("⏳ Pending sync...");
           }
-          useAppStore.getState().showGlobalAlert({ title: "Success", message: "Habit created" });
+          setSuccessMessage("Habit created successfully");
+          setShowSuccessModal(true);
 
           setTimeout(() => {
             if (navigation) navigation.goBack();
           }, 800);
         } else {
           setSyncStatus("❌ Failed to save");
-          useAppStore.getState().showGlobalAlert({ title: "Error", message: "Failed to create habit" });
+          Alert.alert("Error", "Failed to create habit");
         }
       }
     } catch (error) {
       setSyncStatus("❌ Error");
-      
+
       if (error.message === "DUPLICATE_NAME") {
-        useAppStore.getState().showGlobalAlert({ title: "Duplicate Name", message: "A habit with this name already exists. Please choose a unique name!" });
+        Alert.alert(
+          "Duplicate Name",
+          "A habit with this name already exists. Please choose a unique name!",
+        );
       } else {
-        useAppStore.getState().showGlobalAlert({ title: "Error", message: error.message || "Failed to save habit" });
+        Alert.alert("Error", error.message || "Failed to save habit");
       }
     } finally {
       setIsLoading(false);
     }
   };
 
-  // ===== DELETE ACTION 1 (Header Button Trigger) =====
   const handleDeleteAction = () => {
-    if (!habitId) {
-      useAppStore.getState().showGlobalAlert({ title: "Error", message: "Cannot delete: Habit ID is missing." });
-      return;
-    }
-
-    const currentHabitName = habitName.trim() || "this habit";
-    
-    useAppStore.getState().showGlobalAlert({
-      title: "Delete Habit",
-      message: `Are you sure you want to delete "${currentHabitName}" permanently?`,
-      confirmText: "Delete",
-      cancelText: "Cancel",
-      onConfirm: async () => {
-        setIsLoading(true);
-        setSyncStatus("🗑️ Deleting...");
-
-        try {
-          const isDeleted = await habitsManager.deleteHabit(habitId);
-          if (isDeleted) {
-            useAppStore.getState().showGlobalAlert({
-              title: "Success",
-              message: "Habit deleted successfully",
-              onConfirm: () => {
-                if (navigation) {
-                  console.log("-> [UI NAVIGATE]: Dong man hinh, quay lai danh sach chinh.");
-                  navigation.goBack();
-                }
-              }
-            });
-          } else {
-            useAppStore.getState().showGlobalAlert({ title: "Error", message: "Failed to delete habit" });
-          }
-        } catch (e) {
-          console.error("Error deleting habit on UI:", e);
-          setSyncStatus("❌ Delete failed");
-          useAppStore.getState().showGlobalAlert({ title: "Error", message: "Failed to delete habit" });
-        } finally {
-          setIsLoading(false);
-        }
-      }
-    });
+    setShowDeleteModal(true);
   };
 
-  // ===== DELETE ACTION 2 (Fallback handler for alternative UI integrations) =====
-  const handleDeleteHabit = async () => {
+  const confirmDeleteHabit = async () => {
     if (!habitId) return;
 
+    setShowDeleteModal(false);
     setIsLoading(true);
+    setSyncStatus("🗑️ Deleting...");
+
     try {
-      const success = await habitsManager.deleteHabit(habitId);
-      if (success) {
-        useAppStore.getState().showGlobalAlert({
-          title: "Success",
-          message: "Habit deleted successfully",
-          onConfirm: () => {
-            if (navigation) navigation.goBack();
-          }
-        });
+      const isDeleted = await habitsManager.deleteHabit(habitId);
+
+      if (isDeleted) {
+        Alert.alert("Success", "Habit deleted successfully", [
+          { text: "OK", onPress: () => navigation?.goBack() },
+        ]);
       } else {
-        useAppStore.getState().showGlobalAlert({ title: "Error", message: "Failed to delete habit" });
+        Alert.alert("Error", "Failed to delete habit");
       }
     } catch (error) {
-      useAppStore.getState().showGlobalAlert({ title: "Error", message: "Failed to delete habit" });
+      setSyncStatus("❌ Delete failed");
+      Alert.alert("Error", "Failed to delete habit");
     } finally {
       setIsLoading(false);
     }
@@ -387,7 +361,10 @@ export default function CreateHabitScreen({ route, navigation }) {
         await loadHabitForEditing();
       }
     } catch (error) {
-      useAppStore.getState().showGlobalAlert({ title: "Error", message: "Failed to update status" });
+      useAppStore.getState().showGlobalAlert({
+        title: "Error",
+        message: "Failed to update status",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -397,7 +374,6 @@ export default function CreateHabitScreen({ route, navigation }) {
   return (
     <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
       <View style={styles.topHeaderContainer}>
-
         {/* LEFT */}
         <TouchableOpacity
           accessible
@@ -433,9 +409,10 @@ export default function CreateHabitScreen({ route, navigation }) {
           onPress={() => navigation && navigation.goBack()}
           disabled={isLoading}
         >
-          <Text style={styles.headerCloseText}><X size={20} color={colors.textSecondary || "#666"} /></Text>
+          <Text style={styles.headerCloseText}>
+            <X size={20} color={colors.textSecondary || "#666"} />
+          </Text>
         </TouchableOpacity>
-
       </View>
 
       {/* SYNC STATUS INDICATOR */}
@@ -734,7 +711,6 @@ export default function CreateHabitScreen({ route, navigation }) {
             </TouchableOpacity>
           )}
         </View>
-        
       </ScrollView>
 
       {/* CUSTOM FREQUENCY DAY SELECTION MODAL POPUP */}
@@ -793,6 +769,32 @@ export default function CreateHabitScreen({ route, navigation }) {
           </View>
         </View>
       </Modal>
+
+      <SuccessModal
+        visible={showSuccessModal}
+        title="Success"
+        message={successMessage}
+        onClose={() => {
+          setShowSuccessModal(false);
+
+          if (!isEditMode) {
+            navigation?.goBack();
+          }
+        }}
+      />
+
+      <ConfirmModal
+        visible={showDeleteModal}
+        title="Delete Habit"
+        message={`Are you sure you want to delete "${
+          habitName.trim() || "this habit"
+        }" permanently?`}
+        cancelLabel="Cancel"
+        confirmLabel="Delete"
+        destructive
+        onCancel={() => setShowDeleteModal(false)}
+        onConfirm={confirmDeleteHabit}
+      />
     </SafeAreaView>
   );
 }

@@ -22,7 +22,7 @@ export const createCheckin = async ({
 
   return apiClient.post(endpoints.checkins.create, {
     habit_id: Number(habitId),
-    date: Date.now(),
+    date: Date.now(), // Use Date.now() timestamp
     date_only: dateOnly,
     completedCount,
     status,
@@ -32,4 +32,3 @@ export const createCheckin = async ({
 export const listHabitCheckins = async (habitId) => {
   return apiClient.get(endpoints.habits.checkins(String(habitId)));
 };
-
