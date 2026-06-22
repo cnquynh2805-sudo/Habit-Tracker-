@@ -19,7 +19,7 @@ import { useAppStore } from "../../../../shared/stores/useAppStore";
 
 import { getStyles } from "./TodayScreen.styles";
 import { useTheme } from "../../../../providers/ThemeProvider";
-import ConfirmModal from "../../../../shared/components/ConfirmModal";
+import ConfirmModal from "@/shared/components/ConfirmModal";
 import DailyProgressCard from "../../components/DailyProgressCard";
 import FilterMenu from "../../components/FilterMenu";
 import MascotAvatar from "../../components/MascotAvatar";
