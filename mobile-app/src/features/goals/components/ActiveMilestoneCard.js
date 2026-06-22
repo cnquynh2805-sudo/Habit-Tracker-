@@ -13,10 +13,13 @@ export default function ActiveMilestoneCard({ item, styles, colors, onPress }) {
 
   const { habitName, category, goal } = item;
   // targetType from the backend: "Streak" | "TotalCompletions"
-  const { targetType, targetValue, currentProgress, progressPercent } = goal;
+  // isEncouraged and isAchieved come from derivedStateEngine (computed on FE).
+  const { targetType, targetValue, currentProgress, progressPercent, isEncouraged: engineEncouraged, isAchieved: engineAchieved } = goal;
 
   const isStreak = targetType === "Streak";
-  const isAchieved = progressPercent >= 100;
+  // Use engine-computed flags if available; fall back to percentage calculation.
+  const isAchieved = engineAchieved ?? (progressPercent >= 100);
+  const isEncouraged = engineEncouraged ?? (progressPercent >= 80 && progressPercent < 100);
 
   const progress = useSharedValue(0);
 
@@ -37,10 +40,10 @@ export default function ActiveMilestoneCard({ item, styles, colors, onPress }) {
     ? t("goals.goalTypeStreak", { count: targetValue })
     : t("goals.goalTypeTotal", { count: targetValue });
 
-  // Status text
+  // Status text — driven by derived isEncouraged / isAchieved flags.
   let statusText = t("goals.keepGoing");
   if (isAchieved) statusText = t("goals.goalAchieved");
-  else if (progressPercent >= 70) statusText = t("goals.almostThere");
+  else if (isEncouraged) statusText = t("goals.almostThere");
 
   // Category icon
   const categoryIcon = {
@@ -85,7 +88,7 @@ export default function ActiveMilestoneCard({ item, styles, colors, onPress }) {
       {/* Footer */}
       <View style={styles.milestoneFooter}>
         <Text style={[styles.milestoneStatusText, isAchieved && { color: colors.success || colors.primary }]}>
-          {isStreak && progressPercent >= 70 && !isAchieved ? "✦ " : ""}
+          {isStreak && isEncouraged && !isAchieved ? "✦ " : ""}
           {statusText}
         </Text>
         <Text style={styles.milestoneCountText}>

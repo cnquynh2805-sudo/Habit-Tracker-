@@ -1,6 +1,7 @@
 {
   "common": {
     "cancel": "Hủy",
+    "close": "Đóng",
     "delete": "Xóa",
     "save": "Lưu",
     "edit": "Sửa",
@@ -177,7 +178,9 @@
     "saveGoal": "Lưu mục tiêu",
     "goalDeleted": "Đã xóa mục tiêu thành công!",
     "goalSaved": "Đã lưu mục tiêu thành công!",
-    "goalSaveFailed": "Lưu mục tiêu thất bại."
+    "goalSaveFailed": "Lưu mục tiêu thất bại.",
+    "goalAchievedTitle": "🎉 {{name}} — Đạt mục tiêu rồi!",
+    "goalAchievedBody": "Tuyệt vời! Bạn đã hoàn thành mục tiêu đề ra. Hãy tiếp tục phát huy nhé!"
   },
   "icons": {
     "check": "?",

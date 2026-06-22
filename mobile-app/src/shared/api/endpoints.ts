@@ -10,6 +10,7 @@ export const endpoints = {
   checkins: {
     today: "/habits-today?timezone=Asia%2FHo_Chi_Minh",
     list: "/checkins",
+    listAll: "/checkins", // used by derivedStateEngine to fetch full history
     detail: (id: string) => `/checkins/${id}`,
     create: "/checkins",
     update: (id: string) => `/checkins/${id}`,

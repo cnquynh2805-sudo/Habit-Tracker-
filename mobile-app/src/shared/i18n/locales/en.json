@@ -1,6 +1,7 @@
 {
   "common": {
     "cancel": "Cancel",
+    "close": "Close",
     "delete": "Delete",
     "save": "Save",
     "edit": "Edit",
@@ -177,7 +178,9 @@
     "saveGoal": "Save Goal",
     "goalDeleted": "Goal deleted successfully!",
     "goalSaved": "Goal saved successfully!",
-    "goalSaveFailed": "Failed to save goal."
+    "goalSaveFailed": "Failed to save goal.",
+    "goalAchievedTitle": "🎉 {{name}} — Goal Achieved!",
+    "goalAchievedBody": "You crushed it! You've completed your goal. Keep the momentum going!"
   },
   "icons": {
     "check": "?",
