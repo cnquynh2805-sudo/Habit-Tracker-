@@ -202,9 +202,13 @@ export function useTodayCheckins() {
       flushingRef.current += 1;
       setMascot(MASCOT.waiting);
       try {
+        const d = new Date();
+        const dateOnly = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+        
         const payload = {
           habit_id: entry.habit_id,
           date: entry.date,
+          date_only: dateOnly,
           completedCount: entry.completedCount,
           status: entry.status,
         };

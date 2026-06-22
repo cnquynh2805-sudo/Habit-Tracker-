@@ -21,6 +21,7 @@ query checkins verb=POST {
       data = {
         habit_id      : $input.habit_id
         date          : $input.date
+        date_only     : "now"
         completedCount: $input.completedCount
         status        : $input.status
       }
@@ -38,15 +39,31 @@ query checkins verb=POST {
     // ---------------------------------------------------------
     var $now { value = "now"|to_timestamp }
     var $yesterday { value = $now|transform_timestamp:"-1 day" }
-    var $yesterday_day_of_week { value = $yesterday|format_timestamp:"w"|to_int }
+    var $yesterday_day_of_week { value = $yesterday|format_timestamp:"D" }
     
-    var $was_active_yesterday { value = $habit.frequency|contains:$yesterday_day_of_week }
+    // Calculate start and end of days
+    var $start_of_day { value = $now|format_timestamp:"Y-m-d"|to_timestamp }
+    var $start_of_yesterday { value = $yesterday|format_timestamp:"Y-m-d"|to_timestamp }
+    
+    var $was_active_yesterday { value = false }
+    conditional {
+      if ($habit.frequency == "Daily") {
+        var.update $was_active_yesterday { value = true }
+      }
+      elseif ($habit.daysOfWeek != null) {
+        conditional {
+          if ($habit.daysOfWeek|contains:$yesterday_day_of_week) {
+            var.update $was_active_yesterday { value = true }
+          }
+        }
+      }
+    }
     
     conditional {
       if ($was_active_yesterday) {
         // Query checkins for this habit yesterday
         db.query "checkins" {
-          where = $db.checkins.habit_id == $habit.id && $db.checkins.created_at >= $start_of_yesterday && $db.checkins.created_at <= $end_of_yesterday
+          where = $db.checkins.habit_id == $habit.id && $db.checkins.date >= $start_of_yesterday && $db.checkins.date < $start_of_day
         } as $yesterday_checkins
 
         var $total_yesterday { value = 0 }
@@ -58,7 +75,7 @@ query checkins verb=POST {
 
         // If they failed to meet the target yesterday, reset their streak BEFORE adding today's progress
         conditional {
-          if ($total_yesterday < $habit.target) {
+          if ($total_yesterday < $habit.targetPerDay) {
             db.query "goals" {
               where = $db.goals.habit_id == $habit.id && $db.goals.targetType == "streak" && $db.goals.ongoing_streak < $db.goals.targetValue
             } as $failed_streak_goals
@@ -84,7 +101,7 @@ query checkins verb=POST {
     // ---------------------------------------------------------
     // Fetch all checkins for this habit TODAY
     db.query "checkins" {
-      where = $db.checkins.habit_id == $habit.id && $db.checkins.created_at >= $start_of_day
+      where = $db.checkins.habit_id == $habit.id && $db.checkins.date >= $start_of_day
     } as $todays_checkins
 
     var $total_completed { value = 0 }
@@ -95,7 +112,7 @@ query checkins verb=POST {
     }
 
     conditional {
-      if ($total_completed >= $habit.target) {
+      if ($total_completed >= $habit.targetPerDay) {
         // ONLY update goals if the daily target is MET!
         db.query "goals" {
           where = $db.goals.habit_id == $habit.id
