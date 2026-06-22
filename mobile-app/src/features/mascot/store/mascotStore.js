@@ -7,34 +7,54 @@ export const useMascotStore = create(
     (set) => ({
       equippedRewardId: 1,
 
+      mascotSelected: false,
+      selectedMascot: null,
+
+      isHydrated: false,
+
       equipItem: (id) =>
         set({
           equippedRewardId: id,
+        }),
+
+      chooseMascot: (mascotId) =>
+        set({
+          mascotSelected: true,
+          selectedMascot: mascotId,
+        }),
+
+      setHydrated: (value) =>
+        set({
+          isHydrated: value,
         }),
     }),
     {
       name: "mascot-storage",
 
       storage: {
-        getItem: async (key) => {
+        getItem: async (name) => {
           const value =
-            await AsyncStorage.getItem(key);
+            await AsyncStorage.getItem(name);
 
           return value
             ? JSON.parse(value)
             : null;
         },
 
-        setItem: async (key, value) => {
+        setItem: async (name, value) => {
           await AsyncStorage.setItem(
-            key,
+            name,
             JSON.stringify(value)
           );
         },
 
-        removeItem: async (key) => {
-          await AsyncStorage.removeItem(key);
+        removeItem: async (name) => {
+          await AsyncStorage.removeItem(name);
         },
+      },
+
+      onRehydrateStorage: () => (state) => {
+        state?.setHydrated(true);
       },
     }
   )

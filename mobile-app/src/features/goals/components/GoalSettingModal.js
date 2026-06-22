@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect, react-native/no-color-literals, react-native-a11y/no-nested-touchables, react-native-a11y/has-valid-accessibility-descriptors, i18next/no-literal-string */
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -9,9 +10,10 @@ import {
   Pressable,
   Platform,
   ActivityIndicator,
-  Alert,
+  TextInput,
 } from "react-native";
 import { useGoalMutations } from "../hooks/useGoalMutations";
+import { useAppStore } from "../../../shared/stores/useAppStore";
 
 export default function GoalSettingModal({ visible, onClose, habit, colors }) {
   const { t } = useTranslation();
@@ -42,17 +44,17 @@ export default function GoalSettingModal({ visible, onClose, habit, colors }) {
   const isEditing = !!habit.goal;
   const isLoading = isCreating || isUpdating;
 
-  // Handle value changes
-  const handleIncrement = () => {
-    setTargetValue((prev) => prev + 1);
+  const handleTextChange = (text) => {
+    const cleaned = text.replace(/[^0-9]/g, "");
+    if (!cleaned) {
+      setTargetValue(0);
+    } else {
+      const parsed = parseInt(cleaned, 10);
+      setTargetValue(Math.min(parsed, 9999));
+    }
   };
 
-  const handleDecrement = () => {
-    setTargetValue((prev) => Math.max(1, prev - 1));
-  };
-
-  // Save changes
-  const handleSave = async () => {
+  const saveToBackend = async () => {
     try {
       if (isEditing) {
         await updateGoal({
@@ -60,7 +62,10 @@ export default function GoalSettingModal({ visible, onClose, habit, colors }) {
           goalId: habit.goal.id,
           targetValue,
         });
-        Alert.alert(t("common.done"), t("goals.goalSaved"));
+        useAppStore.getState().showGlobalAlert({
+          title: t("common.done"),
+          message: t("goals.goalSaved"),
+        });
       } else {
         await createGoal({
           habitId: habit.id,
@@ -69,12 +74,41 @@ export default function GoalSettingModal({ visible, onClose, habit, colors }) {
           targetType,
           targetValue,
         });
-        Alert.alert(t("common.done"), t("goals.goalSaved"));
+        useAppStore.getState().showGlobalAlert({
+          title: t("common.done"),
+          message: t("goals.goalSaved"),
+        });
       }
       onClose();
     } catch (error) {
       const debugInfo = __DEV__ ? `\nDetails: ${error?.message || String(error)}` : "";
-      Alert.alert(t("common.error"), t("goals.goalSaveFailed") + debugInfo);
+      useAppStore.getState().showGlobalAlert({
+        title: t("common.error"),
+        message: t("goals.goalSaveFailed") + debugInfo,
+      });
+    }
+  };
+
+  // Save changes
+  const handleSave = async () => {
+    if (targetValue <= 0) {
+      useAppStore.getState().showGlobalAlert({
+        title: t("common.error"),
+        message: t("goals.invalidTargetValue"),
+      });
+      return;
+    }
+
+    if (targetValue > 30) {
+      useAppStore.getState().showGlobalAlert({
+        title: "High Target",
+        message: `Are you sure you want to set a target of ${targetValue}?`,
+        confirmText: "Yes",
+        cancelText: "Cancel",
+        onConfirm: saveToBackend,
+      });
+    } else {
+      await saveToBackend();
     }
   };
 
@@ -235,12 +269,15 @@ export default function GoalSettingModal({ visible, onClose, habit, colors }) {
       fontWeight: "600",
       color: "#FFFFFF",
     },
-    targetNumber: {
+    targetNumberInput: {
       fontSize: 34,
       fontWeight: "700",
       color: colors.text || "#333333",
-      minWidth: 60,
+      minWidth: 100,
       textAlign: "center",
+      borderBottomWidth: 2,
+      borderBottomColor: activeGreen,
+      paddingVertical: 8,
     },
     targetUnitText: {
       fontSize: 12,
@@ -377,31 +414,14 @@ export default function GoalSettingModal({ visible, onClose, habit, colors }) {
             <Text style={customStyles.targetSectionTitle}>{t("goals.targetGoal")}</Text>
 
             <View style={customStyles.adjustRow}>
-              {/* Decrement */}
-              <TouchableOpacity
-                style={customStyles.adjustBtnMinus}
-                onPress={handleDecrement}
-                activeOpacity={0.7}
-                accessible={true}
-                accessibilityRole="button"
-                accessibilityLabel="Decrease target"
-              >
-                <Text style={customStyles.btnTextMinus}>-</Text>
-              </TouchableOpacity>
-
-              <Text style={customStyles.targetNumber}>{targetValue}</Text>
-
-              {/* Increment */}
-              <TouchableOpacity
-                style={customStyles.adjustBtnPlus}
-                onPress={handleIncrement}
-                activeOpacity={0.7}
-                accessible={true}
-                accessibilityRole="button"
-                accessibilityLabel="Increase target"
-              >
-                <Text style={customStyles.btnTextPlus}>+</Text>
-              </TouchableOpacity>
+              <TextInput
+                style={customStyles.targetNumberInput}
+                value={targetValue === 0 ? "" : String(targetValue)}
+                onChangeText={handleTextChange}
+                keyboardType="number-pad"
+                maxLength={4}
+                selectTextOnFocus
+              />
             </View>
 
             <Text style={customStyles.targetUnitText}>

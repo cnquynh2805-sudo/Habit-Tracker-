@@ -7,7 +7,8 @@
     "edit": "Edit",
     "done": "Done",
     "required": "Required",
-    "error": "Error"
+    "error": "Error",
+    "rateLimitError": "Rate limit exceeded. API requests are temporarily paused. Actions will be saved locally."
   },
   "action": {
     "pause": "Pause",
@@ -142,9 +143,10 @@
     "undo": "UNDO",
     "undoMsg": {
       "checkedIn": "Checked in!",
-      "progressSaved": "Progress saved!",
+       "progressSaved": "Progress saved!",
       "markedDone": "Habit marked as done!"
-    }
+    },
+    "nothingToUndo": "Nothing to undo"
   },
   "tabs": {
     "today": "Today",
@@ -188,6 +190,7 @@
     "goalDeleted": "Goal deleted successfully!",
     "goalSaved": "Goal saved successfully!",
     "goalSaveFailed": "Failed to save goal.",
+    "invalidTargetValue": "Target must be greater than 0",
     "goalAchievedTitle": "🎉 {{name}} — Goal Achieved!",
     "goalAchievedBody": "You crushed it! You've completed your goal. Keep the momentum going!"
   },

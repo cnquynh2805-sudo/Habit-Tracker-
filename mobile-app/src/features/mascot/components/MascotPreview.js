@@ -43,6 +43,16 @@ export default function MascotPreview() {
     )
   ];
 
+  const selectedMascot =
+    useMascotStore(
+      (state) =>
+        state.selectedMascot
+    );
+    
+  const mascotImages = {
+    brother: require("../../../assets/mascot/happy_boy.gif"),
+  };
+
 console.log("Current equip:", equippedRewardId);
 
   return (
@@ -61,7 +71,12 @@ console.log("Current equip:", equippedRewardId);
         style={styles.preview}
       >
         <Image
-          source={require("../../../assets/mascot/happy_boy.gif")}
+          // source={require("../../../assets/mascot/happy_boy.gif")}
+          source={
+            mascotImages[
+              selectedMascot
+            ]
+          }
           style={styles.mascotImage}
         />
 
