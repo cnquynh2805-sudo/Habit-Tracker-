@@ -1,11 +1,15 @@
 /* eslint-disable react-native/no-color-literals, no-dupe-keys, react-native/no-inline-styles, i18next/no-literal-string, react-native-a11y/no-nested-touchables */
-import { StyleSheet } from "react-native";
+import { StyleSheet, Platform } from "react-native";
 
 export const getStyles = (colors) =>
   StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: colors.background,
+    },
+    flexContainer: {
+      flex: 1,
+      position: "relative",
     },
     globalTopNavigationHeader: {
       flexDirection: "row",
@@ -30,9 +34,6 @@ export const getStyles = (colors) =>
       flex: 1,
       marginLeft: 12,
     },
-    langMenuWrapper: { position: "relative" },
-    themeMenuWrapper: { position: "relative" },
-    relativeWrapper: { position: "relative" },
     headerRightActionGroup: {
       flexDirection: "row",
       alignItems: "center",
@@ -41,6 +42,12 @@ export const getStyles = (colors) =>
     headerActionIconBtn: {
       padding: 4,
     },
+    headerIconButton: {
+      padding: 4,
+    },
+    langMenuWrapper: { position: "relative" },
+    themeMenuWrapper: { position: "relative" },
+    relativeWrapper: { position: "relative" },
     headerPlusIconSymbol: {
       fontSize: 24,
       color: colors.primary,
@@ -53,9 +60,9 @@ export const getStyles = (colors) =>
     },
     headerStatePopoverMenu: {
       position: "absolute",
-      top: 32,
       right: 0,
-      minWidth: 48 + 72,
+      top: 32,
+      width: 140,
       backgroundColor: colors.surface,
       borderRadius: 12,
       paddingVertical: 4,
@@ -73,35 +80,50 @@ export const getStyles = (colors) =>
       paddingHorizontal: 14,
     },
     headerMenuPopoverText: {
-      fontSize: 16,
+      fontSize: 12,
       color: colors.textSecondary,
     },
+
     topFilterBarContainer: {
-      paddingVertical: 8,
-      marginBottom: 8,
-    },
-    filterBarScrollInner: {
+      width: "100%",
+      flexDirection: "row",
+      justifyContent: "flex-end", 
       paddingHorizontal: 20,
-      gap: 8,
+      paddingVertical: 0,
+      marginBottom: 2,
+      position: "relative",
     },
-    filterChipButton: {
-      paddingHorizontal: 18,
-      paddingVertical: 8,
-      borderRadius: 100,
-      backgroundColor: colors.border,
+    filterTriggerRowBtn: {
+      flexDirection: "row",       
+      alignItems: "center",       
+      paddingVertical: 2,         
+      paddingHorizontal: 6,
+      borderRadius: 8,
     },
-    filterChipButtonActive: {
-      backgroundColor: colors.primary,
-    },
-    filterChipText: {
-      fontSize: 14,
-      color: colors.textSecondary,
-      fontWeight: "500",
-    },
-    filterChipTextActive: {
-      color: colors.surface,
+    filterTriggerText: {
+      marginLeft: 6,              
+      color: colors.primary,
       fontWeight: "600",
+      fontSize: 14,
     },
+    filterStandalonePopoverMenu: {
+      position: "absolute",
+      right: 20,
+      top: 28,
+      width: 140,
+      backgroundColor: colors.surface,
+      borderRadius: 12,
+      paddingVertical: 4,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.08,
+      shadowRadius: 8,
+      elevation: 4,
+      borderWidth: 1,
+      borderColor: colors.border,
+      zIndex: 10000,
+    },
+
     listScrollContentBody: {
       paddingHorizontal: 20,
       gap: 12,
@@ -167,65 +189,72 @@ export const getStyles = (colors) =>
       color: colors.textDisabled,
       textDecorationLine: "line-through",
     },
+
     cardTagsGrid: {
       flexDirection: "column",
-      gap: 6,
-      marginTop: 4,
+      gap: 6,                       
+      marginTop: 2,
     },
     cardTagsTopGroup: {
       flexDirection: "row",
-      gap: 8,
-      alignSelf: "flex-start",
+      alignItems: "center",
+      gap: 6,                       
     },
     cardTagsRow: {
       flexDirection: "row",
       alignItems: "center",
-      width: "100%",
-      gap: 8,
-    },
-    cardBadgesRow: {
-      flexDirection: "row",
       gap: 6,
-      marginBottom: 4,
     },
+
     miniMetaBadge: {
-      maxWidth: "55%",
-      paddingHorizontal: 12,
-      paddingVertical: 5,
-      borderRadius: 100,
-    },
-    miniMetaBadgeText: {
-      fontSize: 13,
-      fontWeight: "600",
-    },
-    priorityCapsuleRow: {
-      flexDirection: "row",
-    },
-    figmaPriorityCapsuleBase: {
-      maxWidth: "33.33%",
-      paddingHorizontal: 10,
-      paddingVertical: 3,
-      borderRadius: 100,
-    },
-    figmaPriorityCapsuleText: {
-      fontSize: 11,
-      fontWeight: "600",
-    },
-    cardRightActionBlock: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 12,
-      marginLeft: 4,
-    },
-    statusCapsule: {
-      maxWidth: "33.33%",
-      minWidth: "25%",
-      paddingHorizontal: 8,
-      height: 28,
+      paddingHorizontal: 10,        
+      paddingVertical: 2,           
       borderRadius: 100,
       alignItems: "center",
       justifyContent: "center",
-      marginLeft: "auto",
+      alignSelf: "flex-start",     
+    },
+    miniMetaBadgeText: {
+      fontSize: 12,                 
+      lineHeight: 16,
+      fontWeight: "500",
+      textAlign: "center",
+    },
+    figmaPriorityCapsuleBase: {
+      paddingHorizontal: 10,
+      paddingVertical: 2,
+      borderRadius: 100,
+      alignItems: "center",
+      justifyContent: "center",
+      alignSelf: "flex-start",     
+    },
+    figmaPriorityCapsuleText: {
+      fontSize: 12,
+      lineHeight: 16,
+      fontWeight: "600",
+      textAlign: "center",
+    },
+
+    cardRightActionBlock: {
+      flexDirection: "column",
+      justifyContent: "space-between",
+      alignItems: "flex-end",
+      alignSelf: "stretch",
+      marginLeft: 4,
+      paddingVertical: 2,
+    },
+    moreOptionsButton: {
+      padding: 4,
+      marginRight: -4,
+    },
+    
+    // --- TĂNG SIZE NÚT ACTIVE / CAPSULE TRẠNG THÁI CHUẨN ---
+    statusCapsule: {
+      paddingHorizontal: 12,        // Tăng padding ngang để cân đối với text lớn hơn
+      height: 28,                   // Tăng chiều cao lên 1 size (Từ 24 lên 28)
+      borderRadius: 100,
+      alignItems: "center",
+      justifyContent: "center",
     },
     statusCapsuleActive: {
       backgroundColor: colors.successLight,
@@ -237,8 +266,9 @@ export const getStyles = (colors) =>
       backgroundColor: colors.border,
     },
     statusCapsuleText: {
-      fontSize: 12,
+      fontSize: 12,                 // Tăng kích thước chữ lên 1 size (Từ 11 lên 12)
       fontWeight: "600",
+      textAlign: "center",
     },
     statusTextActive: {
       color: colors.successDark,
@@ -249,28 +279,10 @@ export const getStyles = (colors) =>
     statusTextArchived: {
       color: colors.textMuted,
     },
-    figmaChevronRightContainer: {
-      width: 8,
-      height: 14,
-      justifyContent: "center",
-      alignItems: "center",
-    },
-    figmaChevronLineTop: {
-      width: 6,
-      height: 2,
-      backgroundColor: colors.textMuted,
-      transform: [{ rotate: "45deg" }],
-      marginBottom: 2,
-    },
-    figmaChevronLineBottom: {
-      width: 6,
-      height: 2,
-      backgroundColor: colors.textMuted,
-      transform: [{ rotate: "-45deg" }],
-    },
+    // (Chevron styles removed in favor of MoreVertical icon)
     cardDropdownListMenu: {
       position: "absolute",
-      top: 68,
+      top: 56,
       right: 28,
       minWidth: "30%",
       backgroundColor: colors.surface,
@@ -295,10 +307,7 @@ export const getStyles = (colors) =>
       color: colors.primary,
       fontWeight: "600",
     },
-
-    iconDropletBase: {
-      alignItems: "center",
-    },
+    iconDropletBase: { alignItems: "center" },
     iconDropletTip: {
       width: 0,
       height: 0,
@@ -316,10 +325,7 @@ export const getStyles = (colors) =>
       backgroundColor: colors.primary,
       marginTop: -2,
     },
-    iconBookContainer: {
-      flexDirection: "row",
-      gap: 1,
-    },
+    iconBookContainer: { flexDirection: "row", gap: 1 },
     iconBookLeftPage: {
       width: 6,
       height: 11,
@@ -336,9 +342,7 @@ export const getStyles = (colors) =>
       borderTopRightRadius: 2,
       borderBottomRightRadius: 2,
     },
-    iconMeditationContainer: {
-      alignItems: "center",
-    },
+    iconMeditationContainer: { alignItems: "center" },
     iconMeditationHead: {
       width: 5,
       height: 5,
@@ -393,19 +397,19 @@ export const getStyles = (colors) =>
     floatingActionButton: {
       position: "absolute",
       right: 24,
-      bottom: 116,
-      width: 48,
-      height: 48,
-      borderRadius: 24,
+      bottom: 24,
+      width: 56,
+      height: 56,
+      borderRadius: 28,
       backgroundColor: colors.primary,
       justifyContent: "center",
       alignItems: "center",
-      elevation: 5,
+      elevation: 6,
       shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.25,
-      shadowRadius: 3.84,
-      zIndex: 9999,
+      shadowOffset: { width: 0, height: 3 },
+      shadowOpacity: 0.27,
+      shadowRadius: 4.65,
+      zIndex: 99999,
     },
     fabPlusSignHorizontal: {
       width: 20,

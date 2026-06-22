@@ -183,7 +183,8 @@ export const getStyles = (colors) =>
       marginRight: 12,
     },
     categoryCircleImage: {
-      width: "100%",
+      width: 24,
+      height: 24,
       resizeMode: "contain",
     },
     cardTitleGroup: {
@@ -294,7 +295,9 @@ export const getStyles = (colors) =>
       opacity: 0.7,
     },
     doneEmoji: {
-      fontSize: 18,
+      width: 24,
+      height: 24,
+      resizeMode: "contain",
       marginRight: 12,
     },
     doneName: {
