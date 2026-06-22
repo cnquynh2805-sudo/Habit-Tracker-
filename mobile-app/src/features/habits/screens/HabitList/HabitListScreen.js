@@ -203,9 +203,6 @@ export default function HabitListScreen({ navigation }) {
   }, [navigation, closeAllMenus]);
 
   const handleUpdateStatus = async (habitId, newStatus) => {
-    const target = habits.find((h) => h.id === habitId);
-    if (!target) return;
-
     try {
       console.log(`[UI ACTION]: Cap nhat trang thai habit ${habitId} thanh ${newStatus}`);
       // Goi API thong qua habitsManager voi payload chuan

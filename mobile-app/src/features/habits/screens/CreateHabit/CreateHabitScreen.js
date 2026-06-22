@@ -21,6 +21,8 @@ import { CATEGORIES, CATEGORY_ICONS } from "../../constants";
 import { X } from "lucide-react-native";
 import * as habitsManager from "./services/habitsManager";
 
+const HABITS_CACHE_KEY = "@habits_list";
+
 export default function CreateHabitScreen({ route, navigation }) {
   const { colors } = useTheme();
   const styles = getStyles(colors);
@@ -446,7 +448,7 @@ export default function CreateHabitScreen({ route, navigation }) {
           onPress={() => navigation && navigation.goBack()}
           disabled={isLoading}
         >
-          <Text style={styles.headerCloseText}><X /></Text>
+          <Text style={styles.headerCloseText}><X size={20} color={colors.textSecondary || "#666"} /></Text>
         </TouchableOpacity>
 
       </View>
