@@ -154,5 +154,27 @@
     "arrowLeft": "?",
     "plus": "+",
     "kebab": "?"
+  },
+  "mascot": {
+    "title": "My Room",
+    "subtitle": "Take care of Barnaby today",
+
+    "collection": "Collection",
+    "locked": "Locked",
+
+    "milestones": "Milestones",
+    "seeAllMilestones": "See all milestones",
+
+    "tab": {
+      "collection": "Collection",
+      "locked": "Locked"
+    },
+
+    "milestone": {
+      "completed": "Completed",
+      "incomplete": "Incomplete"
+    },
+
+    "mascotName": "Barnaby the Brother"
   }
 }

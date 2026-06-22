@@ -147,7 +147,8 @@ export const getStyles = (colors) =>
       justifyContent: "center",
     },
     categoryIconImage: {
-      width: "100%",     
+      width: 20,
+      height: 20,     
       resizeMode: "contain",
     },
     iconCircleBadgePaused: {
