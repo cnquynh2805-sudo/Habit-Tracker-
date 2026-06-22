@@ -80,6 +80,10 @@ export default function GoalSettingModal({ visible, onClose, habit, colors }) {
         });
       }
       onClose();
+
+      // Trigger milestone check after a new goal is created or updated
+      // in case it instantly reaches 80% or 100% based on existing check-ins.
+      useAppStore.getState().checkMilestoneForHabit(habit.habitId || habit.id);
     } catch (error) {
       const debugInfo = __DEV__ ? `\nDetails: ${error?.message || String(error)}` : "";
       useAppStore.getState().showGlobalAlert({

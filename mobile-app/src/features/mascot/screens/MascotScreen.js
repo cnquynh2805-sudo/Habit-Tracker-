@@ -36,12 +36,17 @@ export default function MascotScreen() {
   const { setThemeMode, themeMode, colors } = useTheme();
   const { t, i18n } = useTranslation();
   const [activeTab, setActiveTab] = useState("collection");
-  const { equippedRewardId, equipItem } = useMascotStore();
+  const { equippedRewardId, equipItem, unlockedRewardIds } = useMascotStore();
   const styles = createStyles(colors);
   const SCREEN_WIDTH = Dimensions.get("window").width;
   
-  const unlockedRewards = rewardItems.filter((item) => item.unlocked);
-  const lockedRewards = rewardItems.filter((item) => !item.unlocked);
+  const allRewards = rewardItems.map((item) => ({
+    ...item,
+    unlocked: item.unlocked || unlockedRewardIds?.includes(item.id),
+  }));
+
+  const unlockedRewards = allRewards.filter((item) => item.unlocked);
+  const lockedRewards = allRewards.filter((item) => !item.unlocked);
   
   const displayData = activeTab === "collection" ? unlockedRewards : lockedRewards;
   const pages = chunkArray(displayData, 4);
@@ -63,9 +68,10 @@ export default function MascotScreen() {
 
     ]);
 
-      // Reset mascot store
+      // Reset mascot store (including milestone notification flags so modals can re-fire)
       useMascotStore.setState({
         equippedRewardId: 1,
+        notifiedMilestones: {},
       });
 
       Alert.alert(

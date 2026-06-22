@@ -16,6 +16,7 @@ import "./src/shared/i18n"; // Initialize i18n
 import { useMascotStore } from "@/features/mascot/store/mascotStore";
 import MascotSelectionScreen from "@/features/mascot/screens/MascotSelectionScreen";
 import ConfirmModal from "./src/shared/components/ConfirmModal";
+import MilestoneModal from "./src/shared/components/MilestoneModal";
 import { useAppStore } from "./src/shared/stores/useAppStore";
 
 const Stack = createNativeStackNavigator();
@@ -139,6 +140,7 @@ function AppNavigator() {
           hideGlobalAlert();
         }}
       />
+      <MilestoneModal />
     </NavigationContainer>
   );
 }

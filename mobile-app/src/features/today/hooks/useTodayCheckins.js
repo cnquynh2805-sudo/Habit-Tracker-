@@ -16,7 +16,7 @@ import {
   isScheduledOn,
 } from "../utils/today";
 
-const UNDO_WINDOW_MS = 8000;
+const UNDO_WINDOW_MS = 1000;
 const HAPPY_MS = 2500;
 const HABITS_CACHE_KEY = "@today_habits_cache";
 
@@ -270,6 +270,8 @@ export function useTodayCheckins() {
                 [habitId]: { ...current, ...updated, serverId: updated.id },
               });
             }
+            const { useAppStore } = require("../../../shared/stores/useAppStore");
+            useAppStore.getState().checkMilestoneForHabit(habitId);
           }
         } else {
           // POST: no record yet for this habit+date_only on Xano
@@ -284,6 +286,8 @@ export function useTodayCheckins() {
                 [habitId]: { ...current, ...created, serverId: newServerId },
               });
             }
+            const { useAppStore } = require("../../../shared/stores/useAppStore");
+            useAppStore.getState().checkMilestoneForHabit(habitId);
           }
         }
       } catch (e) {

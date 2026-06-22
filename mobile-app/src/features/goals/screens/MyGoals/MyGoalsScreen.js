@@ -19,10 +19,6 @@ export default function MyGoalsScreen() {
 
   const [selectedHabit, setSelectedHabit] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-  // Track achieved goals that have already been shown an alert (by goal id).
-  const shownAchievementsRef = useRef(new Set());
-  const [achievementAlert, setAchievementAlert] = useState(null); // { habitName, goalId }
-
   const handleOpenModal = (habit) => {
     setSelectedHabit(habit);
     setModalVisible(true);
@@ -37,20 +33,6 @@ export default function MyGoalsScreen() {
     overallProgress,
     refetch,
   } = useDashboardGoals();
-
-  // Fire achievement alert for any newly-achieved goal (once per session per goalId).
-  useEffect(() => {
-    if (!activeGoals || activeGoals.length === 0) return;
-    for (const item of activeGoals) {
-      const goalId = item.goal?.id;
-      if (item.goal?.isAchieved && goalId && !shownAchievementsRef.current.has(goalId)) {
-        shownAchievementsRef.current.add(goalId);
-        setAchievementAlert({ habitName: item.habitName, goalId });
-        break; // Show one at a time; user can dismiss and the next will show on next render.
-      }
-    }
-  }, [activeGoals]);
-
   /**
    * Build a flat heterogeneous array for FlashList.
    * FlashList requires a single `data` prop and routes items by type
@@ -201,61 +183,6 @@ export default function MyGoalsScreen() {
         habit={selectedHabit}
         colors={colors}
       />
-
-      {/* Goal Achievement Alert — Core Feature 3: 100% target reached */}
-      <Modal
-        visible={!!achievementAlert}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setAchievementAlert(null)}
-        accessibilityViewIsModal
-      >
-        <View style={{
-          flex: 1,
-          backgroundColor: "rgba(0,0,0,0.55)",
-          justifyContent: "center",
-          alignItems: "center",
-          padding: 24,
-        }}>
-          <View style={{
-            backgroundColor: colors.card || colors.surface || "#1e1e2e",
-            borderRadius: 20,
-            padding: 28,
-            alignItems: "center",
-            width: "90%",
-            maxWidth: 360,
-          }}>
-            <Text style={{ fontSize: 52, marginBottom: 12 }}>🎉</Text>
-            <Text style={[
-              styles.headerTitle,
-              { fontSize: 20, textAlign: "center", marginBottom: 8 },
-            ]}>
-              {t("goals.goalAchievedTitle", { name: achievementAlert?.habitName })}
-            </Text>
-            <Text style={[
-              styles.overallSubtext,
-              { textAlign: "center", marginBottom: 24 },
-            ]}>
-              {t("goals.goalAchievedBody")}
-            </Text>
-            <TouchableOpacity
-              style={{
-                backgroundColor: colors.primary,
-                borderRadius: 12,
-                paddingVertical: 12,
-                paddingHorizontal: 32,
-              }}
-              onPress={() => setAchievementAlert(null)}
-              accessibilityRole="button"
-              accessibilityLabel={t("common.close")}
-            >
-              <Text style={{ color: "#fff", fontWeight: "700", fontSize: 15 }}>
-                {t("common.close")}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
     </SafeAreaView>
   );
 }
