@@ -1,8 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-
-
+import { calculateHabitStats } from "../../../shared/services/derivedStateEngine";
 import {
   createCheckin,
   listCheckins,
@@ -24,6 +23,9 @@ const HABITS_CACHE_KEY = "@today_habits_cache";
 // Local date helper: converts any date input → "YYYY-MM-DD" string, or null.
 function toDateOnly(rawDate) {
   if (!rawDate) return null;
+  if (typeof rawDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(rawDate)) {
+    return rawDate;
+  }
   try {
     const d = rawDate instanceof Date ? rawDate : new Date(rawDate);
     if (isNaN(d.getTime())) return null;
@@ -33,7 +35,6 @@ function toDateOnly(rawDate) {
   }
 }
 
-
 // Mascot states map 1:1 to the gif assets in src/assets/mascot.
 export const MASCOT = {
   idle: "idle",
@@ -42,14 +43,14 @@ export const MASCOT = {
   doubt: "doubt",
 };
 
-// Note: `date` is repurposed as a consecutive-day streak counter (per product
-// decision); `dayKey` is a client-only marker of which calendar day the current
+// Note: `date` stores the UNIX timestamp of progress tracking (conforming to Xano's schema);
+// `dayKey` is a client-only marker of which calendar day the current
 // progress belongs to, used to detect day rollover / missed habits.
 function buildCheckin(habit) {
   return {
     serverId: null,
     habit_id: Number(habit.id) || 0,
-    date: 0,
+    date: Date.now(),
     completedCount: 0,
     status: CHECKIN_STATUS.notStarted,
     dayKey: getTodayKey(),
@@ -69,12 +70,14 @@ function isTodayHabit(habit) {
 export function useTodayCheckins() {
   const [habits, setHabits] = useState([]);
   const [checkins, setCheckins] = useState({});
+  const [allCheckins, setAllCheckins] = useState([]);
   const [mascot, setMascot] = useState(MASCOT.idle);
   const [undo, setUndo] = useState(null); // { habitId, messageKey }
   const [isLoading, setIsLoading] = useState(true);
   const [confirmHabit, setConfirmHabit] = useState(null);
 
   const storageKey = `${CHECKINS_STORAGE_PREFIX}${getTodayKey()}`;
+  const ALL_CHECKINS_CACHE_KEY = "@all_checkins_cache";
 
   // Refs mirror state so timers/async callbacks never read stale values.
   const checkinsRef = useRef(checkins);
@@ -111,9 +114,10 @@ export function useTodayCheckins() {
   );
 
   const reload = useCallback(async () => {
+    const todayKey = getTodayKey();
     try {
       // Read from the server (GET /habits + GET /checkins) plus the local cache
-      // (needed for the day-rollover / streak markers the server can't store).
+      // (needed for the day-rollover markers).
       const [habitList, checkinList, cacheRaw] = await Promise.all([
         listHabits(),
         listCheckins(),
@@ -121,7 +125,6 @@ export function useTodayCheckins() {
       ]);
       const todayHabits = (habitList || []).filter(isTodayHabit);
       const cache = cacheRaw ? JSON.parse(cacheRaw) : {};
-      const todayKey = getTodayKey();
 
       // Latest server check-in per habit FOR TODAY
       const serverByHabit = {};
@@ -140,27 +143,20 @@ export function useTodayCheckins() {
 
       todayHabits.forEach((h) => {
         const target = Math.max(1, h.targetPerDay || 1);
-        const server = serverByHabit[h.id];  // Xano record for today (may be null)
-        const cached = cache[h.id];           // Local AsyncStorage snapshot
+        const server = serverByHabit[h.id]; // Xano record for today (may be null)
+        const cached = cache[h.id]; // Local AsyncStorage snapshot
 
         const habitId = Number(h.id) || 0;
 
         if (server) {
           // ✅ SERVER WINS: Always sync to Xano's ground truth for today.
           // This heals any stale local cache (e.g. from previous 500 errors).
-          // We only preserve the local streak counter (date) if the server record
-          // doesn't carry it (Xano's `date` field stores a timestamp, not a streak).
           const serverCount = server.completedCount || 0;
-          // Use local streak counter if server date looks like a timestamp (> 10^9),
-          // otherwise trust cached streak (cached.date is our streak counter).
-          const serverDateIsTimestamp = (server.date || 0) > 1_000_000_000;
-          const streakFromCache = cached?.dayKey === todayKey ? (cached.date || 0) : 0;
-          const streak = serverDateIsTimestamp ? streakFromCache : (server.date || 0);
 
           next[h.id] = {
             serverId: server.id,
             habit_id: habitId,
-            date: streak,
+            date: server.date || Date.now(), // Store actual timestamp
             completedCount: serverCount,
             status: server.status || deriveStatus(serverCount, target),
             dayKey: todayKey,
@@ -171,27 +167,17 @@ export function useTodayCheckins() {
           next[h.id] = {
             serverId: null,
             habit_id: habitId,
-            date: cached.date || 0,
+            date: cached.date || Date.now(),
             completedCount: cached.completedCount || 0,
             status: cached.status || CHECKIN_STATUS.notStarted,
             dayKey: todayKey,
           };
-        } else if (cached && cached.dayKey && cached.dayKey !== todayKey) {
-          // 🔄 DAY ROLLOVER: Previous day's cache — reset progress for today.
-          next[h.id] = {
-            serverId: null, // new day = no server record yet
-            habit_id: habitId,
-            date: (cached.completedCount || 0) >= target ? (cached.date || 0) : 0,
-            completedCount: 0,
-            status: CHECKIN_STATUS.notStarted,
-            dayKey: todayKey,
-          };
         } else {
-          // 🆕 FRESH: No cache, no server record yet.
+          // 🔄 FRESH or DAY ROLLOVER: No cache or previous day's cache — reset progress for today.
           next[h.id] = {
             serverId: null,
             habit_id: habitId,
-            date: 0,
+            date: Date.now(),
             completedCount: 0,
             status: CHECKIN_STATUS.notStarted,
             dayKey: todayKey,
@@ -201,24 +187,35 @@ export function useTodayCheckins() {
 
       setHabits(todayHabits);
       habitsRef.current = todayHabits;
+      setAllCheckins(checkinList || []);
       AsyncStorage.setItem(HABITS_CACHE_KEY, JSON.stringify(todayHabits)).catch(
-        () => { },
+        () => {},
       );
+      AsyncStorage.setItem(
+        ALL_CHECKINS_CACHE_KEY,
+        JSON.stringify(checkinList || []),
+      ).catch(() => {});
       persist(next); // also caches the check-in map for offline reads
     } catch (e) {
       console.log("Error loading from server, falling back to cache:", e);
       // Offline fallback: last cached habits + check-in map.
       try {
-        const [habitsCache, checkinsCache] = await Promise.all([
-          AsyncStorage.getItem(HABITS_CACHE_KEY),
-          AsyncStorage.getItem(storageKey),
-        ]);
+        const [habitsCache, checkinsCache, allCheckinsCache] =
+          await Promise.all([
+            AsyncStorage.getItem(HABITS_CACHE_KEY),
+            AsyncStorage.getItem(storageKey),
+            AsyncStorage.getItem(ALL_CHECKINS_CACHE_KEY),
+          ]);
         const cachedHabits = habitsCache ? JSON.parse(habitsCache) : [];
         const cachedCheckins = checkinsCache ? JSON.parse(checkinsCache) : {};
+        const cachedAllCheckins = allCheckinsCache
+          ? JSON.parse(allCheckinsCache)
+          : [];
         setHabits(cachedHabits);
         habitsRef.current = cachedHabits;
         checkinsRef.current = cachedCheckins;
         setCheckins(cachedCheckins);
+        setAllCheckins(cachedAllCheckins);
       } catch (cacheErr) {
         console.log("Error reading cache:", cacheErr);
       }
@@ -228,24 +225,6 @@ export function useTodayCheckins() {
     }
   }, [storageKey, persist, settleMascot]);
 
-  useEffect(() => {
-    reload(); // eslint-disable-line react-hooks/set-state-in-effect
-    return () => {
-      if (pendingRef.current) {
-        const pending = pendingRef.current;
-        if (pending.timer) clearTimeout(pending.timer);
-        flushToServer(pending.habitId, pending.entry);
-      }
-      if (happyTimerRef.current) clearTimeout(happyTimerRef.current);
-      if (setCountTimeoutRef.current) clearTimeout(setCountTimeoutRef.current);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Push a single check-in to the server.
-  // RULE: At flush time, read AsyncStorage directly to resolve serverId.
-  //   - If serverId exists in cache → PATCH (record already on Xano)
-  //   - If not → POST (first time creating this habit+date_only pair)
   const flushToServer = useCallback(
     async (habitId, entry) => {
       flushingRef.current += 1;
@@ -258,7 +237,7 @@ export function useTodayCheckins() {
 
         payload = {
           habit_id: entry.habit_id,
-          date: Date.now(),
+          date: entry.date || Date.now(), // UNIX timestamp, NOT streak counter
           date_only: dateOnly,
           completedCount: entry.completedCount,
           status: entry.status,
@@ -275,7 +254,8 @@ export function useTodayCheckins() {
           }
         } catch (_) {
           // Fallback to in-memory ref if AsyncStorage read fails
-          liveServerId = checkinsRef.current[habitId]?.serverId ?? entry.serverId ?? null;
+          liveServerId =
+            checkinsRef.current[habitId]?.serverId ?? entry.serverId ?? null;
         }
         serverId = liveServerId;
 
@@ -308,7 +288,9 @@ export function useTodayCheckins() {
         }
       } catch (e) {
         // Offline / server error: keep local; next flush will retry.
-        const endpoint = serverId ? `PATCH /checkins/${serverId}` : "POST /checkins";
+        const endpoint = serverId
+          ? `PATCH /checkins/${serverId}`
+          : "POST /checkins";
         console.log(`Error syncing checkin at endpoint [${endpoint}]:`, {
           error: e?.message || String(e),
           status: e?.response?.status,
@@ -322,6 +304,19 @@ export function useTodayCheckins() {
     [storageKey, persist, settleMascot],
   );
 
+  useEffect(() => {
+    reload(); // eslint-disable-line react-hooks/set-state-in-effect
+    return () => {
+      if (pendingRef.current) {
+        const pending = pendingRef.current;
+        if (pending.timer) clearTimeout(pending.timer);
+        flushToServer(pending.habitId, pending.entry);
+      }
+      if (happyTimerRef.current) clearTimeout(happyTimerRef.current);
+      if (setCountTimeoutRef.current) clearTimeout(setCountTimeoutRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Commit the currently pending change to the server right now.
   const flushPending = useCallback(() => {
@@ -344,17 +339,11 @@ export function useTodayCheckins() {
       if (pendingRef.current) flushPending();
 
       const newCount = Math.max(0, completedCount);
-      const wasCompleted = (prev.completedCount || 0) >= target;
-      const nowCompleted = newCount >= target;
-      // Streak (stored in `date`): +1 when a habit is finished, -1 if undone.
-      let streak = prev.date || 0;
-      if (!wasCompleted && nowCompleted) streak += 1;
-      else if (wasCompleted && !nowCompleted) streak = Math.max(0, streak - 1);
 
       const entry = {
         ...prev,
         completedCount: newCount,
-        date: streak,
+        date: Date.now(), // timestamp of progress tracking
         status: deriveStatus(newCount, target),
         dayKey: getTodayKey(),
       };
@@ -403,7 +392,8 @@ export function useTodayCheckins() {
       applyChange(habit, finalValue, "today.undoMsg.progressSaved");
 
       if (finalValue >= target) {
-        if (setCountTimeoutRef.current) clearTimeout(setCountTimeoutRef.current);
+        if (setCountTimeoutRef.current)
+          clearTimeout(setCountTimeoutRef.current);
         setCountTimeoutRef.current = setTimeout(() => {
           setConfirmHabit(habit);
         }, 300);
@@ -447,8 +437,23 @@ export function useTodayCheckins() {
 
       // Xano's created_at is typically a Unix timestamp in milliseconds.
       const createdDate = h.createdAt ? new Date(h.createdAt) : null;
-      const isCreatedToday = createdDate ? getTodayKey(createdDate) === todayStr : false;
+      const isCreatedToday = createdDate
+        ? getTodayKey(createdDate) === todayStr
+        : false;
       const isLate = currentHour >= 22;
+
+      // Group history checkins for this habit (excluding today's checkin from the server list,
+      // because we want to use the live local `checkin` object instead to support instant UI update).
+      const habitCheckinsFromHistory = (allCheckins || []).filter(
+        (c) =>
+          Number(c.habit_id) === Number(h.id) &&
+          (c.date_only || toDateOnly(c.date)) !== todayStr,
+      );
+
+      const combinedCheckins = [...habitCheckinsFromHistory, checkin];
+
+      // Calculate streak dynamically using derivedStateEngine
+      const stats = calculateHabitStats(combinedCheckins, h);
 
       const item = {
         habit: h,
@@ -456,13 +461,13 @@ export function useTodayCheckins() {
         target,
         // Habit is overdue if it is not completed, it's late in the day (after 10 PM), and it wasn't just created today.
         overdue: checkin.completedCount < target && isLate && !isCreatedToday,
-        streak: checkin.date || 0,
+        streak: stats.currentStreak,
       };
       if (checkin.completedCount >= target) doneList.push(item);
       else todoList.push(item);
     });
     return { todo: todoList, done: doneList };
-  }, [habits, checkins]);
+  }, [habits, checkins, allCheckins]);
 
   const completedCount = done.length;
   const totalCount = habits.length;
