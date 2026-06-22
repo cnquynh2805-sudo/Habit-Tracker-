@@ -168,6 +168,10 @@ export const getStyles = (colors) =>
       alignItems: "center",
       justifyContent: "center",
     },
+    categoryIconImage: {
+      width: "100%",     
+      resizeMode: "contain",
+    },
     iconCircleBadgePaused: {
       backgroundColor: colors.border,
     },

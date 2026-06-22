@@ -8,10 +8,20 @@ export const endpoints = {
     remove: (id: string) => `/habits/${id}`,
   },
   checkins: {
+    today: "/habits-today?timezone=Asia%2FHo_Chi_Minh",
     list: "/checkins",
-    detail: (id: number) => `/checkins/${id}`,
+    detail: (id: string) => `/checkins/${id}`,
     create: "/checkins",
-    update: (id: number) => `/checkins/${id}`,
-    remove: (id: number) => `/checkins/${id}`,
+    update: (id: string) => `/checkins/${id}`,
+    remove: (id: string) => `/checkins/${id}`,
+  },
+  goals: {
+    list: "/goals",
+    detail: (id: string) => `/goals/${id}`,
+    dashboard: "/dashboard/goals",
+    byHabit: (habitId: string) => `/habits/${habitId}/goals`,
+    updateByHabit: (habitId: string, goalId: string) => `/habits/${habitId}/goals/${goalId}`,
+    progressByHabit: (habitId: string, goalId: string) =>
+      `/habits/${habitId}/goals/${goalId}/progress`,
   },
 } as const;

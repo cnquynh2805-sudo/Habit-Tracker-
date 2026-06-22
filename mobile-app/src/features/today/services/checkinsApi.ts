@@ -7,7 +7,7 @@ import { endpoints } from "@/shared/api/endpoints";
 // so each call resolves directly to the payload.
 
 export function listCheckins(): Promise<Checkin[]> {
-  return apiClient.get(endpoints.checkins.list);
+  return apiClient.get(endpoints.checkins.today);
 }
 
 export function getCheckin(id: number): Promise<Checkin> {

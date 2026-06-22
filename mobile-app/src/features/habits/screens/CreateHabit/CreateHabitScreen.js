@@ -1,3 +1,4 @@
+/* eslint-disable i18next/no-literal-string */
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
@@ -10,12 +11,23 @@ import {
   Alert,
   ActivityIndicator,
   Modal,
+  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { getStyles } from "./CreateHabitScreen.styles";
 import { useTheme } from "../../../../providers/ThemeProvider";
 import * as habitsManager from "./services/habitsManager";
+import { CATEGORIES, CATEGORY_ICONS } from "../../constants";
+import { createCheckin } from "../../services/checkinsApi";
+import {
+  createHabit,
+  updateHabit,
+  deleteHabit,
+} from "../../services/habitsApi";
+import { X } from "lucide-react-native";
+
+const HABITS_CACHE_KEY = "@habits_list";
 
 export default function CreateHabitScreen({ route, navigation }) {
   const { colors } = useTheme();
@@ -340,6 +352,7 @@ export default function CreateHabitScreen({ route, navigation }) {
               } else {
                 Alert.alert("Error", "Failed to delete habit");
               }
+              if (navigation) navigation.goBack();
             } catch (e) {
               setSyncStatus("❌ Delete failed");
               Alert.alert("Error", "Failed to delete habit");
@@ -404,36 +417,11 @@ export default function CreateHabitScreen({ route, navigation }) {
   return (
     <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
       <View style={styles.topHeaderContainer}>
+
+        {/* LEFT */}
         <TouchableOpacity
           accessible
           accessibilityRole="button"
-          accessibilityLabel="Interactive element"
-          onPress={handleLeftHeaderPress}
-          disabled={isLoading}
-        >
-          <Text
-            style={
-              !isEditMode || isEditable
-                ? styles.headerCancelText
-                : styles.headerDeleteText
-            }
-          >
-            {!isEditMode ? "Cancel" : isEditable ? "Cancel" : "Delete"}
-          </Text>
-        </TouchableOpacity>
-
-        <Text style={styles.headerTitleText}>
-          {!isEditMode
-            ? "New Habit"
-            : isEditable
-              ? "Edit Habit"
-              : "Habit Detail"}
-        </Text>
-
-        <TouchableOpacity
-          accessible
-          accessibilityRole="button"
-          accessibilityLabel="Interactive element"
           style={styles.headerSaveCapsuleButton}
           onPress={handleRightHeaderPress}
           disabled={isLoading}
@@ -446,7 +434,27 @@ export default function CreateHabitScreen({ route, navigation }) {
             </Text>
           )}
         </TouchableOpacity>
-      </View>
+
+        {/* CENTER */}
+        <Text style={styles.headerTitleText}>
+          {!isEditMode
+            ? "New Habit"
+            : isEditable
+              ? "Edit Habit"
+              : "Habit Detail"}
+        </Text>
+
+        {/* RIGHT */}
+        <TouchableOpacity
+          accessible
+          accessibilityRole="button"
+          accessibilityLabel="Close"
+          style={styles.headerCloseButton}
+          onPress={() => navigation && navigation.goBack()}
+          disabled={isLoading}
+        >
+          <Text style={styles.headerCloseText}><X /></Text>
+        </TouchableOpacity>
 
       {/* SYNC STATUS INDICATOR */}
       {syncStatus ? (
@@ -528,13 +536,7 @@ export default function CreateHabitScreen({ route, navigation }) {
             {t("createHabit.categoryLabel")}
           </Text>
           <View style={styles.categoryChipsMatrix}>
-            {[
-              { id: "Health", label: "Health 💚" },
-              { id: "Study", label: "Study 📘" },
-              { id: "Work", label: "Work 💼" },
-              { id: "Mindfulness", label: "Mindfulness 🧘" },
-              { id: "Other", label: "Other ⭐" },
-            ].map((chip) => {
+            {CATEGORIES.map((chip) => {
               const isSelected = category === chip.id;
               return (
                 <TouchableOpacity
@@ -549,14 +551,18 @@ export default function CreateHabitScreen({ route, navigation }) {
                   onPress={() => setCategory(chip.id)}
                   disabled={!isEditable || isLoading}
                 >
+                  <Image
+                    source={CATEGORY_ICONS[chip.key]}
+                    style={styles.categoryChipIcon}
+                  />
                   <Text
                     style={[
                       styles.figmaCategoryChipText,
                       isSelected && styles.figmaCategoryChipTextActive,
                     ]}
                   >
-                    {t("category." + chip.id.toLowerCase() + "Emoji", {
-                      defaultValue: chip.label,
+                    {t("category." + chip.key, {
+                      defaultValue: chip.id,
                     })}
                   </Text>
                 </TouchableOpacity>
@@ -732,6 +738,22 @@ export default function CreateHabitScreen({ route, navigation }) {
             </Text>
           </View>
         </View>
+
+        <View>
+          {isEditMode && (
+            <TouchableOpacity
+              accessible
+              accessibilityRole="button"
+              accessibilityLabel="Interactive element"
+              style={styles.deleteButton}
+              onPress={handleDeleteAction}
+              disabled={isLoading}
+            >
+              <Text style={styles.deleteButtonText}>Delete Habit</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+        
       </ScrollView>
 
       {/* CUSTOM FREQUENCY DAY SELECTION MODAL POPUP */}

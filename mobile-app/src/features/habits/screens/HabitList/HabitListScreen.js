@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   Alert,
   TouchableWithoutFeedback,
+  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -370,7 +371,7 @@ export default function HabitListScreen({ navigation }) {
         <View style={styles.flexContainer}>
           {/* TOP HEADER */}
           <View style={styles.globalTopNavigationHeader}>
-            <TouchableOpacity
+            {/* <TouchableOpacity
               accessible
               accessibilityRole="button"
               accessibilityLabel="Interactive element"
@@ -378,7 +379,7 @@ export default function HabitListScreen({ navigation }) {
               onPress={() => navigation && navigation.goBack()}
             >
               <Text style={styles.headerArrowSymbol}>←</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
 
             <Text style={styles.headerMainTitleText}>
               {t("habitList.title")}
