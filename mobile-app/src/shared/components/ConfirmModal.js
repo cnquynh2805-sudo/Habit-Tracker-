@@ -7,6 +7,9 @@ import {
   View,
 } from "react-native";
 
+import { useTheme } from "../../providers/ThemeProvider";
+import { getStyles } from "./ConfirmModal.styles";
+
 // App-styled confirmation dialog (replaces the native Alert).
 export default function ConfirmModal({
   visible,
@@ -16,8 +19,14 @@ export default function ConfirmModal({
   confirmLabel,
   onCancel,
   onConfirm,
-  styles,
+  styles: customStyles,
 }) {
+  const { colors } = useTheme();
+
+  // If no custom styles are supplied, build a clean StyleSeed/Toss fallback sheet.
+  const defaultStyles = getStyles(colors);
+  const styles = customStyles || defaultStyles;
+
   return (
     <Modal
       visible={visible}
@@ -32,14 +41,16 @@ export default function ConfirmModal({
               <Text style={styles.modalTitle}>{title}</Text>
               <Text style={styles.modalMessage}>{message}</Text>
               <View style={styles.modalButtonRow}>
-                <TouchableOpacity
-                  accessibilityRole="button"
-                  style={styles.modalBtnGhost}
-                  onPress={onCancel}
-                  activeOpacity={0.85}
-                >
-                  <Text style={styles.modalBtnGhostText}>{cancelLabel}</Text>
-                </TouchableOpacity>
+                {cancelLabel ? (
+                  <TouchableOpacity
+                    accessibilityRole="button"
+                    style={styles.modalBtnGhost}
+                    onPress={onCancel}
+                    activeOpacity={0.85}
+                  >
+                    <Text style={styles.modalBtnGhostText}>{cancelLabel}</Text>
+                  </TouchableOpacity>
+                ) : null}
                 <TouchableOpacity
                   accessibilityRole="button"
                   style={styles.modalBtnPrimary}
@@ -56,3 +67,4 @@ export default function ConfirmModal({
     </Modal>
   );
 }
+

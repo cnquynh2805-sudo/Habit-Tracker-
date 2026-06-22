@@ -13,11 +13,15 @@ import NfcSettingsScreen from "./src/features/nfc/setting/NfcSettingsScreen";
 import HistoryScreen from "./src/features/habits/screens/HistoryScreen";
 
 import "./src/shared/i18n"; // Initialize i18n
+import ConfirmModal from "./src/shared/components/ConfirmModal";
+import { useAppStore } from "./src/shared/stores/useAppStore";
 
 const Stack = createNativeStackNavigator();
 
 function AppNavigator() {
   const { colors, isDark } = useTheme();
+  const globalAlert = useAppStore((state) => state.globalAlert);
+  const hideGlobalAlert = useAppStore((state) => state.hideGlobalAlert);
 
   const baseTheme = isDark ? DarkTheme : DefaultTheme;
   const navigationTheme = {
@@ -68,6 +72,21 @@ function AppNavigator() {
         />
 
       </Stack.Navigator>
+
+      <ConfirmModal
+        visible={!!globalAlert}
+        title={globalAlert?.title || ""}
+        message={globalAlert?.message || ""}
+        cancelLabel={globalAlert?.cancelLabel}
+        confirmLabel={globalAlert?.confirmLabel || "Close"}
+        onCancel={globalAlert?.onCancel || hideGlobalAlert}
+        onConfirm={() => {
+          if (globalAlert?.onConfirm) {
+            globalAlert.onConfirm();
+          }
+          hideGlobalAlert();
+        }}
+      />
     </NavigationContainer>
   );
 }

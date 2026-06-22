@@ -20,6 +20,7 @@ import { useTheme } from "../../../../providers/ThemeProvider";
 import { CATEGORIES, CATEGORY_ICONS } from "../../constants";
 import { X } from "lucide-react-native";
 import * as habitsManager from "./services/habitsManager";
+import { useAppStore } from "@/shared/stores/useAppStore";
 
 const HABITS_CACHE_KEY = "@habits_list";
 
@@ -172,11 +173,10 @@ export default function CreateHabitScreen({ route, navigation }) {
 
   const handleModalDonePress = () => {
     if (daysOfWeekList.length === 0) {
-      Alert.alert(
-        "Required",
-        "Please select at least one day for your custom schedule.",
-        [{ text: "OK" }],
-      );
+      useAppStore.getState().showGlobalAlert({
+        title: "Required",
+        message: "Please select at least one day for your custom schedule.",
+      });
       return;
     }
     setIsModalVisible(false);
@@ -199,15 +199,15 @@ export default function CreateHabitScreen({ route, navigation }) {
   const handleSaveAction = async () => {
     const cleanedName = habitName.trim();
     if (!cleanedName) {
-      Alert.alert("Error", "Please enter a habit name.");
+      useAppStore.getState().showGlobalAlert({ title: "Error", message: "Please enter a habit name." });
       return;
     }
 
     if (frequency === "Custom" && daysOfWeekList.length === 0) {
-      Alert.alert(
-        "Error",
-        "Please select at least one day for Custom frequency.",
-      );
+      useAppStore.getState().showGlobalAlert({
+        title: "Error",
+        message: "Please select at least one day for Custom frequency.",
+      });
       return;
     }
 
@@ -226,10 +226,10 @@ export default function CreateHabitScreen({ route, navigation }) {
       });
 
       if (isNameDuplicate) {
-        Alert.alert(
-          "Duplicate Name",
-          "A habit with this name already exists. Please choose a unique name!",
-        );
+        useAppStore.getState().showGlobalAlert({
+          title: "Duplicate Name",
+          message: "A habit with this name already exists. Please choose a unique name!",
+        });
         setIsLoading(false);
         setSyncStatus("");
         return;
@@ -270,7 +270,7 @@ export default function CreateHabitScreen({ route, navigation }) {
           setSyncStatus("⏳ Pending sync...");
         }
 
-        Alert.alert("Success", "Habit updated");
+        useAppStore.getState().showGlobalAlert({ title: "Success", message: "Habit updated" });
         await loadHabitForEditing();
       } else {
         // ===== CREATE HABIT =====
@@ -282,23 +282,23 @@ export default function CreateHabitScreen({ route, navigation }) {
           } else {
             setSyncStatus("⏳ Pending sync...");
           }
-          Alert.alert("Success", "Habit created");
+          useAppStore.getState().showGlobalAlert({ title: "Success", message: "Habit created" });
 
           setTimeout(() => {
             if (navigation) navigation.goBack();
           }, 800);
         } else {
           setSyncStatus("❌ Failed to save");
-          Alert.alert("Error", "Failed to create habit");
+          useAppStore.getState().showGlobalAlert({ title: "Error", message: "Failed to create habit" });
         }
       }
     } catch (error) {
       setSyncStatus("❌ Error");
       
       if (error.message === "DUPLICATE_NAME") {
-        Alert.alert("Duplicate Name", "A habit with this name already exists. Please choose a unique name!");
+        useAppStore.getState().showGlobalAlert({ title: "Duplicate Name", message: "A habit with this name already exists. Please choose a unique name!" });
       } else {
-        Alert.alert("Error", error.message || "Failed to save habit");
+        useAppStore.getState().showGlobalAlert({ title: "Error", message: error.message || "Failed to save habit" });
       }
     } finally {
       setIsLoading(false);
@@ -308,56 +308,46 @@ export default function CreateHabitScreen({ route, navigation }) {
   // ===== DELETE ACTION 1 (Header Button Trigger) =====
   const handleDeleteAction = () => {
     if (!habitId) {
-      Alert.alert("Error", "Cannot delete: Habit ID is missing.");
+      useAppStore.getState().showGlobalAlert({ title: "Error", message: "Cannot delete: Habit ID is missing." });
       return;
     }
 
     const currentHabitName = habitName.trim() || "this habit";
     
-    Alert.alert(
-      "Delete Habit",
-      `Are you sure you want to delete "${currentHabitName}" permanently?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            setIsLoading(true);
-            setSyncStatus("🗑️ Deleting...");
+    useAppStore.getState().showGlobalAlert({
+      title: "Delete Habit",
+      message: `Are you sure you want to delete "${currentHabitName}" permanently?`,
+      confirmText: "Delete",
+      cancelText: "Cancel",
+      onConfirm: async () => {
+        setIsLoading(true);
+        setSyncStatus("🗑️ Deleting...");
 
-            try {
-              const isDeleted = await habitsManager.deleteHabit(habitId);
-              if (isDeleted) {
-                Alert.alert(
-                  "Success", 
-                  "Habit deleted successfully",
-                  [
-                    { 
-                      text: "OK", 
-                      onPress: () => {
-                        if (navigation) {
-                          console.log("-> [UI NAVIGATE]: Dong man hinh, quay lai danh sach chinh.");
-                          navigation.goBack();
-                        }
-                      } 
-                    }
-                  ]
-                );
-              } else {
-                Alert.alert("Error", "Failed to delete habit");
+        try {
+          const isDeleted = await habitsManager.deleteHabit(habitId);
+          if (isDeleted) {
+            useAppStore.getState().showGlobalAlert({
+              title: "Success",
+              message: "Habit deleted successfully",
+              onConfirm: () => {
+                if (navigation) {
+                  console.log("-> [UI NAVIGATE]: Dong man hinh, quay lai danh sach chinh.");
+                  navigation.goBack();
+                }
               }
-            } catch (e) {
-              console.error("Error deleting habit on UI:", e);
-              setSyncStatus("❌ Delete failed");
-              Alert.alert("Error", "Failed to delete habit");
-            } finally {
-              setIsLoading(false);
-            }
-          },
-        },
-      ],
-    );
+            });
+          } else {
+            useAppStore.getState().showGlobalAlert({ title: "Error", message: "Failed to delete habit" });
+          }
+        } catch (e) {
+          console.error("Error deleting habit on UI:", e);
+          setSyncStatus("❌ Delete failed");
+          useAppStore.getState().showGlobalAlert({ title: "Error", message: "Failed to delete habit" });
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    });
   };
 
   // ===== DELETE ACTION 2 (Fallback handler for alternative UI integrations) =====
@@ -368,23 +358,18 @@ export default function CreateHabitScreen({ route, navigation }) {
     try {
       const success = await habitsManager.deleteHabit(habitId);
       if (success) {
-        Alert.alert(
-          "Success", 
-          "Habit deleted successfully",
-          [
-            { 
-              text: "OK", 
-              onPress: () => {
-                if (navigation) navigation.goBack();
-              } 
-            }
-          ]
-        );
+        useAppStore.getState().showGlobalAlert({
+          title: "Success",
+          message: "Habit deleted successfully",
+          onConfirm: () => {
+            if (navigation) navigation.goBack();
+          }
+        });
       } else {
-        Alert.alert("Error", "Failed to delete habit");
+        useAppStore.getState().showGlobalAlert({ title: "Error", message: "Failed to delete habit" });
       }
     } catch (error) {
-      Alert.alert("Error", "Failed to delete habit");
+      useAppStore.getState().showGlobalAlert({ title: "Error", message: "Failed to delete habit" });
     } finally {
       setIsLoading(false);
     }
@@ -402,7 +387,7 @@ export default function CreateHabitScreen({ route, navigation }) {
         await loadHabitForEditing();
       }
     } catch (error) {
-      Alert.alert("Error", "Failed to update status");
+      useAppStore.getState().showGlobalAlert({ title: "Error", message: "Failed to update status" });
     } finally {
       setIsLoading(false);
     }
