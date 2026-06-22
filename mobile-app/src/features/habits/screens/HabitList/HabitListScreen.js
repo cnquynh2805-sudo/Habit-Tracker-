@@ -109,6 +109,10 @@ const getAvailableStatusOptions = (status, t) => {
   }
 
   return [
+    {
+      id: "history",
+      label: t("habitList.contextMenu.history"),
+    },
     ...options,
     {
       id: "delete",
@@ -376,6 +380,11 @@ export default function HabitListScreen({ navigation }) {
                 onPress={() => {
                   if (option.id === "delete") {
                     handleDeleteHabit(item);
+                  } else if (option.id === "history") {
+                    closeAllMenus();
+                    navigation && navigation.navigate("History", {
+                      habit: item,
+                    });
                   } else {
                     handleUpdateStatus(currentId, option.id);
                   }

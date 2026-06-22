@@ -29,3 +29,8 @@ export const createCheckin = async ({
     status,
   });
 };
+
+export const listHabitCheckins = async (habitId) => {
+  return apiClient.get(endpoints.habits.checkins(String(habitId)));
+};
+

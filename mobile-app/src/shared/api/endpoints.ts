@@ -6,6 +6,7 @@ export const endpoints = {
     create: "/habits",
     update: (id: string) => `/habits/${id}`,
     remove: (id: string) => `/habits/${id}`,
+    checkins: (id: string) => `/habits/${id}/checkins`,
   },
   checkins: {
     today: "/habits-today?timezone=Asia%2FHo_Chi_Minh",
