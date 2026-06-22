@@ -148,6 +148,24 @@
     "mascotScreen": "Mascot Screen",
     "tapToSeeScreenNames": "Tap to see screen names"
   },
+  "goals": {
+    "overallProgress": "Overall Progress",
+    "habitsHaveGoals": "habits have goals",
+    "activeMilestones": "Active Milestones",
+    "noGoalSetTitle": "Habits Without Goals",
+    "noGoalSet": "No goal set",
+    "setGoal": "Set Goal +",
+    "unitDays": "days",
+    "unitSessions": "sessions",
+    "goalTypePrefix": "Goal",
+    "goalTypeStreak": "{{count}} Day Streak",
+    "goalTypeTotal": "{{count}} Total Sessions",
+    "goalAchieved": "Goal Achieved!",
+    "almostThere": "Almost there!",
+    "keepGoing": "Keep going!",
+    "mascotActive": "You're making great progress on your goals! Keep up the momentum!",
+    "mascotEmpty": "Set some goals to give your habits a clear target to aim for!"
+  },
   "icons": {
     "check": "?",
     "star": "?",

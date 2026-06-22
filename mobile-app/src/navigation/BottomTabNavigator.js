@@ -14,6 +14,7 @@ import {
 import { ListTodo, Trophy } from "lucide-react-native";
 
 import { getTabStyles } from "./BottomTabNavigator.styles";
+import MyGoalsScreen from "../features/goals/screens/MyGoals/MyGoalsScreen";
 import withSwipeTabs from "./withSwipeTabs";
 import HabitListScreen from "../features/habits/screens/HabitList/HabitListScreen";
 import TodayScreen from "../features/today/screens/Today/TodayScreen";
@@ -52,35 +53,11 @@ const StatsScreen = () => {
   );
 };
 
-const GoalsScreen = () => {
-  const { t } = useTranslation();
-  const { colors } = useTheme();
-  return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: colors.background,
-      }}
-    >
-      <Text
-        style={[
-          getTabStyles(colors).dummyScreenText,
-          { color: colors.primary },
-        ]}
-      >
-        {t("tabs.goalsScreen")}
-      </Text>
-    </View>
-  );
-};
-
 // Wrap each screen so a horizontal swipe moves to the adjacent tab.
 const SwipeToday = withSwipeTabs(TodayScreen);
 const SwipeHabits = withSwipeTabs(HabitListScreen);
 const SwipeStats = withSwipeTabs(StatsScreen);
-const SwipeGoals = withSwipeTabs(GoalsScreen);
+const SwipeGoals = withSwipeTabs(MyGoalsScreen);
 const SwipeMascot = withSwipeTabs(MascotScreen);
 
 // --- ICON SUB-COMPONENTS ---
@@ -140,7 +117,7 @@ const HabitsIcon = ({ focused, t, isExpanded }) => {
   const { colors } = useTheme();
   const tabStyles = getTabStyles(colors);
   const iconColor = focused ? colors.successDark : colors.textMuted;
-  
+
   return focused ? (
     <View style={tabStyles.activeTabItemContainer}>
       <View style={tabStyles.activeTabIndicatorCapsule}>
@@ -241,7 +218,7 @@ const GoalsIcon = ({ focused, t, isExpanded }) => {
   const { colors } = useTheme();
   const tabStyles = getTabStyles(colors);
   const iconColor = focused ? colors.successDark : colors.textMuted;
-  
+
   return focused ? (
     <View style={tabStyles.activeTabItemContainer}>
       <View style={tabStyles.activeTabIndicatorCapsule}>
