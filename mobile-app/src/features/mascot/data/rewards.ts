@@ -1,0 +1,333 @@
+export const rewardItems = [
+  {
+    id: 1,
+    name: "Helicopter",
+    type: "Toy",
+
+    unlockCondition: {
+      type: "streak",
+      value: 7,
+    },
+
+    unlocked: true,
+
+    equipped: true,
+
+    animation: require(
+      "../../../assets/rewards/toys/helicopter.json"
+    ),
+  },
+
+  {
+    id: 2,
+
+    name: "Beach Ball",
+
+    type: "Toy",
+
+    unlockCondition: {
+      type: "streak",
+      value: 30,
+    },
+
+    unlocked: true,
+
+    equipped: false,
+
+    animation: require(
+      "../../../assets/rewards/toys/beach_ball.json"
+    ),
+  },
+
+  {
+    id: 3,
+
+    name: "Flying Bird 1",
+
+    type: "Bird",
+
+    unlockCondition: {
+      type: "streak",
+      value: 7,
+    },
+    unlocked: false,
+
+    equipped: false,
+
+    animation: require(
+      "../../../assets/rewards/birds/flying_bird_1.json"
+    ),
+  },
+
+  {
+    id: 4,
+
+    name: "Flying Bird 2",
+
+    type: "Bird",
+
+    unlockCondition: {
+      type: "streak",
+      value: 7,
+    },
+    unlocked: false,
+
+    equipped: false,
+
+    animation: require(
+      "../../../assets/rewards/birds/flying_bird_2.json"
+    ),
+  },
+
+  {
+    id: 5,
+
+    name: "Flying Bird 3",
+
+    type: "Bird",
+
+    unlockCondition: {
+      type: "streak",
+      value: 7,
+    },
+    unlocked: false,
+
+    equipped: false,
+
+    animation: require(
+      "../../../assets/rewards/birds/flying_bird_3.json"
+    ),
+  },
+
+  {
+    id: 6,
+
+    name: "Car",
+
+    type: "Toy",
+
+    unlockCondition: {
+      type: "streak",
+      value: 14,
+    },
+
+    unlocked: false,
+
+    equipped: false,
+
+    animation: require(
+      "../../../assets/rewards/toys/car.json"
+    ),
+  },
+
+  {
+    id: 7,
+
+    name: "Duck",
+
+    type: "Toy",
+
+    unlockCondition: {
+      type: "streak",
+      value: 21,
+    },
+
+    unlocked: false,
+
+    equipped: false,
+
+    animation: require(
+      "../../../assets/rewards/toys/duck.json"
+    ),
+  },
+
+  {
+    id: 8,
+
+    name: "Rocket",
+
+    type: "Toy",
+
+    unlockCondition: {
+      type: "streak",
+      value: 30,
+    },
+
+    unlocked: false,
+
+    equipped: false,
+
+    animation: require(
+      "../../../assets/rewards/toys/rocket.json"
+    ),
+  },
+
+  {
+    id: 9,
+
+    name: "Train",
+
+    type: "Toy",
+
+    unlockCondition: {
+      type: "streak",
+      value: 45,
+    },
+
+    unlocked: false,
+
+    equipped: false,
+
+    animation: require(
+      "../../../assets/rewards/toys/train.json"
+    ),
+  },
+
+  {
+    id: 10,
+
+    name: "Lazy Cat 1",
+
+    type: "Cat",
+
+    unlockCondition: {
+      type: "streak",
+      value: 7,
+    },
+
+    unlocked: false,
+
+    equipped: false,
+
+    animation: require(
+      "../../../assets/rewards/cats/lazy_cat_1.json"
+    ),
+  },
+
+  {
+    id: 11,
+
+    name: "Lazy Cat 2",
+
+    type: "Cat",
+
+    unlockCondition: {
+      type: "streak",
+      value: 14,
+    },
+
+    unlocked: false,
+
+    equipped: false,
+
+    animation: require(
+      "../../../assets/rewards/cats/lazy_cat_2.json"
+    ),
+  },
+
+  {
+    id: 12,
+
+    name: "Lazy Cat 3",
+
+    type: "Cat",
+
+    unlockCondition: {
+      type: "streak",
+      value: 21,
+    },
+
+    unlocked: false,
+
+    equipped: false,
+
+    animation: require(
+      "../../../assets/rewards/cats/lazy_cat_3.json"
+    ),
+  },
+
+  {
+    id: 13,
+
+    name: "Lazy Cat 4",
+
+    type: "Cat",
+
+    unlockCondition: {
+      type: "streak",
+      value: 30,
+    },
+
+    unlocked: false,
+
+    equipped: false,
+
+    animation: require(
+      "../../../assets/rewards/cats/lazy_cat_4.json"
+    ),
+  },
+
+  {
+    id: 14,
+
+    name: "Running Dog 1",
+
+    type: "Dog",
+
+    unlockCondition: {
+      type: "streak",
+      value: 7,
+    },
+
+    unlocked: false,
+
+    equipped: false,
+
+    animation: require(
+      "../../../assets/rewards/dogs/running_dog_1.json"
+    ),
+  },
+
+  {
+    id: 15,
+
+    name: "Running Dog 2",
+
+    type: "Dog",
+
+    unlockCondition: {
+      type: "streak",
+      value: 14,
+    },
+
+    unlocked: false,
+
+    equipped: false,
+
+    animation: require(
+      "../../../assets/rewards/dogs/running_dog_2.json"
+    ),
+  },
+
+  {
+    id: 16,
+
+    name: "Running Dog 3",
+
+    type: "Dog",
+
+    unlockCondition: {
+      type: "streak",
+      value: 21,
+    },
+
+    unlocked: false,
+
+    equipped: false,
+
+    animation: require(
+      "../../../assets/rewards/dogs/running_dog_3.json"
+    ),
+  },
+
+];

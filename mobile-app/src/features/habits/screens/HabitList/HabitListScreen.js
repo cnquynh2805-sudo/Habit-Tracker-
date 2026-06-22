@@ -12,11 +12,13 @@ import {
   ActivityIndicator,
   Alert,
   TouchableWithoutFeedback,
+  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { getStyles } from "./HabitListScreen.styles";
 import { useTheme } from "../../../../providers/ThemeProvider";
+import { CATEGORY_ICONS } from "../../constants";
 import { listHabits, updateHabit, deleteHabit } from "../../services/habitsApi";
 
 const HABITS_CACHE_KEY = "@habits_list";
@@ -200,38 +202,12 @@ export default function HabitListScreen({ navigation }) {
   });
 
   const renderCategoryIcon = (categoryType) => {
-    switch (categoryType?.toLowerCase()) {
-      case "health":
-        return (
-          <View style={styles.iconDropletBase}>
-            <View style={styles.iconDropletTip} />
-            <View style={styles.iconDropletRound} />
-          </View>
-        );
-      case "study":
-        return (
-          <View style={styles.iconBookContainer}>
-            <View style={styles.iconBookLeftPage} />
-            <View style={styles.iconBookRightPage} />
-          </View>
-        );
-      case "mindfulness":
-        return (
-          <View style={styles.iconMeditationContainer}>
-            <View style={styles.iconMeditationHead} />
-            <View style={styles.iconMeditationTorso} />
-            <View style={styles.iconMeditationBaseLine} />
-          </View>
-        );
-      case "work":
-        return (
-          <View style={styles.iconWorkBriefcase}>
-            <View style={styles.iconBriefcaseHandle} />
-          </View>
-        );
-      default:
-        return <Text style={styles.iconStarDefaultText}>★</Text>;
-    }
+    const iconSource = CATEGORY_ICONS[categoryType?.toLowerCase()];
+    return iconSource ? (
+      <Image source={iconSource} style={styles.categoryIconImage} />
+    ) : (
+      <Text style={styles.iconStarDefaultText}>★</Text>
+    );
   };
 
   const getPriorityStyleMapping = (priorityStr) => {

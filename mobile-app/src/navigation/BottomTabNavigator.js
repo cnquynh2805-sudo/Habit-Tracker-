@@ -11,11 +11,14 @@ import {
   UIManager,
 } from "react-native";
 
+import { ListTodo, Trophy } from "lucide-react-native";
+
 import { getTabStyles } from "./BottomTabNavigator.styles";
 import withSwipeTabs from "./withSwipeTabs";
 import HabitListScreen from "../features/habits/screens/HabitList/HabitListScreen";
 import TodayScreen from "../features/today/screens/Today/TodayScreen";
 import { useTheme } from "../providers/ThemeProvider";
+import MascotScreen from "@/features/mascot/screens/MascotScreen";
 
 if (
   Platform.OS === "android" &&
@@ -68,30 +71,6 @@ const GoalsScreen = () => {
         ]}
       >
         {t("tabs.goalsScreen")}
-      </Text>
-    </View>
-  );
-};
-
-const MascotScreen = () => {
-  const { t } = useTranslation();
-  const { colors } = useTheme();
-  return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: colors.background,
-      }}
-    >
-      <Text
-        style={[
-          getTabStyles(colors).dummyScreenText,
-          { color: colors.primary },
-        ]}
-      >
-        {t("tabs.mascotScreen")}
       </Text>
     </View>
   );
@@ -160,16 +139,13 @@ const TodayIcon = ({ focused, t, isExpanded }) => {
 const HabitsIcon = ({ focused, t, isExpanded }) => {
   const { colors } = useTheme();
   const tabStyles = getTabStyles(colors);
+  const iconColor = focused ? colors.successDark : colors.textMuted;
+  
   return focused ? (
     <View style={tabStyles.activeTabItemContainer}>
       <View style={tabStyles.activeTabIndicatorCapsule}>
         <View style={tabStyles.vectorTabIconWrapper}>
-          <View style={tabStyles.vectorIconChecklistRow}>
-            <Text style={tabStyles.vectorIconCheckmarkMini}>
-              {t("icons.check")}
-            </Text>
-            <View style={tabStyles.vectorIconCheckLine} />
-          </View>
+          <ListTodo size={20} color={iconColor} />
         </View>
       </View>
       {isExpanded && (
@@ -185,22 +161,7 @@ const HabitsIcon = ({ focused, t, isExpanded }) => {
   ) : (
     <View style={tabStyles.inactiveTabContainer}>
       <View style={tabStyles.vectorTabIconWrapper}>
-        <View style={tabStyles.vectorIconChecklistRow}>
-          <Text
-            style={[
-              tabStyles.vectorIconCheckmarkMini,
-              { color: colors.textMuted },
-            ]}
-          >
-            {t("icons.check")}
-          </Text>
-          <View
-            style={[
-              tabStyles.vectorIconCheckLine,
-              { backgroundColor: colors.textMuted },
-            ]}
-          />
-        </View>
+        <ListTodo size={20} color={iconColor} />
       </View>
       {isExpanded && (
         <Text
@@ -279,16 +240,13 @@ const StatsIcon = ({ focused, t, isExpanded }) => {
 const GoalsIcon = ({ focused, t, isExpanded }) => {
   const { colors } = useTheme();
   const tabStyles = getTabStyles(colors);
+  const iconColor = focused ? colors.successDark : colors.textMuted;
+  
   return focused ? (
     <View style={tabStyles.activeTabItemContainer}>
       <View style={tabStyles.activeTabIndicatorCapsule}>
         <View style={tabStyles.vectorTabIconWrapper}>
-          <View
-            style={[
-              tabStyles.vectorIconTrophyCup,
-              { borderColor: colors.successDark },
-            ]}
-          />
+          <Trophy size={20} color={iconColor} />
         </View>
       </View>
       {isExpanded && (
@@ -304,7 +262,7 @@ const GoalsIcon = ({ focused, t, isExpanded }) => {
   ) : (
     <View style={tabStyles.inactiveTabContainer}>
       <View style={tabStyles.vectorTabIconWrapper}>
-        <View style={tabStyles.vectorIconTrophyCup} />
+        <Trophy size={20} color={iconColor} />
       </View>
       {isExpanded && (
         <Text

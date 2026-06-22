@@ -7,15 +7,10 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Image,
 } from "react-native";
 
-const CATEGORY_EMOJI = {
-  health: "💚",
-  study: "📘",
-  work: "💼",
-  mindfulness: "🧘",
-  other: "⭐",
-};
+import { CATEGORY_ICONS } from "../../habits/constants";
 
 const SWIPE_THRESHOLD = 110;
 const CHECKIN_COOLDOWN_MS = 3000;
@@ -87,7 +82,7 @@ export default function TodoHabitCard({
     );
   };
 
-  const emoji = CATEGORY_EMOJI[(habit.category || "").toLowerCase()] || "⭐";
+  const emoji = CATEGORY_ICONS[(habit.category || "other").toLowerCase()];
   const fillPct = Math.min(
     100,
     Math.round((count / Math.max(1, target)) * 100),
@@ -112,7 +107,7 @@ export default function TodoHabitCard({
         <View style={[styles.habitCard, overdue && styles.habitCardOverdue]}>
           <View style={styles.cardTopRow}>
             <View style={styles.categoryCircle}>
-              <Text style={styles.categoryCircleEmoji}>{emoji}</Text>
+              <Image source={emoji} style={styles.categoryCircleImage} />
             </View>
 
             <View style={styles.cardTitleGroup}>

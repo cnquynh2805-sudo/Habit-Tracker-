@@ -182,8 +182,9 @@ export const getStyles = (colors) =>
       backgroundColor: colors.successLight,
       marginRight: 12,
     },
-    categoryCircleEmoji: {
-      fontSize: 20,
+    categoryCircleImage: {
+      width: "100%",
+      resizeMode: "contain",
     },
     cardTitleGroup: {
       flex: 1,
