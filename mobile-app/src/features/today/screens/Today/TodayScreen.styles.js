@@ -183,8 +183,8 @@ export const getStyles = (colors) =>
       marginRight: 12,
     },
     categoryCircleImage: {
-      width: 24,
-      height: 24,
+      width: 20,
+      height: 20,
       resizeMode: "contain",
     },
     cardTitleGroup: {
@@ -294,11 +294,20 @@ export const getStyles = (colors) =>
       marginBottom: 10,
       opacity: 0.7,
     },
-    doneEmoji: {
+    doneEmojiContainer: {
       width: 24,
       height: 24,
-      resizeMode: "contain",
+      borderRadius: 12,
+      backgroundColor: "#6e6e6e",
+      alignItems: "center",
+      justifyContent: "center",
       marginRight: 12,
+    },
+    doneEmoji: {
+      borderRadius: 14,
+      height: 20,
+      width: 20,
+      fontSize: 5,
     },
     doneName: {
       flex: 1,

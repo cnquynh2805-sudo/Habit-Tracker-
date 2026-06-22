@@ -185,5 +185,27 @@
     "arrowLeft": "?",
     "plus": "+",
     "kebab": "?"
+  }, 
+  "mascot": {
+    "title": "Phòng của tôi",
+    "subtitle": "Chăm sóc Barnaby hôm nay nhé",
+
+    "collection": "Bộ sưu tập",
+    "locked": "Đã khóa",
+
+    "milestones": "Cột mốc",
+    "seeAllMilestones": "Xem tất cả cột mốc",
+
+    "tab": {
+      "collection": "Bộ sưu tập",
+      "locked": "Đã khóa"
+    },
+
+    "milestone": {
+      "completed": "Đã hoàn thành",
+      "incomplete": "Chưa hoàn thành"
+    },
+
+    "mascotName": "Barnaby - Người bạn nhỏ"
   }
 }

@@ -24,11 +24,16 @@ import { useTheme } from "@/providers/ThemeProvider";
 import { createStyles } from "./MascotScreen.styles";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { chunkArray } from "../../../shared/helper/chunkArray";
+import LanguageSwitcher from "@/shared/settings/LanguageSwitcher";
+import ThemeSwitcher from "@/shared/settings/ThemeSwitcher";
+import i18n from "@/shared/i18n";
+import { useTranslation } from "react-i18next";
 
 export default function MascotScreen() {
+  const { setThemeMode, themeMode, colors } = useTheme();
+  const { t, i18n } = useTranslation();
   const [activeTab, setActiveTab] = useState("collection");
   const { equippedRewardId, equipItem } = useMascotStore();
-  const { colors } = useTheme();
   const styles = createStyles(colors);
   const SCREEN_WIDTH = Dimensions.get("window").width;
   
@@ -48,17 +53,34 @@ export default function MascotScreen() {
       <View style={styles.headerRow}>
         <View>
           <Text style={styles.title}>
-            My Room
+            {t("mascot.title")}
           </Text>
 
           <Text style={styles.subtitle}>
-            Take care of Barnaby today
+            {t("mascot.subtitle")}
           </Text>
         </View>
+
+        <View style={styles.settingsButton}>
+          
+          <View>
+            <LanguageSwitcher i18n={i18n} colors={colors} />
+          </View>
+
+          <View>
+            <ThemeSwitcher
+              themeMode={themeMode}
+              setThemeMode={setThemeMode}
+              colors={colors}
+              t={t}
+            />
+          </View>
+
+        </View>
         
-        <TouchableOpacity style={styles.settingsButton}>
+        {/* <TouchableOpacity style={styles.settingsButton}>
           <Settings size={24} color={colors.primary} />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       <MascotPreview />
@@ -76,13 +98,8 @@ export default function MascotScreen() {
           ]}
           onPress={() => setActiveTab("collection")}
         >
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === "collection" && styles.activeTabText,
-            ]}
-          >
-            Collection ({unlockedRewards.length})
+          <Text style={[styles.tabText, activeTab === "collection" && styles.activeTabText]}>
+            {t("mascot.collection")} ({unlockedRewards.length})
           </Text>
           {activeTab === "collection" && (
             <View style={styles.tabIndicator} />
@@ -96,13 +113,8 @@ export default function MascotScreen() {
           ]}
           onPress={() => setActiveTab("locked")}
         >
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === "locked" && styles.activeTabText,
-            ]}
-          >
-            Locked ({lockedRewards.length})
+          <Text style={[styles.tabText, activeTab === "locked" && styles.activeTabText]}>
+            {t("mascot.locked")} ({lockedRewards.length})
           </Text>
           {activeTab === "locked" && (
             <View style={styles.tabIndicator} />
@@ -152,7 +164,7 @@ export default function MascotScreen() {
 
       {/* Milestones Section */}
       <Text style={styles.sectionTitle}>
-        Milestones
+        {t("mascot.milestones")}
       </Text>
 
       {displayedMilestones.map((m) => (
@@ -179,7 +191,7 @@ export default function MascotScreen() {
 
       <TouchableOpacity style={styles.seeAllButton}>
         <Text style={styles.seeAllText}>
-          See all milestones
+          {t("mascot.seeAllMilestones")}
         </Text>
       </TouchableOpacity>
     </ScrollView>

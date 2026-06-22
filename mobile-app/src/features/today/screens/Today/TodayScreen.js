@@ -216,10 +216,12 @@ export default function TodayScreen({ navigation }) {
             {doneExpanded &&
               done.map(({ habit, streak }) => (
                 <View key={habit.id} style={styles.doneRow}>
-                  <Image
-                    source={CATEGORY_ICONS[(habit.category || "other").toLowerCase()]}
-                    style={styles.doneEmoji}
-                  />
+                  <View style={styles.doneEmojiContainer}>
+                    <Image
+                      source={CATEGORY_ICONS[(habit.category || "other").toLowerCase()]}
+                      style={styles.doneEmoji}
+                    />
+                  </View>                 
                   <Text style={styles.doneName} numberOfLines={1}>
                     {habit.name}
                   </Text>
