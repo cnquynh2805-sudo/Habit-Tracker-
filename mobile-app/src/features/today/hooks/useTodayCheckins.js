@@ -161,7 +161,7 @@ export function useTodayCheckins() {
       setHabits(todayHabits);
       habitsRef.current = todayHabits;
       AsyncStorage.setItem(HABITS_CACHE_KEY, JSON.stringify(todayHabits)).catch(
-        () => {},
+        () => { },
       );
       persist(next); // also caches the check-in map for offline reads
     } catch (e) {
@@ -204,7 +204,7 @@ export function useTodayCheckins() {
       try {
         const d = new Date();
         const dateOnly = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-        
+
         const payload = {
           habit_id: entry.habit_id,
           date: entry.date,
@@ -354,15 +354,22 @@ export function useTodayCheckins() {
   const { todo, done } = useMemo(() => {
     const todoList = [];
     const doneList = [];
+    const currentHour = new Date().getHours();
+    const todayStr = getTodayKey();
+
     habits.forEach((h) => {
       const checkin = checkins[h.id] || buildCheckin(h);
       const target = Math.max(1, h.targetPerDay || 1);
+
+      const isCreatedToday = h.created_at ? getTodayKey(new Date(h.created_at)) === todayStr : false;
+      const isLate = currentHour >= 22;
+
       const item = {
         habit: h,
         checkin,
         target,
-        // Any not-yet-started habit shows the Overdue (light red) style.
-        overdue: checkin.status === CHECKIN_STATUS.notStarted,
+        // Habit is overdue if it is not completed, it's late in the day (after 10 PM), and it wasn't just created today.
+        overdue: checkin.completedCount < target && isLate && !isCreatedToday,
         streak: checkin.date || 0,
       };
       if (checkin.completedCount >= target) doneList.push(item);
