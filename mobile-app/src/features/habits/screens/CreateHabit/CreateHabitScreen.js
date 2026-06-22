@@ -20,6 +20,8 @@ import { useTheme } from "../../../../providers/ThemeProvider";
 import { CATEGORIES, CATEGORY_ICONS } from "../../constants";
 import { X } from "lucide-react-native";
 import * as habitsManager from "./services/habitsManager";
+import ConfirmModal from "@/shared/components/confirmModal/ConfirmModal";
+import SuccessModal from "@/shared/components/successModal/SuccessModal";
 
 const HABITS_CACHE_KEY = "@habits_list";
 
@@ -40,6 +42,9 @@ export default function CreateHabitScreen({ route, navigation }) {
   const [priority, setPriority] = useState("Medium");
 
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [syncStatus, setSyncStatus] = useState("");
   const [backupData, setBackupData] = useState(null);
@@ -270,7 +275,11 @@ export default function CreateHabitScreen({ route, navigation }) {
           setSyncStatus("⏳ Pending sync...");
         }
 
-        Alert.alert("Success", "Habit updated");
+        setSuccessMessage(
+          "Habit updated successfully"
+        );
+
+        setShowSuccessModal(true);
         await loadHabitForEditing();
       } else {
         // ===== CREATE HABIT =====
@@ -282,7 +291,11 @@ export default function CreateHabitScreen({ route, navigation }) {
           } else {
             setSyncStatus("⏳ Pending sync...");
           }
-          Alert.alert("Success", "Habit created");
+          setSuccessMessage(
+            "Habit created successfully"
+          );
+
+          setShowSuccessModal(true);
 
           setTimeout(() => {
             if (navigation) navigation.goBack();
@@ -305,89 +318,60 @@ export default function CreateHabitScreen({ route, navigation }) {
     }
   };
 
-  // ===== DELETE ACTION 1 (Header Button Trigger) =====
-  const handleDeleteAction = () => {
-    if (!habitId) {
-      Alert.alert("Error", "Cannot delete: Habit ID is missing.");
-      return;
-    }
-
-    const currentHabitName = habitName.trim() || "this habit";
-    
-    Alert.alert(
-      "Delete Habit",
-      `Are you sure you want to delete "${currentHabitName}" permanently?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            setIsLoading(true);
-            setSyncStatus("🗑️ Deleting...");
-
-            try {
-              const isDeleted = await habitsManager.deleteHabit(habitId);
-              if (isDeleted) {
-                Alert.alert(
-                  "Success", 
-                  "Habit deleted successfully",
-                  [
-                    { 
-                      text: "OK", 
-                      onPress: () => {
-                        if (navigation) {
-                          console.log("-> [UI NAVIGATE]: Dong man hinh, quay lai danh sach chinh.");
-                          navigation.goBack();
-                        }
-                      } 
-                    }
-                  ]
-                );
-              } else {
-                Alert.alert("Error", "Failed to delete habit");
-              }
-            } catch (e) {
-              console.error("Error deleting habit on UI:", e);
-              setSyncStatus("❌ Delete failed");
-              Alert.alert("Error", "Failed to delete habit");
-            } finally {
-              setIsLoading(false);
-            }
-          },
-        },
-      ],
-    );
-  };
-
-  // ===== DELETE ACTION 2 (Fallback handler for alternative UI integrations) =====
-  const handleDeleteHabit = async () => {
+  const confirmDeleteHabit = async () => {
     if (!habitId) return;
 
+    setShowDeleteModal(false);
+
     setIsLoading(true);
+    setSyncStatus("🗑️ Deleting...");
+
     try {
-      const success = await habitsManager.deleteHabit(habitId);
-      if (success) {
+      const isDeleted =
+        await habitsManager.deleteHabit(habitId);
+
+      if (isDeleted) {
         Alert.alert(
-          "Success", 
+          "Success",
           "Habit deleted successfully",
           [
-            { 
-              text: "OK", 
+            {
+              text: "OK",
               onPress: () => {
-                if (navigation) navigation.goBack();
-              } 
-            }
+                navigation?.goBack();
+              },
+            },
           ]
         );
       } else {
-        Alert.alert("Error", "Failed to delete habit");
+        Alert.alert(
+          "Error",
+          "Failed to delete habit"
+        );
       }
     } catch (error) {
-      Alert.alert("Error", "Failed to delete habit");
+      setSyncStatus("❌ Delete failed");
+
+      Alert.alert(
+        "Error",
+        "Failed to delete habit"
+      );
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // ===== DELETE ACTION 1 (Header Button Trigger) =====
+  const handleDeleteAction = () => {
+    if (!habitId) {
+      Alert.alert(
+        "Error",
+        "Cannot delete: Habit ID is missing."
+      );
+      return;
+    }
+
+    setShowDeleteModal(true);
   };
 
   // ===== UPDATE STATUS QUICK ROW =====
@@ -808,6 +792,35 @@ export default function CreateHabitScreen({ route, navigation }) {
           </View>
         </View>
       </Modal>
+
+      <SuccessModal
+        visible={showSuccessModal}
+        title="Success"
+        message={successMessage}
+        onClose={() => {
+          setShowSuccessModal(false);
+
+          if (!isEditMode) {
+            navigation?.goBack();
+          }
+        }}
+      />
+
+      <ConfirmModal
+        visible={showDeleteModal}
+        title="Delete Habit"
+        message={`Are you sure you want to delete "${
+          habitName.trim() || "this habit"
+        }" permanently?`}
+        cancelLabel="Cancel"
+        confirmLabel="Delete"
+        destructive
+        onCancel={() =>
+          setShowDeleteModal(false)
+        }
+        onConfirm={confirmDeleteHabit}
+      />
+
     </SafeAreaView>
   );
 }

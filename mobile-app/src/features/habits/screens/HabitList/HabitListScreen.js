@@ -18,6 +18,7 @@ import { getStyles } from "./HabitListScreen.styles";
 import { useTheme } from "../../../../providers/ThemeProvider";
 import { API_BASE_URL } from "../CreateHabit/services/config";
 import * as habitsManager from "../CreateHabit/services/habitsManager";
+import ConfirmModal from "@/shared/components/confirmModal/ConfirmModal";
 
 const CATEGORIES = ["All", "Health", "Study", "Work", "Mindfulness", "Other"];
 
@@ -232,34 +233,58 @@ export default function HabitListScreen({ navigation }) {
     }
   };
 
+  const [confirmVisible, setConfirmVisible] = useState(false);
+
+  const [habitToDelete, setHabitToDelete] = useState(null);
+
   const handleDeleteHabit = (item) => {
-    Alert.alert(
-      "Delete Habit",
-      `Are you sure you want to delete "${item.name}" permanently?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            const targetId = item.id || item.serverId;
-            try {
-              const isDeleted = await habitsManager.deleteHabit(targetId);
-              if (isDeleted) {
-                setHabits((prevHabits) => prevHabits.filter((h) => String(h.id) !== String(targetId) && String(h.serverId) !== String(targetId)));
-                setActiveDropdownId(null);
-                Alert.alert("Success", "Habit deleted successfully");
-              } else {
-                Alert.alert("Error", "Failed to delete habit");
-              }
-            } catch (error) {
-              console.error("Error deleting habit on UI:", error);
-              Alert.alert("Error", "Failed to delete habit");
-            }
-          },
-        },
-      ],
-    );
+    setHabitToDelete(item);
+    setConfirmVisible(true);
+  };
+
+  const confirmDeleteHabit = async () => {
+    if (!habitToDelete) {
+      return;
+    }
+
+    const targetId =
+      habitToDelete.id ||
+      habitToDelete.serverId;
+
+    try {
+      const isDeleted =
+        await habitsManager.deleteHabit(
+          targetId
+        );
+
+      if (isDeleted) {
+        setHabits((prevHabits) =>
+          prevHabits.filter(
+            (h) =>
+              String(h.id) !== String(targetId) &&
+              String(h.serverId) !==
+                String(targetId)
+          )
+        );
+
+        setActiveDropdownId(null);
+      } else {
+        Alert.alert(
+          "Error",
+          "Failed to delete habit"
+        );
+      }
+    } catch (error) {
+      console.error(error);
+
+      Alert.alert(
+        "Error",
+        "Failed to delete habit"
+      );
+    } finally {
+      setConfirmVisible(false);
+      setHabitToDelete(null);
+    }
   };
 
   const filteredHabits = useMemo(() => {
@@ -423,7 +448,7 @@ export default function HabitListScreen({ navigation }) {
 
             <View style={styles.headerRightActionGroup}>
               {/* Language Dropdown */}
-              <View style={styles.langMenuWrapper}>
+              {/* <View style={styles.langMenuWrapper}>
                 <TouchableOpacity
                   accessible
                   accessibilityRole="button"
@@ -463,10 +488,10 @@ export default function HabitListScreen({ navigation }) {
                     ))}
                   </View>
                 )}
-              </View>
+              </View> */}
 
               {/* Theme Dropdown */}
-              <View style={styles.themeMenuWrapper}>
+              {/* <View style={styles.themeMenuWrapper}>
                 <TouchableOpacity
                   accessible
                   accessibilityRole="button"
@@ -499,7 +524,7 @@ export default function HabitListScreen({ navigation }) {
                     ))}
                   </View>
                 )}
-              </View>
+              </View> */}
 
               <TouchableOpacity
                 accessible
@@ -658,6 +683,25 @@ export default function HabitListScreen({ navigation }) {
           </TouchableOpacity>
         </View>
       </TouchableWithoutFeedback>
+
+      <ConfirmModal
+        visible={confirmVisible}
+        title="Delete Habit"
+        message={
+          habitToDelete
+            ? `Are you sure you want to delete "${habitToDelete.name}" permanently?`
+            : ""
+        }
+        cancelLabel="Cancel"
+        confirmLabel="Delete"
+        onCancel={() => {
+          setConfirmVisible(false);
+          setHabitToDelete(null);
+        }}
+        onConfirm={confirmDeleteHabit}
+        destructive
+      />
+
     </SafeAreaView>
   );
 }

@@ -17,7 +17,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { getStyles } from "./TodayScreen.styles";
 import { useTheme } from "../../../../providers/ThemeProvider";
-import ConfirmModal from "../../components/ConfirmModal";
+import ConfirmModal from "../../../../shared/components/confirmModal/ConfirmModal";
 import DailyProgressCard from "../../components/DailyProgressCard";
 import FilterMenu from "../../components/FilterMenu";
 import MascotAvatar from "../../components/MascotAvatar";

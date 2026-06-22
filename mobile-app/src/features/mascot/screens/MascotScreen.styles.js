@@ -16,7 +16,7 @@ export const createStyles = (colors) =>
 
     content: {
       paddingHorizontal: 20,
-      paddingBottom: 140,
+      paddingBottom: 24,
     },
 
     header: {
@@ -226,4 +226,21 @@ export const createStyles = (colors) =>
       color: colors.primary,
       fontWeight: "600",
     },
+
+    resetContainer: {
+      marginTop: 32,
+      marginBottom: 24,
+      alignItems: "center",
+    },
+
+    resetDescription: {
+      color: colors.textSecondary,
+    },
+
+    resetLink: {
+      color: colors.primary,
+      textDecorationLine: "underline",
+      fontWeight: "600",
+    },
+
   });

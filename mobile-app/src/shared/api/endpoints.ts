@@ -26,4 +26,7 @@ export const endpoints = {
     progressByHabit: (habitId: string, goalId: string) =>
       `/habits/${habitId}/goals/${goalId}/progress`,
   },
+  system: {
+    reset: "/system/reset",
+  },
 } as const;

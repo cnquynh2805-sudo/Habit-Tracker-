@@ -7,6 +7,7 @@ import {
   FlatList,
   TouchableOpacity,
   Dimensions,
+  Alert,
 } from "react-native";
 
 import { Settings } from "lucide-react-native";
@@ -28,6 +29,8 @@ import LanguageSwitcher from "@/shared/settings/LanguageSwitcher";
 import ThemeSwitcher from "@/shared/settings/ThemeSwitcher";
 import i18n from "@/shared/i18n";
 import { useTranslation } from "react-i18next";
+import { resetSystemData } from "../services/resetSytemApi";
+import ConfirmModal from "@/shared/components/confirmModal/ConfirmModal";
 
 export default function MascotScreen() {
   const { setThemeMode, themeMode, colors } = useTheme();
@@ -42,13 +45,49 @@ export default function MascotScreen() {
   
   const displayData = activeTab === "collection" ? unlockedRewards : lockedRewards;
   const pages = chunkArray(displayData, 4);
-  const displayedMilestones = milestones.slice(0, 2);
+  const [showAllMilestones, setShowAllMilestones] = useState(false);
+  const displayedMilestones = showAllMilestones
+  ? milestones
+  : milestones.slice(0, 2);
+  
+  const handleResetData = async () => {
+    try {
+      await resetSystemData();
+
+      await AsyncStorage.multiRemove([
+      "@habits_list",
+      "@dashboard_goals_cache_v2",
+      "@local_nfc_mappings",
+      "@today_habits_cache",
+      "mascot-storage",
+
+    ]);
+
+      // Reset mascot store
+      useMascotStore.setState({
+        equippedRewardId: 1,
+      });
+
+      Alert.alert(
+        "Success",
+        "All data has been reset."
+      );
+    } catch (error) {
+      Alert.alert(
+        "Error",
+        "Failed to reset data."
+      );
+    }
+  };
+
+ const [showResetModal, setShowResetModal] = useState(false);
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "left", "right"]}> 
     <ScrollView
       style={styles.container}
       contentContainerStyle={styles.content}
+      bounces={false}
     >
       <View style={styles.headerRow}>
         <View>
@@ -189,12 +228,43 @@ export default function MascotScreen() {
         </View>
       ))}
 
-      <TouchableOpacity style={styles.seeAllButton}>
+      <TouchableOpacity
+        style={styles.seeAllButton}
+        onPress={() =>
+          setShowAllMilestones(!showAllMilestones)
+        }
+      >
         <Text style={styles.seeAllText}>
-          {t("mascot.seeAllMilestones")}
+          {showAllMilestones
+            ? "Show Less"
+            : t("mascot.seeAllMilestones")}
         </Text>
       </TouchableOpacity>
+
+      <View style={styles.resetContainer}>
+        <Text style={styles.resetDescription}>
+          Want to start over?{" "}
+          <Text
+            style={styles.resetLink}
+            onPress={() => setShowResetModal(true)}
+          >
+            Reset
+          </Text>
+        </Text>
+      </View>
     </ScrollView>
+
+    <ConfirmModal
+      visible={showResetModal}
+      title="Reset Data"
+      message="This action will reset all data in your account and cannot be undone."
+      cancelLabel="Cancel"
+      confirmLabel="Reset"
+      onCancel={() => setShowResetModal(false)}
+      onConfirm={handleResetData}
+    />
+
     </SafeAreaView>
+
   );
 }
