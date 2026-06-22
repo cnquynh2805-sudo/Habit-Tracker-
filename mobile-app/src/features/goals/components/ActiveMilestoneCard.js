@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { View, Text } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -8,7 +8,7 @@ import Animated, {
   Easing,
 } from "react-native-reanimated";
 
-export default function ActiveMilestoneCard({ item, styles, colors }) {
+export default function ActiveMilestoneCard({ item, styles, colors, onPress }) {
   const { t } = useTranslation();
 
   const { habitName, category, goal } = item;
@@ -52,7 +52,14 @@ export default function ActiveMilestoneCard({ item, styles, colors }) {
   }[category] || "🎯";
 
   return (
-    <View style={styles.milestoneCard}>
+    <TouchableOpacity
+      style={styles.milestoneCard}
+      onPress={onPress}
+      activeOpacity={0.8}
+      accessible={true}
+      accessibilityRole="button"
+      accessibilityLabel={`${habitName}, ${t("goals.goalTypePrefix")}: ${goalSubtitle}`}
+    >
       {/* Header row */}
       <View style={styles.milestoneHeader}>
         <View style={styles.milestoneIconContainer}>
@@ -85,6 +92,6 @@ export default function ActiveMilestoneCard({ item, styles, colors }) {
           {currentProgress} / {targetValue} {unit}
         </Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }

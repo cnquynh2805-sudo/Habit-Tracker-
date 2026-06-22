@@ -3,14 +3,17 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { View, Text, TouchableOpacity } from "react-native";
 
-export default function NoGoalCard({ item, styles, colors }) {
+export default function NoGoalCard({ item, styles, colors, onSetGoal }) {
   const { t } = useTranslation();
   const navigation = useNavigation();
 
   const handleSetGoal = () => {
-    // Navigate to CreateHabitScreen, passing the habitId so they can edit it
-    // and presumably add a target or goal.
-    navigation.navigate("CreateHabit", { habitId: item.id });
+    if (onSetGoal) {
+      onSetGoal(item);
+    } else {
+      // Fallback: Navigate to CreateHabitScreen, passing the habitId
+      navigation.navigate("CreateHabit", { habitId: item.id });
+    }
   };
 
   return (

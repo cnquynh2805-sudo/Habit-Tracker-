@@ -164,7 +164,20 @@
     "almostThere": "Almost there!",
     "keepGoing": "Keep going!",
     "mascotActive": "You're making great progress on your goals! Keep up the momentum!",
-    "mascotEmpty": "Set some goals to give your habits a clear target to aim for!"
+    "mascotEmpty": "Set some goals to give your habits a clear target to aim for!",
+    "modalSubtitle": "Set your milestones to stay motivated.",
+    "streakTarget": "Streak Target",
+    "streakTargetDesc": "Maintain X consecutive days",
+    "totalCompletions": "Total Completions",
+    "totalCompletionsDesc": "Complete X times total",
+    "targetGoal": "Target Goal",
+    "daysInARow": "days in a row",
+    "timesTotal": "times total",
+    "currentProgressLabel": "Your current progress: {{progress}}",
+    "saveGoal": "Save Goal",
+    "goalDeleted": "Goal deleted successfully!",
+    "goalSaved": "Goal saved successfully!",
+    "goalSaveFailed": "Failed to save goal."
   },
   "icons": {
     "check": "?",

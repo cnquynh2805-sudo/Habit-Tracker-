@@ -1,5 +1,5 @@
 import { FlashList } from "@shopify/flash-list";
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View, Text, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -7,6 +7,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import ActiveMilestoneCard from "../../components/ActiveMilestoneCard";
 import NoGoalCard from "../../components/NoGoalCard";
 import OverallProgressCard from "../../components/OverallProgressCard";
+import GoalSettingModal from "../../components/GoalSettingModal";
 import { useDashboardGoals } from "../../hooks/useDashboardGoals";
 import { getGoalsStyles } from "./MyGoalsScreen.styles";
 import { useTheme } from "../../../../providers/ThemeProvider";
@@ -15,6 +16,14 @@ export default function MyGoalsScreen() {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = getGoalsStyles(colors);
+
+  const [selectedHabit, setSelectedHabit] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const handleOpenModal = (habit) => {
+    setSelectedHabit(habit);
+    setModalVisible(true);
+  };
 
   const {
     isLoading,
@@ -81,6 +90,7 @@ export default function MyGoalsScreen() {
             item={item.item}
             styles={styles}
             colors={colors}
+            onPress={() => handleOpenModal(item.item)}
           />
         );
 
@@ -90,6 +100,7 @@ export default function MyGoalsScreen() {
             item={item.item}
             styles={styles}
             colors={colors}
+            onSetGoal={() => handleOpenModal(item.item)}
           />
         );
 
@@ -164,6 +175,16 @@ export default function MyGoalsScreen() {
           refreshing={isFetching}
         />
       )}
+
+      <GoalSettingModal
+        visible={modalVisible}
+        onClose={() => {
+          setModalVisible(false);
+          setSelectedHabit(null);
+        }}
+        habit={selectedHabit}
+        colors={colors}
+      />
     </SafeAreaView>
   );
 }

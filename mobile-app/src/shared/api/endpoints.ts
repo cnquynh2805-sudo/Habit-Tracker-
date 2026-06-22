@@ -20,6 +20,7 @@ export const endpoints = {
     detail: (id: string) => `/goals/${id}`,
     dashboard: "/dashboard/goals",
     byHabit: (habitId: string) => `/habits/${habitId}/goals`,
+    updateByHabit: (habitId: string, goalId: string) => `/habits/${habitId}/goals/${goalId}`,
     progressByHabit: (habitId: string, goalId: string) =>
       `/habits/${habitId}/goals/${goalId}/progress`,
   },

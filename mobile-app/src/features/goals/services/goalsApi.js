@@ -83,3 +83,56 @@ export const fetchDashboardGoals = async () => {
     habitsWithGoalsCount: habitsWithGoals.length,
   };
 };
+
+/**
+ * Create a new goal for a habit.
+ * Path: POST /habits/{habitId}/goals
+ * Payload: { targetType, targetValue }
+ */
+export const createGoal = async (habitId, goalData) => {
+  try {
+    const data = await apiClient.post(endpoints.goals.byHabit(habitId), {
+      targetType: goalData.targetType,
+      targetValue: Number(goalData.targetValue),
+    });
+    return data;
+  } catch (error) {
+    console.error("Error creating goal:", error.response?.data?.message || error.message);
+    throw error;
+  }
+};
+
+/**
+ * Update an existing goal.
+ * Path: PATCH /habits/{habitId}/goals/{goalId}
+ * Payload: { targetValue }
+ */
+export const updateGoal = async (habitId, goalId, goalData) => {
+  try {
+    const data = await apiClient.patch(
+      endpoints.goals.updateByHabit(habitId, goalId),
+      {
+        targetValue: Number(goalData.targetValue),
+      }
+    );
+    return data;
+  } catch (error) {
+    console.error("Error updating goal:", error.response?.data?.message || error.message);
+    throw error;
+  }
+};
+
+/**
+ * Delete an existing goal.
+ * Path: DELETE /habits/{habitId}/goals/{goalId}
+ */
+export const deleteGoal = async (habitId, goalId) => {
+  try {
+    const data = await apiClient.delete(endpoints.goals.updateByHabit(habitId, goalId));
+    return data;
+  } catch (error) {
+    console.error("Error deleting goal:", error.response?.data?.message || error.message);
+    throw error;
+  }
+};
+
