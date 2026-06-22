@@ -1,12 +1,14 @@
 {
   "common": {
     "cancel": "Hủy",
+    "close": "Đóng",
     "delete": "Xóa",
     "save": "Lưu",
     "edit": "Sửa",
     "done": "Xong",
     "required": "Bắt buộc",
-    "error": "Lỗi"
+    "error": "Lỗi",
+    "rateLimitError": "Đã vượt quá giới hạn lượt yêu cầu. Kết nối máy chủ tạm dừng. Các hoạt động sẽ được lưu cục bộ."
   },
   "action": {
     "pause": "Tạm dừng",
@@ -69,8 +71,17 @@
       "resume": "Resume",
       "archive": "Archive",
       "restore": "Restore",
-      "delete": "Delete"
+      "delete": "Delete",
+      "history": "Lịch sử"
     }
+  },
+  "history": {
+    "title": "Lịch sử Điểm danh",
+    "empty": "Chưa ghi nhận điểm danh nào",
+    "streak": "Chuỗi hiện tại",
+    "longest": "Chuỗi dài nhất",
+    "total": "Tổng hoàn thành",
+    "back": "Quay lại"
   },
   "createHabit": {
     "titleNew": "Thói quen mới",
@@ -134,7 +145,8 @@
       "checkedIn": "Đã điểm danh!",
       "progressSaved": "Đã lưu tiến độ!",
       "markedDone": "Đã đánh dấu hoàn thành!"
-    }
+    },
+    "nothingToUndo": "Không có gì để hoàn tác"
   },
   "tabs": {
     "today": "Hôm nay",
@@ -177,7 +189,10 @@
     "saveGoal": "Lưu mục tiêu",
     "goalDeleted": "Đã xóa mục tiêu thành công!",
     "goalSaved": "Đã lưu mục tiêu thành công!",
-    "goalSaveFailed": "Lưu mục tiêu thất bại."
+    "goalSaveFailed": "Lưu mục tiêu thất bại.",
+    "invalidTargetValue": "Mục tiêu phải lớn hơn 0",
+    "goalAchievedTitle": "🎉 {{name}} — Đạt mục tiêu rồi!",
+    "goalAchievedBody": "Tuyệt vời! Bạn đã hoàn thành mục tiêu đề ra. Hãy tiếp tục phát huy nhé!"
   },
   "icons": {
     "check": "?",
@@ -185,5 +200,27 @@
     "arrowLeft": "?",
     "plus": "+",
     "kebab": "?"
+  }, 
+  "mascot": {
+    "title": "Phòng của tôi",
+    "subtitle": "Chăm sóc Barnaby hôm nay nhé",
+
+    "collection": "Bộ sưu tập",
+    "locked": "Đã khóa",
+
+    "milestones": "Cột mốc",
+    "seeAllMilestones": "Xem tất cả cột mốc",
+
+    "tab": {
+      "collection": "Bộ sưu tập",
+      "locked": "Đã khóa"
+    },
+
+    "milestone": {
+      "completed": "Đã hoàn thành",
+      "incomplete": "Chưa hoàn thành"
+    },
+
+    "mascotName": "Barnaby - Người bạn nhỏ"
   }
 }

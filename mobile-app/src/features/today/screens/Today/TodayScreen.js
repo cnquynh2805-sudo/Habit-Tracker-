@@ -15,9 +15,11 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { useAppStore } from "../../../../shared/stores/useAppStore";
+
 import { getStyles } from "./TodayScreen.styles";
 import { useTheme } from "../../../../providers/ThemeProvider";
-import ConfirmModal from "../../components/ConfirmModal";
+import ConfirmModal from "@/shared/components/ConfirmModal";
 import DailyProgressCard from "../../components/DailyProgressCard";
 import FilterMenu from "../../components/FilterMenu";
 import MascotAvatar from "../../components/MascotAvatar";
@@ -75,6 +77,8 @@ export default function TodayScreen({ navigation }) {
     setCount,
     markDone,
     undoLast,
+    confirmHabit,
+    setConfirmHabit,
   } = useTodayCheckins();
 
   const [doneExpanded, setDoneExpanded] = useState(true);
@@ -86,8 +90,7 @@ export default function TodayScreen({ navigation }) {
   const [statusFilter, setStatusFilter] = useState("All");
   const filterActive = categoryFilter !== "All" || statusFilter !== "All";
 
-  // Swipe-to-done confirmation state.
-  const [confirmHabit, setConfirmHabit] = useState(null);
+  // Swipe-to-done confirmation state managed by hook.
 
   useEffect(() => {
     const unsubscribe = navigation?.addListener("focus", () => reload());
@@ -98,6 +101,16 @@ export default function TodayScreen({ navigation }) {
     setRefreshing(true);
     await reload();
     setRefreshing(false);
+  };
+
+  const handleUndo = () => {
+    const success = undoLast();
+    if (!success) {
+      useAppStore.getState().showGlobalAlert({
+        title: t("common.error"),
+        message: t("today.nothingToUndo"),
+      });
+    }
   };
 
   const toggleDone = () => {
@@ -216,10 +229,12 @@ export default function TodayScreen({ navigation }) {
             {doneExpanded &&
               done.map(({ habit, streak }) => (
                 <View key={habit.id} style={styles.doneRow}>
-                  <Image
-                    source={CATEGORY_ICONS[(habit.category || "other").toLowerCase()]}
-                    style={styles.doneEmoji}
-                  />
+                  <View style={styles.doneEmojiContainer}>
+                    <Image
+                      source={CATEGORY_ICONS[(habit.category || "other").toLowerCase()]}
+                      style={styles.doneEmoji}
+                    />
+                  </View>                 
                   <Text style={styles.doneName} numberOfLines={1}>
                     {habit.name}
                   </Text>
@@ -240,7 +255,7 @@ export default function TodayScreen({ navigation }) {
       <UndoSnackbar
         visible={!!undo}
         message={undo ? t(undo.messageKey) : ""}
-        onUndo={undoLast}
+        onUndo={handleUndo}
         styles={styles}
         t={t}
       />

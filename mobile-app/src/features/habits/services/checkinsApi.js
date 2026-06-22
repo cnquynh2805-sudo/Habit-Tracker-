@@ -12,7 +12,6 @@ export const createCheckin = async ({
   habitId,
   status = "In Progress",
   completedCount = 0,
-  date = 0,
 }) => {
   // Generate YYYY-MM-DD for Xano's date_only required field
   const d = new Date();
@@ -23,9 +22,14 @@ export const createCheckin = async ({
 
   return apiClient.post(endpoints.checkins.create, {
     habit_id: Number(habitId),
-    date,
+    date: Date.now(),
     date_only: dateOnly,
     completedCount,
     status,
   });
 };
+
+export const listHabitCheckins = async (habitId) => {
+  return apiClient.get(endpoints.habits.checkins(String(habitId)));
+};
+

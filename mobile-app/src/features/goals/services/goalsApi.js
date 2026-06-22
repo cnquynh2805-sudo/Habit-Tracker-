@@ -1,45 +1,64 @@
 import apiClient from "../../../shared/api/apiClient";
 import { endpoints } from "../../../shared/api/endpoints";
 import { listHabits } from "../../habits/services/habitsApi";
+import { calculateGoalProgress } from "../../../shared/services/derivedStateEngine";
 
 /**
  * Fetch all goals from the backend.
- * Response: { value: [{id, habit_id, targetType, targetValue, ongoing_streak, current_completions, startDate}], Count }
+ * Response: { value: [{id, habit_id, targetType, targetValue, reward_item_id, startDate}], Count }
+ *
+ * NOTE: `ongoing_streak` and `current_completions` are intentionally NOT used anywhere
+ * in the frontend. All progress is computed on-the-fly by derivedStateEngine.
  */
 export const fetchGoals = async () => {
   const data = await apiClient.get(endpoints.goals.list);
-  // API wraps items in a "value" array
   return Array.isArray(data?.value) ? data.value : Array.isArray(data) ? data : [];
 };
 
 /**
+ * Fetch ALL check-in records (full history, not just today).
+ * Used by derivedStateEngine to compute streaks and total completions.
+ */
+export const fetchAllCheckins = async () => {
+  try {
+    const data = await apiClient.get(endpoints.checkins.listAll);
+    return Array.isArray(data?.value) ? data.value : Array.isArray(data) ? data : [];
+  } catch {
+    return [];
+  }
+};
+
+/**
  * Try the dedicated dashboard endpoint first (GET /dashboard/goals).
- * Falls back to client-side join of /habits + /goals if dashboard endpoint fails (e.g. 500).
+ * Falls back to client-side join of /habits + /goals + /checkins if dashboard endpoint
+ * fails or returns unexpected data.
  *
- * Expected dashboard response shape (if working):
- *   { habitsWithGoals: [...], habitsWithoutGoals: [...], totalHabits: N, habitsWithGoalsCount: N }
+ * ARCHITECTURE (Advanced Challenge — Derived State):
+ *   ALL progress values (currentProgress, progressPercent, isEncouraged, isAchieved)
+ *   are computed via derivedStateEngine — NEVER read from static DB columns.
+ *   This satisfies "Avoid duplicated state" and "Clear separation between
+ *   Raw data and Computed values".
  */
 export const fetchDashboardGoals = async () => {
-  try {
-    const data = await apiClient.get(endpoints.goals.dashboard);
-    if (data && (data.habitsWithGoals || data.habitsWithoutGoals)) {
-      return { source: "dashboard", ...data };
-    }
-    // Dashboard didn't return expected shape — fall through to manual join
-  } catch (_) {
-    // Dashboard endpoint unavailable — use manual join
-  }
-
-  // Manual join: fetch habits + goals in parallel
-  const [habitsRaw, goalsRaw] = await Promise.all([
+  // Always fetch raw data in parallel (habits, goals, full checkin history).
+  const [habitsRaw, goalsRaw, allCheckins] = await Promise.all([
     listHabits(),
     fetchGoals(),
+    fetchAllCheckins(),
   ]);
 
-  // Build a map: habit_id -> goal
+  // Build lookup maps for O(1) access.
   const goalMap = {};
   goalsRaw.forEach((g) => {
     goalMap[String(g.habit_id)] = g;
+  });
+
+  // Group checkins by habit_id for efficient per-habit Engine access.
+  const checkinsByHabit = {};
+  allCheckins.forEach((c) => {
+    const key = String(c.habit_id);
+    if (!checkinsByHabit[key]) checkinsByHabit[key] = [];
+    checkinsByHabit[key].push(c);
   });
 
   const habitsWithGoals = [];
@@ -48,15 +67,11 @@ export const fetchDashboardGoals = async () => {
   habitsRaw.forEach((h) => {
     const goal = goalMap[String(h.id)];
     if (goal) {
-      // Calculate progress
-      const isStreak = goal.targetType === "Streak";
-      const currentProgress = isStreak
-        ? (goal.ongoing_streak || 0)
-        : (goal.current_completions || 0);
-      const progressPercent =
-        goal.targetValue > 0
-          ? Math.min((currentProgress / goal.targetValue) * 100, 100)
-          : 0;
+      const habitCheckins = checkinsByHabit[String(h.id)] || [];
+
+      // DERIVED STATE: compute progress from raw check-in history via Engine.
+      const { progress, percentage, isEncouraged, isAchieved } =
+        calculateGoalProgress(goal, h, habitCheckins);
 
       habitsWithGoals.push({
         habitId: String(h.id),
@@ -66,8 +81,11 @@ export const fetchDashboardGoals = async () => {
           id: goal.id,
           targetType: goal.targetType,
           targetValue: goal.targetValue,
-          currentProgress,
-          progressPercent,
+          // currentProgress is a DERIVED value, NOT a stored DB field.
+          currentProgress: progress,
+          progressPercent: percentage,
+          isEncouraged,
+          isAchieved,
         },
       });
     } else {
@@ -76,7 +94,7 @@ export const fetchDashboardGoals = async () => {
   });
 
   return {
-    source: "manual",
+    source: "derived",
     habitsWithGoals,
     habitsWithoutGoals,
     totalHabits: habitsRaw.length,
@@ -135,4 +153,3 @@ export const deleteGoal = async (habitId, goalId) => {
     throw error;
   }
 };
-

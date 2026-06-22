@@ -1,6 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+
+
 import {
   createCheckin,
   listCheckins,
@@ -18,6 +20,19 @@ import {
 const UNDO_WINDOW_MS = 8000;
 const HAPPY_MS = 2500;
 const HABITS_CACHE_KEY = "@today_habits_cache";
+
+// Local date helper: converts any date input → "YYYY-MM-DD" string, or null.
+function toDateOnly(rawDate) {
+  if (!rawDate) return null;
+  try {
+    const d = rawDate instanceof Date ? rawDate : new Date(rawDate);
+    if (isNaN(d.getTime())) return null;
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  } catch {
+    return null;
+  }
+}
+
 
 // Mascot states map 1:1 to the gif assets in src/assets/mascot.
 export const MASCOT = {
@@ -57,6 +72,7 @@ export function useTodayCheckins() {
   const [mascot, setMascot] = useState(MASCOT.idle);
   const [undo, setUndo] = useState(null); // { habitId, messageKey }
   const [isLoading, setIsLoading] = useState(true);
+  const [confirmHabit, setConfirmHabit] = useState(null);
 
   const storageKey = `${CHECKINS_STORAGE_PREFIX}${getTodayKey()}`;
 
@@ -66,6 +82,7 @@ export function useTodayCheckins() {
   const flushingRef = useRef(0);
   const pendingRef = useRef(null); // { habitId, entry, prev, timer }
   const happyTimerRef = useRef(null);
+  const setCountTimeoutRef = useRef(null);
 
   const restingMascot = useCallback(() => {
     const list = habitsRef.current;
@@ -106,26 +123,53 @@ export function useTodayCheckins() {
       const cache = cacheRaw ? JSON.parse(cacheRaw) : {};
       const todayKey = getTodayKey();
 
-      // Latest server check-in per habit (highest id wins).
+      // Latest server check-in per habit FOR TODAY
       const serverByHabit = {};
       (checkinList || []).forEach((c) => {
-        const prev = serverByHabit[c.habit_id];
-        if (!prev || (c.id || 0) >= (prev.id || 0))
-          serverByHabit[c.habit_id] = c;
+        // ONLY consider today's checkins for serverId matching!
+        const cDateOnly = c.date_only || toDateOnly(c.date);
+        if (cDateOnly === todayKey) {
+          const prev = serverByHabit[c.habit_id];
+          if (!prev || (c.id || 0) >= (prev.id || 0)) {
+            serverByHabit[c.habit_id] = c;
+          }
+        }
       });
 
       const next = {};
+
       todayHabits.forEach((h) => {
         const target = Math.max(1, h.targetPerDay || 1);
-        const server = serverByHabit[h.id];
-        const cached = cache[h.id];
-        const serverId = cached?.serverId ?? server?.id ?? null;
+        const server = serverByHabit[h.id];  // Xano record for today (may be null)
+        const cached = cache[h.id];           // Local AsyncStorage snapshot
+
         const habitId = Number(h.id) || 0;
 
-        if (cached && cached.dayKey === todayKey) {
-          // Local cache holds today's progress (incl. unsynced edits).
+        if (server) {
+          // ✅ SERVER WINS: Always sync to Xano's ground truth for today.
+          // This heals any stale local cache (e.g. from previous 500 errors).
+          // We only preserve the local streak counter (date) if the server record
+          // doesn't carry it (Xano's `date` field stores a timestamp, not a streak).
+          const serverCount = server.completedCount || 0;
+          // Use local streak counter if server date looks like a timestamp (> 10^9),
+          // otherwise trust cached streak (cached.date is our streak counter).
+          const serverDateIsTimestamp = (server.date || 0) > 1_000_000_000;
+          const streakFromCache = cached?.dayKey === todayKey ? (cached.date || 0) : 0;
+          const streak = serverDateIsTimestamp ? streakFromCache : (server.date || 0);
+
           next[h.id] = {
-            serverId,
+            serverId: server.id,
+            habit_id: habitId,
+            date: streak,
+            completedCount: serverCount,
+            status: server.status || deriveStatus(serverCount, target),
+            dayKey: todayKey,
+          };
+        } else if (cached && cached.dayKey === todayKey) {
+          // ⚠️ LOCAL ONLY: Server has no record yet for today (not synced yet or mid-session).
+          // Keep local progress but ensure serverId is null (POST will happen on next flush).
+          next[h.id] = {
+            serverId: null,
             habit_id: habitId,
             date: cached.date || 0,
             completedCount: cached.completedCount || 0,
@@ -133,26 +177,23 @@ export function useTodayCheckins() {
             dayKey: todayKey,
           };
         } else if (cached && cached.dayKey && cached.dayKey !== todayKey) {
-          // The day rolled over: reset to a fresh "Not Started" day, keeping the
-          // streak only if the previous day was completed.
-          const wasCompleted = (cached.completedCount || 0) >= target;
+          // 🔄 DAY ROLLOVER: Previous day's cache — reset progress for today.
           next[h.id] = {
-            serverId,
+            serverId: null, // new day = no server record yet
             habit_id: habitId,
-            date: wasCompleted ? cached.date || 0 : 0,
+            date: (cached.completedCount || 0) >= target ? (cached.date || 0) : 0,
             completedCount: 0,
             status: CHECKIN_STATUS.notStarted,
             dayKey: todayKey,
           };
         } else {
-          // First load on this device: trust the server snapshot as today's.
-          const count = server?.completedCount || 0;
+          // 🆕 FRESH: No cache, no server record yet.
           next[h.id] = {
-            serverId: server?.id ?? null,
+            serverId: null,
             habit_id: habitId,
-            date: server?.date || 0,
-            completedCount: count,
-            status: server?.status || deriveStatus(count, target),
+            date: 0,
+            completedCount: 0,
+            status: CHECKIN_STATUS.notStarted,
             dayKey: todayKey,
           };
         }
@@ -161,7 +202,7 @@ export function useTodayCheckins() {
       setHabits(todayHabits);
       habitsRef.current = todayHabits;
       AsyncStorage.setItem(HABITS_CACHE_KEY, JSON.stringify(todayHabits)).catch(
-        () => {},
+        () => { },
       );
       persist(next); // also caches the check-in map for offline reads
     } catch (e) {
@@ -190,35 +231,68 @@ export function useTodayCheckins() {
   useEffect(() => {
     reload(); // eslint-disable-line react-hooks/set-state-in-effect
     return () => {
-      if (pendingRef.current?.timer) clearTimeout(pendingRef.current.timer);
+      if (pendingRef.current) {
+        const pending = pendingRef.current;
+        if (pending.timer) clearTimeout(pending.timer);
+        flushToServer(pending.habitId, pending.entry);
+      }
       if (happyTimerRef.current) clearTimeout(happyTimerRef.current);
+      if (setCountTimeoutRef.current) clearTimeout(setCountTimeoutRef.current);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Push a single check-in to the server (create first time, then patch).
+  // Push a single check-in to the server.
+  // RULE: At flush time, read AsyncStorage directly to resolve serverId.
+  //   - If serverId exists in cache → PATCH (record already on Xano)
+  //   - If not → POST (first time creating this habit+date_only pair)
   const flushToServer = useCallback(
     async (habitId, entry) => {
       flushingRef.current += 1;
       setMascot(MASCOT.waiting);
+      let serverId = null;
+      let payload = null;
       try {
         const d = new Date();
         const dateOnly = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-        
-        const payload = {
+
+        payload = {
           habit_id: entry.habit_id,
-          date: entry.date,
+          date: Date.now(),
           date_only: dateOnly,
           completedCount: entry.completedCount,
           status: entry.status,
         };
-        // Resolve the server id from the latest state, not the captured
-        // closure: a superseded action may have created the record already.
-        const serverId =
-          checkinsRef.current[habitId]?.serverId ?? entry.serverId;
+
+        // READ AsyncStorage at flush time (not from closure) to get the latest serverId.
+        // This is the source of truth for deciding POST vs PATCH.
+        let liveServerId = null;
+        try {
+          const cacheRaw = await AsyncStorage.getItem(storageKey);
+          if (cacheRaw) {
+            const cache = JSON.parse(cacheRaw);
+            liveServerId = cache[habitId]?.serverId ?? null;
+          }
+        } catch (_) {
+          // Fallback to in-memory ref if AsyncStorage read fails
+          liveServerId = checkinsRef.current[habitId]?.serverId ?? entry.serverId ?? null;
+        }
+        serverId = liveServerId;
+
         if (serverId) {
-          await updateCheckin(serverId, payload);
+          // PATCH: record already exists on Xano for this habit+date_only
+          const updated = await updateCheckin(serverId, payload);
+          if (updated && updated.id) {
+            const current = checkinsRef.current[habitId];
+            if (current && current.dayKey === entry.dayKey) {
+              persist({
+                ...checkinsRef.current,
+                [habitId]: { ...current, ...updated, serverId: updated.id },
+              });
+            }
+          }
         } else {
+          // POST: no record yet for this habit+date_only on Xano
           const created = await createCheckin(payload);
           const newServerId = created?.id ?? null;
           if (newServerId != null) {
@@ -227,21 +301,27 @@ export function useTodayCheckins() {
             if (current && current.dayKey === entry.dayKey) {
               persist({
                 ...checkinsRef.current,
-                [habitId]: { ...current, serverId: newServerId },
+                [habitId]: { ...current, ...created, serverId: newServerId },
               });
             }
           }
         }
       } catch (e) {
-        // Offline / server error: keep local; next change retries.
-        console.log("Error syncing checkin:", e);
+        // Offline / server error: keep local; next flush will retry.
+        const endpoint = serverId ? `PATCH /checkins/${serverId}` : "POST /checkins";
+        console.log(`Error syncing checkin at endpoint [${endpoint}]:`, {
+          error: e?.message || String(e),
+          status: e?.response?.status,
+          payload,
+        });
       } finally {
         flushingRef.current -= 1;
         settleMascot();
       }
     },
-    [persist, settleMascot],
+    [storageKey, persist, settleMascot],
   );
+
 
   // Commit the currently pending change to the server right now.
   const flushPending = useCallback(() => {
@@ -316,15 +396,18 @@ export function useTodayCheckins() {
     (habit, value) => {
       const target = Math.max(1, habit.targetPerDay || 1);
       const parsed = Math.max(0, parseInt(value, 10) || 0);
+      const finalValue = Math.min(parsed, target);
       const current = checkinsRef.current[habit.id]?.completedCount || 0;
-      if (parsed === current) return;
-      applyChange(
-        habit,
-        parsed,
-        parsed >= target
-          ? "today.undoMsg.markedDone"
-          : "today.undoMsg.progressSaved",
-      );
+      if (finalValue === current) return;
+
+      applyChange(habit, finalValue, "today.undoMsg.progressSaved");
+
+      if (finalValue >= target) {
+        if (setCountTimeoutRef.current) clearTimeout(setCountTimeoutRef.current);
+        setCountTimeoutRef.current = setTimeout(() => {
+          setConfirmHabit(habit);
+        }, 300);
+      }
     },
     [applyChange],
   );
@@ -341,28 +424,38 @@ export function useTodayCheckins() {
 
   const undoLast = useCallback(() => {
     const pending = pendingRef.current;
-    if (!pending) return;
+    if (!pending) return false;
     if (pending.timer) clearTimeout(pending.timer);
     if (happyTimerRef.current) clearTimeout(happyTimerRef.current);
     pendingRef.current = null;
     persist({ ...checkinsRef.current, [pending.habitId]: pending.prev });
     setUndo(null);
     settleMascot();
+    return true;
   }, [persist, settleMascot]);
 
   // Split habits into the To-Do and Done buckets for the screen.
   const { todo, done } = useMemo(() => {
     const todoList = [];
     const doneList = [];
+    const currentHour = new Date().getHours();
+    const todayStr = getTodayKey();
+
     habits.forEach((h) => {
       const checkin = checkins[h.id] || buildCheckin(h);
       const target = Math.max(1, h.targetPerDay || 1);
+
+      // Xano's created_at is typically a Unix timestamp in milliseconds.
+      const createdDate = h.createdAt ? new Date(h.createdAt) : null;
+      const isCreatedToday = createdDate ? getTodayKey(createdDate) === todayStr : false;
+      const isLate = currentHour >= 22;
+
       const item = {
         habit: h,
         checkin,
         target,
-        // Any not-yet-started habit shows the Overdue (light red) style.
-        overdue: checkin.status === CHECKIN_STATUS.notStarted,
+        // Habit is overdue if it is not completed, it's late in the day (after 10 PM), and it wasn't just created today.
+        overdue: checkin.completedCount < target && isLate && !isCreatedToday,
         streak: checkin.date || 0,
       };
       if (checkin.completedCount >= target) doneList.push(item);
@@ -391,5 +484,7 @@ export function useTodayCheckins() {
     setCount,
     markDone,
     undoLast,
+    confirmHabit,
+    setConfirmHabit,
   };
 }

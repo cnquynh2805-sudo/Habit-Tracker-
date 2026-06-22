@@ -36,10 +36,44 @@ export const createStyles = (colors) =>
       padding: 8,
       borderRadius: 12,
       backgroundColor: colors.surface || "#f5f5f5",
-      justifyContent: "center",
-      alignItems: "center",
+      flexDirection: "row",
+      alignItems: "flex-start",
+      gap: 6,
     },
 
+    settingsItem: {
+      position: "relative",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    dropdownMenu: {
+      position: "absolute",
+      top: 38,
+      right: 0,
+
+      minWidth: 140,   // 👈 QUAN TRỌNG (fix “đường thẳng”)
+      maxWidth: 200,
+
+      backgroundColor: colors.surface,
+      borderRadius: 12,
+      paddingVertical: 6,
+
+      borderWidth: 1,
+      borderColor: colors.border,
+
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.1,
+      shadowRadius: 8,
+      elevation: 5,
+
+      zIndex: 9999,
+    },
+    dropdownText: {
+      fontSize: 14,
+      color: colors.textSecondary,
+      flexShrink: 1,
+    },
     title: {
       fontSize: 24,
       fontWeight: "800",

@@ -4,11 +4,11 @@ A cross-platform mobile application built with React Native and Expo.
 
 ## 🚀 Getting Started
 
-The easiest way to run this app is using **Expo Go** on your physical device. This requires zero setup for Android or iOS SDKs.
+Since this app uses custom native modules (e.g., NFC capabilities) via `expo-dev-client`, **Expo Go** can no longer be used to run the app. Instead, you will create a **Custom Development Build** using Expo Application Services (EAS).
 
 ### Prerequisites
 - [Node.js](https://nodejs.org/) installed on your computer.
-- **Expo Go** app installed on your physical [iOS](https://apps.apple.com/us/app/expo-go/id982107779) or [Android](https://play.google.com/store/apps/details?id=host.exp.exponent) device.
+- An Expo account (create one at [expo.dev](https://expo.dev)).
 
 ### 1. Installation
 
@@ -19,44 +19,9 @@ cd mobile-app
 npm install
 ```
 
-### 2. Run the App (The Easy Way)
+### 2. Create a Development Build (Online)
 
-1. Make sure your computer and your phone are connected to the **same Wi-Fi network**.
-2. Start the Expo development server:
-   ```bash
-   npx expo start
-   ```
-3. A large QR code will appear in your terminal.
-   - **Android**: Open the **Expo Go** app and tap "Scan QR Code".
-   - **iOS**: Open the default **Camera** app, point it at the QR code, and tap the Expo Go prompt that appears.
-
----
-
-## 💻 Advanced: Running on Emulators (Optional)
-
-If you prefer to run the app on your computer using an emulator, you will need to set up the respective SDKs.
-
-### Android Emulator (Windows / Mac / Linux)
-1. Install [Android Studio](https://developer.android.com/studio). This is the easiest way to get the SDK and emulators.
-2. Open Android Studio, go to the **Virtual Device Manager**, and start an Android emulator.
-3. Run the app:
-   ```bash
-   npx expo start --android
-   ```
-
-### iOS Simulator (Mac Only)
-1. Install **Xcode** from the Mac App Store.
-2. Open Xcode to agree to the terms and ensure the command line tools are installed.
-3. Run the app:
-   ```bash
-   npx expo start --ios
-   ```
-
----
-
-## 📦 Building for Production (APK / IPA)
-
-To build standalone files for app stores (or to install permanently on your phone), we use **EAS (Expo Application Services)**.
+To build the app so it can run on your physical device, we use EAS Build. 
 
 1. Install the EAS CLI globally on your computer:
    ```bash
@@ -66,15 +31,23 @@ To build standalone files for app stores (or to install permanently on your phon
    ```bash
    eas login
    ```
-3. Build for Android (generates an `.apk` or `.aab`):
+3. Start the build process for your desired platform. For Android (generates an `.apk`):
    ```bash
-   eas build -p android --profile preview
+   eas build --profile development --platform android
    ```
-4. Build for iOS (generates an `.ipa`):
+   > **Note:** The first build can take anywhere from several minutes to a few hours depending on the queue for the free tier on Expo.
+
+### 3. Install and Run the App on Your Phone
+
+Once the EAS build is completed online:
+1. On your mobile phone, log in to [expo.dev](https://expo.dev) with the same account.
+2. Go to the provided build link, or use your phone's camera to scan the QR code generated in your terminal.
+3. Download the app (`.apk` for Android) and install it on your device.
+4. Back on your computer, start the local development server:
    ```bash
-   eas build -p ios --profile preview
+   npx expo start
    ```
-*(Note: iOS builds require a paid Apple Developer account).*
+5. Open the newly installed app on your phone. Scan the QR code shown in your computer's terminal using the app's built-in scanner to connect to your local Metro server.
 
 ---
 

@@ -28,7 +28,7 @@ export const fromApiHabit = (h) => {
     priority: h.priority || "Medium",
     status,
     canCheckin: status === "Active",
-    createdAt: h.createdAt,
+    createdAt: h.created_at || h.createdAt,
   };
 };
 
