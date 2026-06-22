@@ -294,7 +294,7 @@ export const getStyles = (colors) =>
       marginBottom: 10,
       opacity: 0.7,
     },
-    doneEmojiContainer:{
+    doneEmojiContainer: {
       width: 24,
       height: 24,
       borderRadius: 12,

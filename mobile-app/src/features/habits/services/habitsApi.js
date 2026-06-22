@@ -48,7 +48,9 @@ export const toApiHabit = (local) => ({
 
 export const listHabits = async () => {
   const data = await apiClient.get(endpoints.habits.list);
-  return Array.isArray(data) ? data.map(fromApiHabit) : [];
+  // Xano returns { value: [...], Count: N } — handle both shapes
+  const arr = Array.isArray(data) ? data : Array.isArray(data?.value) ? data.value : [];
+  return arr.map(fromApiHabit);
 };
 
 export const createHabit = async (local) => {
