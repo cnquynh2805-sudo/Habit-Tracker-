@@ -57,6 +57,7 @@ export function useTodayCheckins() {
   const [mascot, setMascot] = useState(MASCOT.idle);
   const [undo, setUndo] = useState(null); // { habitId, messageKey }
   const [isLoading, setIsLoading] = useState(true);
+  const [confirmHabit, setConfirmHabit] = useState(null);
 
   const storageKey = `${CHECKINS_STORAGE_PREFIX}${getTodayKey()}`;
 
@@ -66,6 +67,7 @@ export function useTodayCheckins() {
   const flushingRef = useRef(0);
   const pendingRef = useRef(null); // { habitId, entry, prev, timer }
   const happyTimerRef = useRef(null);
+  const setCountTimeoutRef = useRef(null);
 
   const restingMascot = useCallback(() => {
     const list = habitsRef.current;
@@ -192,6 +194,7 @@ export function useTodayCheckins() {
     return () => {
       if (pendingRef.current?.timer) clearTimeout(pendingRef.current.timer);
       if (happyTimerRef.current) clearTimeout(happyTimerRef.current);
+      if (setCountTimeoutRef.current) clearTimeout(setCountTimeoutRef.current);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -201,11 +204,13 @@ export function useTodayCheckins() {
     async (habitId, entry) => {
       flushingRef.current += 1;
       setMascot(MASCOT.waiting);
+      let serverId = null;
+      let payload = null;
       try {
         const d = new Date();
         const dateOnly = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 
-        const payload = {
+        payload = {
           habit_id: entry.habit_id,
           date: entry.date,
           date_only: dateOnly,
@@ -214,7 +219,7 @@ export function useTodayCheckins() {
         };
         // Resolve the server id from the latest state, not the captured
         // closure: a superseded action may have created the record already.
-        const serverId =
+        serverId =
           checkinsRef.current[habitId]?.serverId ?? entry.serverId;
         if (serverId) {
           await updateCheckin(serverId, payload);
@@ -234,7 +239,12 @@ export function useTodayCheckins() {
         }
       } catch (e) {
         // Offline / server error: keep local; next change retries.
-        console.log("Error syncing checkin:", e);
+        const endpoint = serverId ? `PATCH /checkins/${serverId}` : "POST /checkins";
+        console.log(`Error syncing checkin at endpoint [${endpoint}]:`, {
+          error: e?.message || String(e),
+          status: e?.response?.status,
+          payload,
+        });
       } finally {
         flushingRef.current -= 1;
         settleMascot();
@@ -316,15 +326,18 @@ export function useTodayCheckins() {
     (habit, value) => {
       const target = Math.max(1, habit.targetPerDay || 1);
       const parsed = Math.max(0, parseInt(value, 10) || 0);
+      const finalValue = Math.min(parsed, target);
       const current = checkinsRef.current[habit.id]?.completedCount || 0;
-      if (parsed === current) return;
-      applyChange(
-        habit,
-        parsed,
-        parsed >= target
-          ? "today.undoMsg.markedDone"
-          : "today.undoMsg.progressSaved",
-      );
+      if (finalValue === current) return;
+
+      if (finalValue >= target) {
+        if (setCountTimeoutRef.current) clearTimeout(setCountTimeoutRef.current);
+        setCountTimeoutRef.current = setTimeout(() => {
+          setConfirmHabit(habit);
+        }, 500);
+      } else {
+        applyChange(habit, finalValue, "today.undoMsg.progressSaved");
+      }
     },
     [applyChange],
   );
@@ -341,13 +354,14 @@ export function useTodayCheckins() {
 
   const undoLast = useCallback(() => {
     const pending = pendingRef.current;
-    if (!pending) return;
+    if (!pending) return false;
     if (pending.timer) clearTimeout(pending.timer);
     if (happyTimerRef.current) clearTimeout(happyTimerRef.current);
     pendingRef.current = null;
     persist({ ...checkinsRef.current, [pending.habitId]: pending.prev });
     setUndo(null);
     settleMascot();
+    return true;
   }, [persist, settleMascot]);
 
   // Split habits into the To-Do and Done buckets for the screen.
@@ -400,5 +414,7 @@ export function useTodayCheckins() {
     setCount,
     markDone,
     undoLast,
+    confirmHabit,
+    setConfirmHabit,
   };
 }

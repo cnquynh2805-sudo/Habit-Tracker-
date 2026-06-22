@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
+  Alert,
   LayoutAnimation,
   Platform,
   RefreshControl,
@@ -17,7 +18,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { getStyles } from "./TodayScreen.styles";
 import { useTheme } from "../../../../providers/ThemeProvider";
-import ConfirmModal from "../../components/ConfirmModal";
+import ConfirmModal from "../../../../shared/components/ConfirmModal";
 import DailyProgressCard from "../../components/DailyProgressCard";
 import FilterMenu from "../../components/FilterMenu";
 import MascotAvatar from "../../components/MascotAvatar";
@@ -75,6 +76,8 @@ export default function TodayScreen({ navigation }) {
     setCount,
     markDone,
     undoLast,
+    confirmHabit,
+    setConfirmHabit,
   } = useTodayCheckins();
 
   const [doneExpanded, setDoneExpanded] = useState(true);
@@ -86,8 +89,7 @@ export default function TodayScreen({ navigation }) {
   const [statusFilter, setStatusFilter] = useState("All");
   const filterActive = categoryFilter !== "All" || statusFilter !== "All";
 
-  // Swipe-to-done confirmation state.
-  const [confirmHabit, setConfirmHabit] = useState(null);
+  // Swipe-to-done confirmation state managed by hook.
 
   useEffect(() => {
     const unsubscribe = navigation?.addListener("focus", () => reload());
@@ -98,6 +100,13 @@ export default function TodayScreen({ navigation }) {
     setRefreshing(true);
     await reload();
     setRefreshing(false);
+  };
+
+  const handleUndo = () => {
+    const success = undoLast();
+    if (!success) {
+      Alert.alert(t("common.error"), t("today.nothingToUndo"));
+    }
   };
 
   const toggleDone = () => {
@@ -242,7 +251,7 @@ export default function TodayScreen({ navigation }) {
       <UndoSnackbar
         visible={!!undo}
         message={undo ? t(undo.messageKey) : ""}
-        onUndo={undoLast}
+        onUndo={handleUndo}
         styles={styles}
         t={t}
       />
