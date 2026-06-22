@@ -64,7 +64,7 @@ export default function MascotScreen() {
       <MascotPreview />
 
       <Text style={styles.name}>
-        Barnaby the Bear
+        Barnaby the Brother
       </Text>
 
       {/* Tab Navigation */}
