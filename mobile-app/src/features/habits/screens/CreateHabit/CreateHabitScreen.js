@@ -1,5 +1,6 @@
 /* eslint-disable i18next/no-literal-string */
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { X } from "lucide-react-native";
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -18,8 +19,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { getStyles } from "./CreateHabitScreen.styles";
 import { useTheme } from "../../../../providers/ThemeProvider";
 import { CATEGORIES, CATEGORY_ICONS } from "../../constants";
-import { X } from "lucide-react-native";
 import * as habitsManager from "./services/habitsManager";
+import { useAppStore } from "../../../../shared/stores/useAppStore";
+
 import ConfirmModal from "@/shared/components/ConfirmModal";
 import SuccessModal from "@/shared/components/successModal/SuccessModal";
 
@@ -76,8 +78,7 @@ export default function CreateHabitScreen({ route, navigation }) {
 
         const rawStatus = targetHabit.status || "Active";
         const formattedStatus =
-          rawStatus.charAt(0).toUpperCase() +
-          rawStatus.slice(1).toLowerCase();
+          rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1).toLowerCase();
 
         setHabitName(targetHabit.name);
         setCategory(targetHabit.category || "Mindfulness");
@@ -115,11 +116,12 @@ export default function CreateHabitScreen({ route, navigation }) {
 
   useEffect(() => {
     if (isEditMode) {
-      loadHabitForEditing();
+      loadHabitForEditing(); // eslint-disable-line react-hooks/set-state-in-effect
     } else {
       setCurrentStatus("Active");
       setSyncStatus("");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEditMode]);
 
   // ===== HEADER HANDLERS =====
@@ -203,7 +205,10 @@ export default function CreateHabitScreen({ route, navigation }) {
   const handleSaveAction = async () => {
     const cleanedName = habitName.trim();
     if (!cleanedName) {
-      useAppStore.getState().showGlobalAlert({ title: "Error", message: "Please enter a habit name." });
+      useAppStore.getState().showGlobalAlert({
+        title: "Error",
+        message: "Please enter a habit name.",
+      });
       return;
     }
 
@@ -232,7 +237,8 @@ export default function CreateHabitScreen({ route, navigation }) {
       if (isNameDuplicate) {
         useAppStore.getState().showGlobalAlert({
           title: "Duplicate Name",
-          message: "A habit with this name already exists. Please choose a unique name!",
+          message:
+            "A habit with this name already exists. Please choose a unique name!",
         });
         setIsLoading(false);
         setSyncStatus("");
@@ -261,7 +267,7 @@ export default function CreateHabitScreen({ route, navigation }) {
           category,
           frequency,
           daysOfWeek: frequency === "Custom" ? daysOfWeekList : [],
-          targetPerDay: targetPerDay,
+          targetPerDay,
           status: finalStatus,
           priority,
         });
@@ -302,13 +308,20 @@ export default function CreateHabitScreen({ route, navigation }) {
       setSyncStatus("❌ Error");
 
       if (error.message === "DUPLICATE_NAME") {
-        Alert.alert("Duplicate Name", "A habit with this name already exists. Please choose a unique name!");
+        Alert.alert(
+          "Duplicate Name",
+          "A habit with this name already exists. Please choose a unique name!",
+        );
       } else {
         Alert.alert("Error", error.message || "Failed to save habit");
       }
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleDeleteAction = () => {
+    setShowDeleteModal(true);
   };
 
   const confirmDeleteHabit = async () => {
@@ -322,11 +335,9 @@ export default function CreateHabitScreen({ route, navigation }) {
       const isDeleted = await habitsManager.deleteHabit(habitId);
 
       if (isDeleted) {
-        Alert.alert(
-          "Success",
-          "Habit deleted successfully",
-          [{ text: "OK", onPress: () => navigation?.goBack() }]
-        );
+        Alert.alert("Success", "Habit deleted successfully", [
+          { text: "OK", onPress: () => navigation?.goBack() },
+        ]);
       } else {
         Alert.alert("Error", "Failed to delete habit");
       }
@@ -350,7 +361,10 @@ export default function CreateHabitScreen({ route, navigation }) {
         await loadHabitForEditing();
       }
     } catch (error) {
-      useAppStore.getState().showGlobalAlert({ title: "Error", message: "Failed to update status" });
+      useAppStore.getState().showGlobalAlert({
+        title: "Error",
+        message: "Failed to update status",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -360,7 +374,6 @@ export default function CreateHabitScreen({ route, navigation }) {
   return (
     <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
       <View style={styles.topHeaderContainer}>
-
         {/* LEFT */}
         <TouchableOpacity
           accessible
@@ -396,9 +409,10 @@ export default function CreateHabitScreen({ route, navigation }) {
           onPress={() => navigation && navigation.goBack()}
           disabled={isLoading}
         >
-          <Text style={styles.headerCloseText}><X size={20} color={colors.textSecondary || "#666"} /></Text>
+          <Text style={styles.headerCloseText}>
+            <X size={20} color={colors.textSecondary || "#666"} />
+          </Text>
         </TouchableOpacity>
-
       </View>
 
       {/* SYNC STATUS INDICATOR */}
@@ -697,7 +711,6 @@ export default function CreateHabitScreen({ route, navigation }) {
             </TouchableOpacity>
           )}
         </View>
-        
       </ScrollView>
 
       {/* CUSTOM FREQUENCY DAY SELECTION MODAL POPUP */}
@@ -779,12 +792,9 @@ export default function CreateHabitScreen({ route, navigation }) {
         cancelLabel="Cancel"
         confirmLabel="Delete"
         destructive
-        onCancel={() =>
-          setShowDeleteModal(false)
-        }
+        onCancel={() => setShowDeleteModal(false)}
         onConfirm={confirmDeleteHabit}
       />
-
     </SafeAreaView>
   );
 }
