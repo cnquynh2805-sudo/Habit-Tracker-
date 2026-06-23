@@ -8,11 +8,31 @@ import {
   ScrollView,
   TextInput,
 } from "react-native";
-import NfcManager, { NfcTech, Ndef } from "react-native-nfc-manager";
+// import NfcManager, { NfcTech, Ndef } from "react-native-nfc-manager";
+import { Platform } from 'react-native';
+
+// Chỉ require thư viện thật nếu KHÔNG PHẢI là iOS (hoặc khi chạy build thật)
+const NfcManager = Platform.OS !== 'ios' 
+  ? require('react-native-nfc-manager').default 
+  : null;
+
+// Lúc này xuống dưới code bạn thoải mái gọi an toàn:
+const startNfc = async () => {
+  if (!NfcManager) {
+    console.log("📱 [iOS Expo Go] Đã chặn an toàn, không gọi phần cứng.");
+    return;
+  }
+  
+  try {
+    await NfcManager.start();
+    // ... logic đọc thẻ của bạn
+  } catch (err) {
+    console.warn(err);
+  }
+};
 import styles from "./NfcSettingsScreen.styles";
 import useNfcMappings from "./hooks/useNfcMappings";
 
-// Tách nhỏ UI hiển thị danh sách thẻ đã cấu hình để tránh re-render lãng phí
 const ConfiguredTagRow = React.memo(({ tagId, mapping, habitLabel, onUnlink }) => {
   return (
     <View style={styles.mappingRow}>
@@ -70,9 +90,55 @@ export default function NfcSettingsScreen() {
     };
   }, []);
 
+  // Hàm cốt lõi xử lý việc lưu data sau khi đã chốt được Tag ID (từ quét thật hoặc nhập tay)
+  const finalizeConfiguration = async (tagId, type, habitId) => {
+    try {
+      const finalTagName =
+        tagName.trim() ||
+        (type === "MULTIPLE" ? "Multi-Habit Tag" : `Tag #${tagId.slice(-4)}`);
+
+      // Ghi chuẩn URL thường
+      const urlToRecord =
+        type === "MULTIPLE"
+          ? `bloom://nfc?type=multiple&tagId=${tagId}`
+          : `bloom://nfc?type=single&tagId=${tagId}&localId=${habitId}`;
+
+      // 🔥 ÉP KIỂU TRIỆT ĐỂ CHO XANO: Nếu là MULTIPLE hoặc không có ID, luôn bằng 0 (Integer)
+      const safeHabitId = (type === "MULTIPLE" || !habitId) ? 0 : parseInt(habitId, 10);
+
+      // 🔥 TRUYỀN DATA "BAO ĐẬU": Truyền cả camelCase (cho local) và snake_case (cho Xano)
+      const result = await saveMappingAndSync({
+        tagId: tagId,
+        type: type,
+        habitId: safeHabitId,
+        tagName: finalTagName,
+        ndefUrl: urlToRecord,
+        // -- Đính kèm snake_case đề phòng useNfcMappings truyền thẳng lên Axios --
+        tag_id: tagId,
+        habit_id: safeHabitId,
+        tag_name: finalTagName,
+        ndef_url: urlToRecord,
+      });
+
+      if (result && result.success) {
+        Alert.alert("Success", `Successfully configured tag "${finalTagName}"!`);
+        setTagName("");
+      } else if (result && result.error === "DUPLICATE_TAG_ID") {
+        Alert.alert("Tag Exists", result.message);
+      }
+    } catch (err) {
+      Alert.alert("Error", "Failed to save tag configuration.");
+    } finally {
+      setScanState("ready");
+      loadData();
+    }
+  };
+
   const handleWriteAndSave = async (type, habitId = null) => {
     try {
       setScanState("scanning");
+      
+      // 1. Cố gắng kích hoạt phần cứng quét NFC (Chỉ chạy được trên máy thật)
       await NfcManager.requestTechnology([NfcTech.Ndef]);
       const tag = await NfcManager.getTag();
       
@@ -80,55 +146,58 @@ export default function NfcSettingsScreen() {
         throw new Error("No valid tag detected.");
       }
 
+      // Check trùng cục bộ ngay khi quét trên máy thật
       if (nfcMappings && nfcMappings[tag.id]) {
         Alert.alert(
           "Tag Exists",
-          `This tag is already configured as "${
-            nfcMappings[tag.id].tagName?.trim() || "Unnamed Tag"
-          }". Please unlink it first.`
+          `This tag is already configured as "${nfcMappings[tag.id].tagName || "Unnamed Tag"}".`
         );
+        setScanState("ready");
+        await cleanUpNfcListener();
         return;
       }
 
+      // Ghi data Ndef lên chip vật lý
       const targetHabit = allHabits.find((h) => String(h.id) === String(habitId));
       const finalServerId = targetHabit?.serverId || "null";
-
+      
       const urlToRecord =
         type === "MULTIPLE"
-          ? `Bloom://nfc?type=multiple`
-          : `Bloom://nfc?type=single&serverId=${finalServerId}&localId=${habitId}`;
+          ? `bloom://nfc?type=multiple&tagId=${tag.id}`
+          : `bloom://nfc?type=single&tagId=${tag.id}&serverId=${finalServerId}&localId=${habitId}`;
 
       const bytes = Ndef.encodeMessage([Ndef.uriRecord(urlToRecord)]);
       await NfcManager.ndefHandler.writeNdefMessage(bytes);
+      await cleanUpNfcListener();
 
-      const finalTagName =
-        tagName.trim() ||
-        (type === "MULTIPLE"
-          ? "Multi-Habit Tag"
-          : `Tag #${tag.id.slice(-4)}`);
+      // Tiến hành lưu lên Xano
+      await finalizeConfiguration(tag.id, type, habitId);
 
-      await saveMappingAndSync({
-        tagId: tag.id,
-        type,
-        habitId,
-        tagName: finalTagName,
-        ndefUrl: urlToRecord,
-      });
-
-      Alert.alert(
-        "Success",
-        `Successfully configured and wrote data to "${finalTagName}"!`
-      );
-      setTagName("");
-    } catch (err) {
-      Alert.alert(
-        "Write Error",
-        "Failed to write data onto the NFC tag. Please try again."
-      );
-    } finally {
+    } catch (nfcHardwareErr) {
+      // 2. HÀNG RÀO PHÒNG THỦ MÁY ẢO: Khi phát hiện lỗi phần cứng, hiện luôn ô nhập tay ID
       await cleanUpNfcListener();
       setScanState("ready");
-      loadData();
+
+      Alert.prompt(
+        "NFC Hardware Mock",
+        "Laptop không hỗ trợ quét thẻ. Hãy nhập tay một mã ID Tag (ví dụ: 04a1b2) để giả lập:",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "OK",
+            onPress: (mockTagId) => {
+              const cleanedId = (mockTagId || "").trim().toLowerCase();
+              if (!cleanedId) {
+                Alert.alert("Error", "Mã ID không được để trống!");
+                return;
+              }
+              // Chuyển thẳng ID nhập tay vào luồng lưu API
+              finalizeConfiguration(cleanedId, type, habitId);
+            },
+          },
+        ],
+        "plain-text"
+      );
     }
   };
 
@@ -157,9 +226,9 @@ export default function NfcSettingsScreen() {
 
   const getHabitLabel = useCallback((habitId) => {
     if (!allHabits) return "Loading habit...";
-    const habit = allHabits.find((h) => h.id === habitId);
+    const habit = allHabits.find((h) => String(h.id) === String(habitId));
     if (!habit) return "Linked habit deleted";
-    return habit.name;
+    return habit.name || habit.title || "Unnamed Habit";
   }, [allHabits]);
 
   const safeNfcMappings = useMemo(() => nfcMappings || {}, [nfcMappings]);
@@ -189,9 +258,7 @@ export default function NfcSettingsScreen() {
       {scanState === "scanning" && (
         <View style={styles.scanInfo}>
           <ActivityIndicator color="#3B604D" />
-          <Text style={styles.scanText}>
-            Hold the NFC tag near the phone...
-          </Text>
+          <Text style={styles.scanText}>Hold the NFC tag near the phone...</Text>
         </View>
       )}
 
@@ -224,7 +291,7 @@ export default function NfcSettingsScreen() {
                 onPress={() => handleWriteAndSave("SINGLE", habit.id)}
                 disabled={scanState === "scanning"}
               >
-                <Text style={styles.btnSecondaryText}>{habit.name}</Text>
+                <Text style={styles.btnSecondaryText}>{habit.name || habit.title}</Text>
               </TouchableOpacity>
             ))}
 
@@ -242,9 +309,7 @@ export default function NfcSettingsScreen() {
         )}
       </View>
 
-      <Text style={styles.sectionTitle}>
-        Configured tags ({tagKeys.length})
-      </Text>
+      <Text style={styles.sectionTitle}>Configured tags ({tagKeys.length})</Text>
 
       {tagKeys.length === 0 ? (
         <View style={styles.emptyBox}>
