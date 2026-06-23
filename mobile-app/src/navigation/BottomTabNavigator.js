@@ -14,7 +14,7 @@ import {
 
 import { getTabStyles } from "./BottomTabNavigator.styles";
 import withSwipeTabs from "./withSwipeTabs";
-import DashboardScreen from "../features/dashboard/screens/DashboardScreen";
+import DashboardScreen from "@/features/dashboard/screens/DashboardScreen";
 import MyGoalsScreen from "../features/goals/screens/MyGoals/MyGoalsScreen";
 import HabitListScreen from "../features/habits/screens/HabitList/HabitListScreen";
 import TodayScreen from "../features/today/screens/Today/TodayScreen";
