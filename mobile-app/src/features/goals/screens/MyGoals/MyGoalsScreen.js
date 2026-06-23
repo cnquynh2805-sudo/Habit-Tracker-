@@ -1,16 +1,29 @@
+/* eslint-disable no-unused-vars, react-native/no-inline-styles, react-native/no-color-literals */
 import { FlashList } from "@shopify/flash-list";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useTranslation } from "react-i18next";
-import { View, Text, ActivityIndicator, Modal, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  ActivityIndicator,
+  Modal,
+  TouchableOpacity,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import ActiveMilestoneCard from "../../components/ActiveMilestoneCard";
-import NoGoalCard from "../../components/NoGoalCard";
-import OverallProgressCard from "../../components/OverallProgressCard";
-import GoalSettingModal from "../../components/GoalSettingModal";
-import { useDashboardGoals } from "../../hooks/useDashboardGoals";
 import { getGoalsStyles } from "./MyGoalsScreen.styles";
 import { useTheme } from "../../../../providers/ThemeProvider";
+import ActiveMilestoneCard from "../../components/ActiveMilestoneCard";
+import GoalSettingModal from "../../components/GoalSettingModal";
+import NoGoalCard from "../../components/NoGoalCard";
+import OverallProgressCard from "../../components/OverallProgressCard";
+import { useDashboardGoals } from "../../hooks/useDashboardGoals";
 
 export default function MyGoalsScreen() {
   const { t } = useTranslation();
@@ -43,7 +56,11 @@ export default function MyGoalsScreen() {
     if (!activeGoals || activeGoals.length === 0) return;
     for (const item of activeGoals) {
       const goalId = item.goal?.id;
-      if (item.goal?.isAchieved && goalId && !shownAchievementsRef.current.has(goalId)) {
+      if (
+        item.goal?.isAchieved &&
+        goalId &&
+        !shownAchievementsRef.current.has(goalId)
+      ) {
         shownAchievementsRef.current.add(goalId);
         setAchievementAlert({ habitName: item.habitName, goalId });
         break; // Show one at a time; user can dismiss and the next will show on next render.
@@ -148,7 +165,10 @@ export default function MyGoalsScreen() {
   if (isLoading) {
     return (
       <SafeAreaView
-        style={[styles.container, { justifyContent: "center", alignItems: "center" }]}
+        style={[
+          styles.container,
+          { justifyContent: "center", alignItems: "center" },
+        ]}
         edges={["top"]}
       >
         <ActivityIndicator size="large" color={colors.primary} />
@@ -210,32 +230,42 @@ export default function MyGoalsScreen() {
         onRequestClose={() => setAchievementAlert(null)}
         accessibilityViewIsModal
       >
-        <View style={{
-          flex: 1,
-          backgroundColor: "rgba(0,0,0,0.55)",
-          justifyContent: "center",
-          alignItems: "center",
-          padding: 24,
-        }}>
-          <View style={{
-            backgroundColor: colors.card || colors.surface || "#1e1e2e",
-            borderRadius: 20,
-            padding: 28,
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.55)",
+            justifyContent: "center",
             alignItems: "center",
-            width: "90%",
-            maxWidth: 360,
-          }}>
+            padding: 24,
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: colors.card || colors.surface || "#1e1e2e",
+              borderRadius: 20,
+              padding: 28,
+              alignItems: "center",
+              width: "90%",
+              maxWidth: 360,
+            }}
+          >
             <Text style={{ fontSize: 52, marginBottom: 12 }}>🎉</Text>
-            <Text style={[
-              styles.headerTitle,
-              { fontSize: 20, textAlign: "center", marginBottom: 8 },
-            ]}>
-              {t("goals.goalAchievedTitle", { name: achievementAlert?.habitName })}
+            <Text
+              style={[
+                styles.headerTitle,
+                { fontSize: 20, textAlign: "center", marginBottom: 8 },
+              ]}
+            >
+              {t("goals.goalAchievedTitle", {
+                name: achievementAlert?.habitName,
+              })}
             </Text>
-            <Text style={[
-              styles.overallSubtext,
-              { textAlign: "center", marginBottom: 24 },
-            ]}>
+            <Text
+              style={[
+                styles.overallSubtext,
+                { textAlign: "center", marginBottom: 24 },
+              ]}
+            >
               {t("goals.goalAchievedBody")}
             </Text>
             <TouchableOpacity

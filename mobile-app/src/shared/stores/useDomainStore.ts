@@ -19,9 +19,10 @@
  *  - AsyncStorage persistence for offline-first experience
  */
 
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+
 import apiClient from "@/shared/api/apiClient";
 import { endpoints } from "@/shared/api/endpoints";
 
@@ -113,8 +114,12 @@ export const useDomainStore = create<DomainState>()(
 
           // Fetch habits, goals, and time-windowed checkins in parallel
           const [habitsRes, goalsRes, checkinsRes] = await Promise.allSettled([
-            apiClient.get(endpoints.habits.list, { signal }) as Promise<RawHabit[]>,
-            apiClient.get(endpoints.goals.list, { signal }) as Promise<RawGoal[]>,
+            apiClient.get(endpoints.habits.list, { signal }) as Promise<
+              RawHabit[]
+            >,
+            apiClient.get(endpoints.goals.list, { signal }) as Promise<
+              RawGoal[]
+            >,
             apiClient.get(endpoints.checkins.list, {
               params: {
                 start_date: startDateStr,
@@ -138,19 +143,29 @@ export const useDomainStore = create<DomainState>()(
               : get().goals;
 
           const checkins =
-            checkinsRes.status === "fulfilled" && Array.isArray(checkinsRes.value)
+            checkinsRes.status === "fulfilled" &&
+            Array.isArray(checkinsRes.value)
               ? checkinsRes.value
               : get().checkins;
 
           // Log any individual failures (non-fatal)
           if (habitsRes.status === "rejected") {
-            console.warn("[DomainStore] habits fetch failed:", habitsRes.reason?.message);
+            console.warn(
+              "[DomainStore] habits fetch failed:",
+              habitsRes.reason?.message,
+            );
           }
           if (goalsRes.status === "rejected") {
-            console.warn("[DomainStore] goals fetch failed:", goalsRes.reason?.message);
+            console.warn(
+              "[DomainStore] goals fetch failed:",
+              goalsRes.reason?.message,
+            );
           }
           if (checkinsRes.status === "rejected") {
-            console.warn("[DomainStore] checkins fetch failed:", checkinsRes.reason?.message);
+            console.warn(
+              "[DomainStore] checkins fetch failed:",
+              checkinsRes.reason?.message,
+            );
           }
 
           set({
@@ -185,6 +200,6 @@ export const useDomainStore = create<DomainState>()(
         checkins: state.checkins,
         lastFetched: state.lastFetched,
       }),
-    }
-  )
+    },
+  ),
 );

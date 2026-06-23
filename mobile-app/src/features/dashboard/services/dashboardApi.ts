@@ -10,7 +10,7 @@ export const dashboardApi = {
     startDate: string,
     endDate: string,
     timezone: string,
-    signal?: AbortSignal
+    signal?: AbortSignal,
   ) => {
     return apiClient.get(endpoints.dashboard.simpleHeatmap, {
       params: { startDate, endDate, timezone },

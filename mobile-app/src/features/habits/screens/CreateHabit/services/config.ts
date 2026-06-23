@@ -1,7 +1,6 @@
 import NetInfo from "@react-native-community/netinfo";
 
-export const API_BASE_URL =
-  "https://x8ki-letl-twmt.n7.xano.io/api:EDyDyMOI";
+export const API_BASE_URL = "https://x8ki-letl-twmt.n7.xano.io/api:EDyDyMOI";
 
 export async function isOnline(): Promise<boolean> {
   try {
@@ -15,7 +14,7 @@ export async function isOnline(): Promise<boolean> {
 
 export async function apiCall(
   endpoint: string,
-  options?: RequestInit
+  options?: RequestInit,
 ): Promise<Response> {
   const url = `${API_BASE_URL}${endpoint}`;
 

@@ -9,11 +9,11 @@ const headers = {
 function makeHabitPayload(habit: Partial<Habit>) {
   return {
     // Keep sending the original ID, but Xano will ignore or store it based on its auto-increment config
-    id: String(habit.id), 
+    id: String(habit.id),
     name: habit.name,
     category: habit.category,
     frequency: habit.frequency,
-    daysOfWeek: habit.frequency === "Custom" ? habit.daysOfWeek ?? [] : null,
+    daysOfWeek: habit.frequency === "Custom" ? (habit.daysOfWeek ?? []) : null,
     targetPerDay: habit.targetPerDay ?? 1,
     priority: habit.priority,
     status: habit.status,
@@ -57,9 +57,9 @@ export async function createHabitRemote(habit: Habit) {
   // Ensure the response maintains your local string ID,
   // and assigns the generated server ID to 'serverId' for habitsManager to save locally
   if (responseData && responseData.id) {
-    const serverGeneratedId = responseData.id; 
-    responseData.id = String(habit.id);        
-    responseData.serverId = String(serverGeneratedId); 
+    const serverGeneratedId = responseData.id;
+    responseData.id = String(habit.id);
+    responseData.serverId = String(serverGeneratedId);
   }
 
   return responseData;
@@ -68,11 +68,11 @@ export async function createHabitRemote(habit: Habit) {
 // 2. UPDATE: Prioritize using 'serverId', fallback to local 'id' if offline/not synced yet
 export async function updateHabitRemote(habit: any) {
   const remoteId = habit.serverId || String(habit.id);
-  
+
   if (!remoteId) {
     throw new Error("Cannot update remote habit without a valid ID");
   }
-  
+
   return apiRequest(`/habits/${remoteId}`, {
     method: "PATCH",
     body: JSON.stringify(makeHabitPayload(habit)),
@@ -81,7 +81,10 @@ export async function updateHabitRemote(habit: any) {
 
 // 3. DELETE: Extract 'serverId' or 'id' properly from either a habit object or a string ID
 export async function deleteHabitRemote(habit: any) {
-  const remoteId = typeof habit === "object" ? (habit.serverId || String(habit.id)) : String(habit);
+  const remoteId =
+    typeof habit === "object"
+      ? habit.serverId || String(habit.id)
+      : String(habit);
 
   return apiRequest(`/habits/${remoteId}`, {
     method: "DELETE",

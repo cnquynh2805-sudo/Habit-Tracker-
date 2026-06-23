@@ -1,5 +1,11 @@
+/* eslint-disable no-unused-vars, i18next/no-literal-string, react-native-a11y/no-nested-touchables, react-native/no-inline-styles */
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Globe, Palette, SlidersHorizontal, MoreVertical } from "lucide-react-native";
+import {
+  Globe,
+  Palette,
+  SlidersHorizontal,
+  MoreVertical,
+} from "lucide-react-native";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -18,6 +24,7 @@ import { getStyles } from "./HabitListScreen.styles";
 import { useTheme } from "../../../../providers/ThemeProvider";
 import { API_BASE_URL } from "../CreateHabit/services/config";
 import * as habitsManager from "../CreateHabit/services/habitsManager";
+
 import ConfirmModal from "@/shared/components/confirmModal/ConfirmModal";
 
 const CATEGORIES = ["All", "Health", "Study", "Work", "Mindfulness", "Other"];
@@ -130,7 +137,7 @@ export default function HabitListScreen({ navigation }) {
 
   const [habits, setHabits] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [currentViewStatus, setCurrentViewStatus] = useState("Active"); 
+  const [currentViewStatus, setCurrentViewStatus] = useState("Active");
   const [isLoading, setIsLoading] = useState(false);
 
   const [activeDropdownId, setActiveDropdownId] = useState(null);
@@ -173,7 +180,7 @@ export default function HabitListScreen({ navigation }) {
         const apiHabits = Array.isArray(raw)
           ? raw
           : raw?.data || raw?.habits || raw?.items || [];
-        
+
         setHabits(apiHabits);
         await AsyncStorage.setItem("@habits_list", JSON.stringify(apiHabits));
       }
@@ -209,13 +216,18 @@ export default function HabitListScreen({ navigation }) {
 
   const handleUpdateStatus = async (habitId, newStatus) => {
     try {
-      console.log(`[UI ACTION]: Cap nhat trang thai habit ${habitId} thanh ${newStatus}`);
+      console.log(
+        `[UI ACTION]: Cap nhat trang thai habit ${habitId} thanh ${newStatus}`,
+      );
       // Goi API thong qua habitsManager voi payload chuan
       await habitsManager.updateHabit(habitId, { status: newStatus });
 
       setHabits((prevHabits) =>
         prevHabits.map((h) => {
-          if (String(h.id) === String(habitId) || (h.serverId && String(h.serverId) === String(habitId))) {
+          if (
+            String(h.id) === String(habitId) ||
+            (h.serverId && String(h.serverId) === String(habitId))
+          ) {
             return {
               ...h,
               status: newStatus,
@@ -223,9 +235,9 @@ export default function HabitListScreen({ navigation }) {
             };
           }
           return h;
-        })
+        }),
       );
-      
+
       setActiveDropdownId(null);
     } catch (error) {
       console.log("Error updating status:", error);
@@ -247,40 +259,28 @@ export default function HabitListScreen({ navigation }) {
       return;
     }
 
-    const targetId =
-      habitToDelete.id ||
-      habitToDelete.serverId;
+    const targetId = habitToDelete.id || habitToDelete.serverId;
 
     try {
-      const isDeleted =
-        await habitsManager.deleteHabit(
-          targetId
-        );
+      const isDeleted = await habitsManager.deleteHabit(targetId);
 
       if (isDeleted) {
         setHabits((prevHabits) =>
           prevHabits.filter(
             (h) =>
               String(h.id) !== String(targetId) &&
-              String(h.serverId) !==
-                String(targetId)
-          )
+              String(h.serverId) !== String(targetId),
+          ),
         );
 
         setActiveDropdownId(null);
       } else {
-        Alert.alert(
-          "Error",
-          "Failed to delete habit"
-        );
+        Alert.alert("Error", "Failed to delete habit");
       }
     } catch (error) {
       console.error(error);
 
-      Alert.alert(
-        "Error",
-        "Failed to delete habit"
-      );
+      Alert.alert("Error", "Failed to delete habit");
     } finally {
       setConfirmVisible(false);
       setHabitToDelete(null);
@@ -298,7 +298,8 @@ export default function HabitListScreen({ navigation }) {
         item.category?.toLowerCase() === selectedCategory.toLowerCase();
 
       const itemStatus = item.status
-        ? item.status.charAt(0).toUpperCase() + item.status.slice(1).toLowerCase()
+        ? item.status.charAt(0).toUpperCase() +
+          item.status.slice(1).toLowerCase()
         : "Active";
       const matchStatus = itemStatus === currentViewStatus;
 
@@ -306,129 +307,179 @@ export default function HabitListScreen({ navigation }) {
     });
   }, [habits, selectedCategory, currentViewStatus]);
 
-  const renderHabitItem = useCallback(({ item }) => {
-    const rawStatus = item.status || "Active";
-    const currentStatus = rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1).toLowerCase();
+  const renderHabitItem = useCallback(
+    ({ item }) => {
+      const rawStatus = item.status || "Active";
+      const currentStatus =
+        rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1).toLowerCase();
 
-    const currentId = item.id || item.serverId;
-    const isDropdownVisible = activeDropdownId === currentId;
-    const priTheme = getPriorityStyleMapping(item.priority, colors, t);
-    const availableOptions = getAvailableStatusOptions(currentStatus, t);
+      const currentId = item.id || item.serverId;
+      const isDropdownVisible = activeDropdownId === currentId;
+      const priTheme = getPriorityStyleMapping(item.priority, colors, t);
+      const availableOptions = getAvailableStatusOptions(currentStatus, t);
 
-    const isStudy = item.category?.toLowerCase() === "study";
-    const categoryBadgeBg = isStudy ? colors.badgeStudyBg : colors.badgeDefaultBg;
-    const categoryBadgeText = isStudy ? colors.badgeStudyText : colors.badgeDefaultText;
+      const isStudy = item.category?.toLowerCase() === "study";
+      const categoryBadgeBg = isStudy
+        ? colors.badgeStudyBg
+        : colors.badgeDefaultBg;
+      const categoryBadgeText = isStudy
+        ? colors.badgeStudyText
+        : colors.badgeDefaultText;
 
-    return (
-      <View style={styles.cardOuterContainer}>
-        <TouchableOpacity
-          accessible
-          accessibilityRole="button"
-          accessibilityLabel="Interactive element"
-          style={styles.habitCardWrapper}
-          onPress={() => {
-            closeAllMenus();
-            navigation && navigation.navigate("CreateHabit", { habitId: currentId });
-          }}
-          activeOpacity={0.9}
-        >
-          <View style={[styles.cardLeftStripe, { backgroundColor: priTheme.stripe }]} />
+      return (
+        <View style={styles.cardOuterContainer}>
+          <TouchableOpacity
+            accessible
+            accessibilityRole="button"
+            accessibilityLabel="Interactive element"
+            style={styles.habitCardWrapper}
+            onPress={() => {
+              closeAllMenus();
+              navigation &&
+                navigation.navigate("CreateHabit", { habitId: currentId });
+            }}
+            activeOpacity={0.9}
+          >
+            <View
+              style={[
+                styles.cardLeftStripe,
+                { backgroundColor: priTheme.stripe },
+              ]}
+            />
 
-          <View style={styles.cardMainContentContainer}>
-            <View style={styles.leftMetaContainer}>
-              <View style={[styles.iconCircleBadge, currentStatus !== "Active" && styles.iconCircleBadgePaused]}>
-                {renderCategoryIcon(item.category, styles)}
+            <View style={styles.cardMainContentContainer}>
+              <View style={styles.leftMetaContainer}>
+                <View
+                  style={[
+                    styles.iconCircleBadge,
+                    currentStatus !== "Active" && styles.iconCircleBadgePaused,
+                  ]}
+                >
+                  {renderCategoryIcon(item.category, styles)}
+                </View>
               </View>
-            </View>
 
-            <View style={styles.cardTextGroup}>
-              <Text style={[styles.habitTitleLabel, currentStatus !== "Active" && styles.textMuted]} numberOfLines={1}>
-                {item.name}
-              </Text>
-
-              <DynamicPriorityTagsGrid
-                item={item}
-                currentStatus={currentStatus}
-                categoryBadgeBg={categoryBadgeBg}
-                categoryBadgeText={categoryBadgeText}
-                colors={colors}
-                styles={styles}
-                t={t}
-                priTheme={priTheme}
-              />
-            </View>
-
-            <View style={styles.cardRightActionBlock}>
-              <View style={[
-                styles.statusCapsule,
-                currentStatus === "Active" && styles.statusCapsuleActive,
-                currentStatus === "Paused" && styles.statusCapsulePaused,
-                currentStatus === "Archived" && styles.statusCapsuleArchived,
-              ]}>
+              <View style={styles.cardTextGroup}>
                 <Text
                   style={[
-                    styles.statusCapsuleText,
-                    currentStatus === "Active" && styles.statusTextActive,
-                    currentStatus === "Paused" && styles.statusTextPaused,
-                    currentStatus === "Archived" && styles.statusTextArchived,
+                    styles.habitTitleLabel,
+                    currentStatus !== "Active" && styles.textMuted,
                   ]}
                   numberOfLines={1}
-                  ellipsizeMode="tail"
                 >
-                  {t(`status.${currentStatus.toLowerCase()}`)}
+                  {item.name}
                 </Text>
+
+                <DynamicPriorityTagsGrid
+                  item={item}
+                  currentStatus={currentStatus}
+                  categoryBadgeBg={categoryBadgeBg}
+                  categoryBadgeText={categoryBadgeText}
+                  colors={colors}
+                  styles={styles}
+                  t={t}
+                  priTheme={priTheme}
+                />
               </View>
 
-              <TouchableOpacity
-                accessible
-                accessibilityRole="button"
-                accessibilityLabel="Open Context Menu"
-                style={styles.moreOptionsButton}
-                onPress={() => setActiveDropdownId(isDropdownVisible ? null : currentId)}
-                activeOpacity={0.7}
-              >
-                <MoreVertical size={20} color={colors.textSecondary || "#666"} />
-              </TouchableOpacity>
-            </View>
-          </View>
-        </TouchableOpacity>
+              <View style={styles.cardRightActionBlock}>
+                <View
+                  style={[
+                    styles.statusCapsule,
+                    currentStatus === "Active" && styles.statusCapsuleActive,
+                    currentStatus === "Paused" && styles.statusCapsulePaused,
+                    currentStatus === "Archived" &&
+                      styles.statusCapsuleArchived,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.statusCapsuleText,
+                      currentStatus === "Active" && styles.statusTextActive,
+                      currentStatus === "Paused" && styles.statusTextPaused,
+                      currentStatus === "Archived" && styles.statusTextArchived,
+                    ]}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    {t(`status.${currentStatus.toLowerCase()}`)}
+                  </Text>
+                </View>
 
-        {isDropdownVisible && availableOptions.length > 0 && (
-          <View style={[styles.cardDropdownListMenu, { height: availableOptions.length * 36 + 8 }]}>
-            {availableOptions.map((option) => (
-              <TouchableOpacity
-                accessible
-                accessibilityRole="button"
-                accessibilityLabel="Interactive element"
-                key={option.id}
-                style={styles.cardDropdownOptionItem}
-                onPress={() => {
-                  if (option.id === "delete") {
-                    handleDeleteHabit(item);
-                  } else if (option.id === "history") {
-                    closeAllMenus();
-                    navigation && navigation.navigate("History", {
-                      habit: item,
-                    });
-                  } else {
-                    handleUpdateStatus(currentId, option.id);
+                <TouchableOpacity
+                  accessible
+                  accessibilityRole="button"
+                  accessibilityLabel="Open Context Menu"
+                  style={styles.moreOptionsButton}
+                  onPress={() =>
+                    setActiveDropdownId(isDropdownVisible ? null : currentId)
                   }
-                }}
-              >
-                <Text style={[styles.cardDropdownOptionText, option.isDestructive && { color: colors.warningDark, fontWeight: "bold" }]}>
-                  {option.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        )}
-      </View>
-    );
-  }, [activeDropdownId, colors, t, styles, navigation, closeAllMenus]);
+                  activeOpacity={0.7}
+                >
+                  <MoreVertical
+                    size={20}
+                    color={colors.textSecondary || "#666"}
+                  />
+                </TouchableOpacity>
+              </View>
+            </View>
+          </TouchableOpacity>
+
+          {isDropdownVisible && availableOptions.length > 0 && (
+            <View
+              style={[
+                styles.cardDropdownListMenu,
+                { height: availableOptions.length * 36 + 8 },
+              ]}
+            >
+              {availableOptions.map((option) => (
+                <TouchableOpacity
+                  accessible
+                  accessibilityRole="button"
+                  accessibilityLabel="Interactive element"
+                  key={option.id}
+                  style={styles.cardDropdownOptionItem}
+                  onPress={() => {
+                    if (option.id === "delete") {
+                      handleDeleteHabit(item);
+                    } else if (option.id === "history") {
+                      closeAllMenus();
+                      navigation &&
+                        navigation.navigate("History", {
+                          habit: item,
+                        });
+                    } else {
+                      handleUpdateStatus(currentId, option.id);
+                    }
+                  }}
+                >
+                  <Text
+                    style={[
+                      styles.cardDropdownOptionText,
+                      option.isDestructive && {
+                        color: colors.warningDark,
+                        fontWeight: "bold",
+                      },
+                    ]}
+                  >
+                    {option.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+        </View>
+      );
+    },
+    [activeDropdownId, colors, t, styles, navigation, closeAllMenus],
+  );
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
-      <TouchableWithoutFeedback onPress={closeAllMenus}>
+      <TouchableWithoutFeedback
+        accessibilityRole="button"
+        onPress={closeAllMenus}
+      >
         <View style={styles.flexContainer}>
           {/* TOP HEADER */}
           <View style={styles.globalTopNavigationHeader}>
@@ -447,8 +498,6 @@ export default function HabitListScreen({ navigation }) {
             </Text>
 
             <View style={styles.headerRightActionGroup}>
-
-
               <TouchableOpacity
                 accessible
                 accessibilityRole="button"
@@ -491,19 +540,38 @@ export default function HabitListScreen({ navigation }) {
                         accessibilityRole="button"
                         accessibilityLabel="Interactive element"
                         key={menuItem.id}
-                        style={[styles.headerMenuPopoverItem, currentViewStatus === menuItem.id && { backgroundColor: colors.surfaceMuted }]}
+                        style={[
+                          styles.headerMenuPopoverItem,
+                          currentViewStatus === menuItem.id && {
+                            backgroundColor: colors.surfaceMuted,
+                          },
+                        ]}
                         onPress={() => {
                           setCurrentViewStatus(menuItem.id);
                           closeAllMenus();
                         }}
                       >
-                        <Text style={[styles.headerMenuPopoverText, currentViewStatus === menuItem.id && { color: colors.primary, fontWeight: "700" }]}>
+                        <Text
+                          style={[
+                            styles.headerMenuPopoverText,
+                            currentViewStatus === menuItem.id && {
+                              color: colors.primary,
+                              fontWeight: "700",
+                            },
+                          ]}
+                        >
                           {menuItem.title}
                         </Text>
                       </TouchableOpacity>
                     ))}
 
-                    <View style={{ height: 1, backgroundColor: colors.border, marginVertical: 4 }} />
+                    <View
+                      style={{
+                        height: 1,
+                        backgroundColor: colors.border,
+                        marginVertical: 4,
+                      }}
+                    />
 
                     <TouchableOpacity
                       accessible
@@ -515,7 +583,12 @@ export default function HabitListScreen({ navigation }) {
                         navigation && navigation.navigate("NfcSettings");
                       }}
                     >
-                      <Text style={[styles.headerMenuPopoverText, { color: colors.primary, fontWeight: "600" }]}>
+                      <Text
+                        style={[
+                          styles.headerMenuPopoverText,
+                          { color: colors.primary, fontWeight: "600" },
+                        ]}
+                      >
                         ⚙ NFC Setting
                       </Text>
                     </TouchableOpacity>
@@ -540,19 +613,20 @@ export default function HabitListScreen({ navigation }) {
               style={styles.filterTriggerRowBtn}
             >
               <SlidersHorizontal color={colors.primary} size={22} />
-              <Text style={styles.filterTriggerText}>
-                {t("Filter")}
-              </Text>
+              <Text style={styles.filterTriggerText}>{t("Filter")}</Text>
             </TouchableOpacity>
 
             {isFilterMenuOpen && (
               <View style={styles.filterStandalonePopoverMenu}>
                 {CATEGORIES.map((cat) => (
                   <TouchableOpacity
+                    accessibilityRole="button"
                     key={cat}
                     style={[
                       styles.headerMenuPopoverItem,
-                      selectedCategory === cat && { backgroundColor: colors.surfaceMuted }
+                      selectedCategory === cat && {
+                        backgroundColor: colors.surfaceMuted,
+                      },
                     ]}
                     onPress={() => {
                       setSelectedCategory(cat);
@@ -562,7 +636,10 @@ export default function HabitListScreen({ navigation }) {
                     <Text
                       style={[
                         styles.headerMenuPopoverText,
-                        selectedCategory === cat && { color: colors.primary, fontWeight: "700" },
+                        selectedCategory === cat && {
+                          color: colors.primary,
+                          fontWeight: "700",
+                        },
                       ]}
                     >
                       {t("category." + cat.toLowerCase())}
@@ -624,49 +701,81 @@ export default function HabitListScreen({ navigation }) {
         onConfirm={confirmDeleteHabit}
         destructive
       />
-
     </SafeAreaView>
   );
 }
 
-const DynamicPriorityTagsGrid = React.memo(({
-  item,
-  currentStatus,
-  categoryBadgeBg,
-  categoryBadgeText,
-  colors,
-  styles,
-  t,
-  priTheme,
-}) => {
-  const [topGroupWidth, setTopGroupWidth] = React.useState(null);
-  const currentId = item.id || item.serverId;
+const DynamicPriorityTagsGrid = React.memo(
+  ({
+    item,
+    currentStatus,
+    categoryBadgeBg,
+    categoryBadgeText,
+    colors,
+    styles,
+    t,
+    priTheme,
+  }) => {
+    const [topGroupWidth, setTopGroupWidth] = React.useState(null);
+    const currentId = item.id || item.serverId;
 
-  return (
-    <View style={styles.cardTagsGrid}>
-      <View style={styles.cardTagsRow}>
-        <View style={styles.cardTagsTopGroup} onLayout={(e) => setTopGroupWidth(e.nativeEvent.layout.width)}>
-          <View style={[styles.miniMetaBadge, { backgroundColor: categoryBadgeBg }]}>
-            <Text style={[styles.miniMetaBadgeText, { color: categoryBadgeText }]} numberOfLines={1} ellipsizeMode="tail">
-              {t(`category.${(item.category || "").toLowerCase()}`)}
-            </Text>
-          </View>
-          <View style={[styles.miniMetaBadge, { backgroundColor: colors.border }]}>
-            <Text style={[styles.miniMetaBadgeText, { color: colors.textMuted }]} numberOfLines={1} ellipsizeMode="tail">
-              {t(`frequency.${(item.frequency || "").toLowerCase()}`)}
-            </Text>
+    return (
+      <View style={styles.cardTagsGrid}>
+        <View style={styles.cardTagsRow}>
+          <View
+            style={styles.cardTagsTopGroup}
+            onLayout={(e) => setTopGroupWidth(e.nativeEvent.layout.width)}
+          >
+            <View
+              style={[
+                styles.miniMetaBadge,
+                { backgroundColor: categoryBadgeBg },
+              ]}
+            >
+              <Text
+                style={[styles.miniMetaBadgeText, { color: categoryBadgeText }]}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {t(`category.${(item.category || "").toLowerCase()}`)}
+              </Text>
+            </View>
+            <View
+              style={[styles.miniMetaBadge, { backgroundColor: colors.border }]}
+            >
+              <Text
+                style={[styles.miniMetaBadgeText, { color: colors.textMuted }]}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {t(`frequency.${(item.frequency || "").toLowerCase()}`)}
+              </Text>
+            </View>
           </View>
         </View>
 
-      </View>
-
-      <View style={styles.cardTagsRow}>
-        <View style={[styles.figmaPriorityCapsuleBase, { backgroundColor: priTheme.bg }, topGroupWidth ? { width: topGroupWidth } : { flexShrink: 1 }]}>
-          <Text style={[styles.figmaPriorityCapsuleText, { color: priTheme.text }]} numberOfLines={1} ellipsizeMode="tail" adjustsFontSizeToFit>
-            {priTheme.label}
-          </Text>
+        <View style={styles.cardTagsRow}>
+          <View
+            style={[
+              styles.figmaPriorityCapsuleBase,
+              { backgroundColor: priTheme.bg },
+              topGroupWidth ? { width: topGroupWidth } : { flexShrink: 1 },
+            ]}
+          >
+            <Text
+              style={[
+                styles.figmaPriorityCapsuleText,
+                { color: priTheme.text },
+              ]}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+              adjustsFontSizeToFit
+            >
+              {priTheme.label}
+            </Text>
+          </View>
         </View>
       </View>
-    </View>
-  );
-});
+    );
+  },
+);

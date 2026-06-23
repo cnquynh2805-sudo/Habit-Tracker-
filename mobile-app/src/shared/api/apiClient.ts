@@ -22,14 +22,18 @@ apiClient.interceptors.request.use(
     if (isRateLimited) {
       const now = Date.now();
       if (now < rateLimitResetTime) {
-        return Promise.reject(new Error("API requests are temporarily halted due to rate limits (429)."));
+        return Promise.reject(
+          new Error(
+            "API requests are temporarily halted due to rate limits (429).",
+          ),
+        );
       } else {
         isRateLimited = false;
       }
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 // Unwrap the response so callers receive the payload directly.
@@ -40,12 +44,16 @@ apiClient.interceptors.response.use(
       if (!isRateLimited) {
         isRateLimited = true;
         rateLimitResetTime = Date.now() + 60000; // 60 seconds halt
-        console.log("Xano Rate Limit (429) hit. Halting subsequent API requests for 60 seconds.");
-        
+        console.log(
+          "Xano Rate Limit (429) hit. Halting subsequent API requests for 60 seconds.",
+        );
+
         // Show user-facing custom alert
         useAppStore.getState().showGlobalAlert({
           title: i18n.t("common.error") || "Error",
-          message: i18n.t("common.rateLimitError") || "Rate limit exceeded. API requests are temporarily paused. Actions will be saved locally.",
+          message:
+            i18n.t("common.rateLimitError") ||
+            "Rate limit exceeded. API requests are temporarily paused. Actions will be saved locally.",
         });
       }
     }

@@ -1,10 +1,12 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { AxiosError } from "axios";
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+
 import { dashboardApi } from "../services/dashboardApi";
+
 import apiClient from "@/shared/api/apiClient";
 import { endpoints } from "@/shared/api/endpoints";
-import { AxiosError } from "axios";
 
 interface DashboardState {
   summary: any | null;
@@ -34,7 +36,10 @@ export const useDashboardStore = create<DashboardState>()(
         const { lastFetched, isLoading } = get();
         const now = Date.now();
         // Skip if already loading or cache < 5 min old (unless forced)
-        if (isLoading || (!force && lastFetched && now - lastFetched < 5 * 60 * 1000)) {
+        if (
+          isLoading ||
+          (!force && lastFetched && now - lastFetched < 5 * 60 * 1000)
+        ) {
           return;
         }
 
@@ -42,7 +47,8 @@ export const useDashboardStore = create<DashboardState>()(
 
         try {
           const timezone =
-            Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Ho_Chi_Minh";
+            Intl.DateTimeFormat().resolvedOptions().timeZone ||
+            "Asia/Ho_Chi_Minh";
 
           // Compute dates for 3-month heatmap
           const endDateObj = new Date();
@@ -52,27 +58,37 @@ export const useDashboardStore = create<DashboardState>()(
           const startDate = startDateObj.toISOString().split("T")[0];
 
           // Fetch all dashboard endpoints concurrently
-          const [summaryRes, heatmapRes, weeklyRes, goalsRes] = await Promise.allSettled([
-            dashboardApi.getSummary(),
-            dashboardApi.getSimpleHeatmap(startDate, endDate, timezone),
-            dashboardApi.getWeeklyProgress(),
-            dashboardApi.getGoals(),
-          ]);
+          const [summaryRes, heatmapRes, weeklyRes, goalsRes] =
+            await Promise.allSettled([
+              dashboardApi.getSummary(),
+              dashboardApi.getSimpleHeatmap(startDate, endDate, timezone),
+              dashboardApi.getWeeklyProgress(),
+              dashboardApi.getGoals(),
+            ]);
 
           const summary =
-            summaryRes.status === "fulfilled" ? summaryRes.value : get().summary;
+            summaryRes.status === "fulfilled"
+              ? summaryRes.value
+              : get().summary;
           const heatmap =
-            heatmapRes.status === "fulfilled" ? heatmapRes.value : get().heatmap;
+            heatmapRes.status === "fulfilled"
+              ? heatmapRes.value
+              : get().heatmap;
           const weeklyProgress =
-            weeklyRes.status === "fulfilled" ? weeklyRes.value : get().weeklyProgress;
+            weeklyRes.status === "fulfilled"
+              ? weeklyRes.value
+              : get().weeklyProgress;
           const goals =
             goalsRes.status === "fulfilled" ? goalsRes.value : get().goals;
 
           // Fetch all checkins for per-habit derived stats
           // GET /checkins returns all checkins — build a map { habitId: [...] }
-          let checkinsByHabit: Record<number, any[]> = get().checkinsByHabit || {};
+          let checkinsByHabit: Record<number, any[]> =
+            get().checkinsByHabit || {};
           try {
-            const allCheckins: any[] = await apiClient.get(endpoints.checkins.listAll);
+            const allCheckins: any[] = await apiClient.get(
+              endpoints.checkins.listAll,
+            );
             if (Array.isArray(allCheckins)) {
               checkinsByHabit = {};
               allCheckins.forEach((c: any) => {
@@ -101,7 +117,9 @@ export const useDashboardStore = create<DashboardState>()(
           console.error("Dashboard data load error:", err);
           set({
             error:
-              err instanceof AxiosError ? err.message : "Failed to load dashboard data",
+              err instanceof AxiosError
+                ? err.message
+                : "Failed to load dashboard data",
             isLoading: false,
           });
         }
@@ -118,6 +136,6 @@ export const useDashboardStore = create<DashboardState>()(
         checkinsByHabit: state.checkinsByHabit,
         lastFetched: state.lastFetched,
       }),
-    }
-  )
+    },
+  ),
 );

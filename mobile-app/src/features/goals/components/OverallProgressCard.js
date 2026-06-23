@@ -98,7 +98,9 @@ export default function OverallProgressCard({
 
       {/* Linear progress bar */}
       <View style={styles.overallProgressBarBg}>
-        <Animated.View style={[styles.overallProgressBarFill, animatedBarStyle]} />
+        <Animated.View
+          style={[styles.overallProgressBarFill, animatedBarStyle]}
+        />
       </View>
     </View>
   );

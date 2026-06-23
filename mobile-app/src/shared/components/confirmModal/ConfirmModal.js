@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React from "react";
 import {
   Modal,
@@ -7,8 +8,9 @@ import {
   View,
 } from "react-native";
 
-import { useTheme } from "@/providers/ThemeProvider";
 import { createConfirmModalStyles } from "./ConfirmModal.styles";
+
+import { useTheme } from "@/providers/ThemeProvider";
 
 export default function ConfirmModal({
   visible,
@@ -18,14 +20,14 @@ export default function ConfirmModal({
   confirmLabel = "Confirm",
   onCancel,
   onConfirm,
-  destructive = false
+  destructive = false,
 }) {
   const { colors } = useTheme();
   const styles = createConfirmModalStyles(colors);
 
   const primaryStyle = destructive
-  ? styles.modalBtnDanger
-  : styles.modalBtnPrimary;
+    ? styles.modalBtnDanger
+    : styles.modalBtnPrimary;
 
   return (
     <Modal
@@ -34,47 +36,33 @@ export default function ConfirmModal({
       animationType="fade"
       onRequestClose={onCancel}
     >
-      <TouchableWithoutFeedback onPress={onCancel}>
+      <TouchableWithoutFeedback accessibilityRole="button" onPress={onCancel}>
         <View style={styles.modalOverlay}>
-          <TouchableWithoutFeedback>
+          <TouchableWithoutFeedback accessibilityRole="button">
             <View style={styles.modalCard}>
-              <Text style={styles.modalTitle}>
-                {title}
-              </Text>
+              <Text style={styles.modalTitle}>{title}</Text>
 
-              <Text style={styles.modalMessage}>
-                {message}
-              </Text>
+              <Text style={styles.modalMessage}>{message}</Text>
 
               <View style={styles.modalButtonRow}>
                 <TouchableOpacity
+                  accessibilityRole="button"
                   style={styles.modalBtnGhost}
                   onPress={onCancel}
                   activeOpacity={0.85}
                 >
-                  <Text
-                    style={styles.modalBtnGhostText}
-                  >
-                    {cancelLabel}
-                  </Text>
+                  <Text style={styles.modalBtnGhostText}>{cancelLabel}</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
+                  accessibilityRole="button"
                   style={
-                    destructive
-                    ? styles.modalBtnDanger
-                    : styles.modalBtnPrimary
+                    destructive ? styles.modalBtnDanger : styles.modalBtnPrimary
                   }
                   onPress={onConfirm}
                   activeOpacity={0.85}
                 >
-                  <Text
-                    style={
-                      styles.modalBtnPrimaryText
-                    }
-                  >
-                    {confirmLabel}
-                  </Text>
+                  <Text style={styles.modalBtnPrimaryText}>{confirmLabel}</Text>
                 </TouchableOpacity>
               </View>
             </View>

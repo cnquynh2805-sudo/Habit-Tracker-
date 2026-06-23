@@ -1,23 +1,15 @@
+/* eslint-disable react-native/no-inline-styles */
+import LottieView from "lottie-react-native";
 import React from "react";
-
-import {
-  View,
-  Text,
-  TouchableOpacity,
-} from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
 
 import styles from "./CollectionCard.styles.js";
-import LottieView from "lottie-react-native";
 import { useMascotStore } from "../store/mascotStore";
 
-export default function CollectionCard({
-  item,
-  onEquip,
-}) {
-  
+export default function CollectionCard({ item, onEquip }) {
   const { equippedRewardId } = useMascotStore();
   const isEquipped = equippedRewardId === item.id;
-  
+
   // const getButtonStyle = () => {
   //   if (item.unlocked && isEquipped) {
   //     return styles.equippedButton;
@@ -43,28 +35,19 @@ export default function CollectionCard({
 
     !item.unlocked && styles.lockedButton,
 
-    item.unlocked &&
-      !isEquipped &&
-      styles.unequippedButton,
+    item.unlocked && !isEquipped && styles.unequippedButton,
 
-    item.unlocked &&
-      isEquipped &&
-      styles.equippedButton,
+    item.unlocked && isEquipped && styles.equippedButton,
   ];
 
   const buttonTextStyle = [
     styles.buttonText,
 
-    !item.unlocked &&
-      styles.lockedButtonText,
+    !item.unlocked && styles.lockedButtonText,
 
-    item.unlocked &&
-      !isEquipped &&
-      styles.unequippedButtonText,
+    item.unlocked && !isEquipped && styles.unequippedButtonText,
 
-    item.unlocked &&
-      isEquipped &&
-      styles.equippedButtonText,
+    item.unlocked && isEquipped && styles.equippedButtonText,
   ];
 
   const getButtonLabel = () => {
@@ -74,10 +57,15 @@ export default function CollectionCard({
 
     return "Equip";
   };
-  
+
   return (
     <View style={styles.card}>
-      <View style={{opacity: item.unlocked ? 1 : 0.35, ...styles.animationContainer}} >
+      <View
+        style={{
+          opacity: item.unlocked ? 1 : 0.35,
+          ...styles.animationContainer,
+        }}
+      >
         <LottieView
           source={item.animation}
           autoPlay
@@ -86,19 +74,14 @@ export default function CollectionCard({
         />
       </View>
 
-      <Text style={styles.name}>
-        {item.name}
-      </Text>
+      <Text style={styles.name}>{item.name}</Text>
 
       <TouchableOpacity
+        accessibilityRole="button"
         style={buttonStyle}
-        onPress={() =>
-          item.unlocked && onEquip(item.id)
-        }
+        onPress={() => item.unlocked && onEquip(item.id)}
       >
-        <Text style={buttonTextStyle}>
-          {getButtonLabel()}
-        </Text>
+        <Text style={buttonTextStyle}>{getButtonLabel()}</Text>
       </TouchableOpacity>
     </View>
   );

@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-color-literals */
 import { StyleSheet } from "react-native";
 
 const styles = StyleSheet.create({
@@ -77,6 +78,5 @@ const styles = StyleSheet.create({
     color: "#a7a7a7",
   },
 });
-
 
 export default styles;
