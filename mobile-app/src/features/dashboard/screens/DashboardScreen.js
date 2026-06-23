@@ -524,26 +524,6 @@ const DashboardScreen = () => {
       {/* HEADER */}
       <View style={styles.header}>
         <Text style={styles.pageTitle}>Dashboard</Text>
-        <View style={styles.headerActions}>
-          <TouchableOpacity
-            accessibilityLabel="Share dashboard"
-            accessibilityRole="button"
-            onPress={() =>
-              Share.share({
-                message: `My habit consistency today: ${todayScore}%`,
-              })
-            }
-          >
-            <Upload size={22} color={C.text} />
-          </TouchableOpacity>
-          <TouchableOpacity
-            accessibilityLabel="Settings"
-            accessibilityRole="button"
-            style={{ marginLeft: 16 }}
-          >
-            <Settings size={22} color={C.text} />
-          </TouchableOpacity>
-        </View>
       </View>
 
       <ScrollView

@@ -181,10 +181,6 @@ export default function MyGoalsScreen() {
       {/* Screen header */}
       <View style={styles.headerContainer}>
         <Text style={styles.headerTitle}>{t("tabs.goals")}</Text>
-        {/* Search icon placeholder */}
-        <View style={styles.searchButton}>
-          <Text style={{ fontSize: 18 }}>🔍</Text>
-        </View>
       </View>
 
       {isError ? (
