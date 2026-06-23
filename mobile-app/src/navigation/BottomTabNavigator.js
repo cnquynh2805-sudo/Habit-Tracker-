@@ -20,6 +20,7 @@ import HabitListScreen from "../features/habits/screens/HabitList/HabitListScree
 import TodayScreen from "../features/today/screens/Today/TodayScreen";
 import { useTheme } from "../providers/ThemeProvider";
 import MascotScreen from "@/features/mascot/screens/MascotScreen";
+import DashboardScreen from "../features/dashboard/screens/DashboardScreen";
 
 if (
   Platform.OS === "android" &&
@@ -28,35 +29,10 @@ if (
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-// --- CLEAN DUMMY SCREENS ---
-const StatsScreen = () => {
-  const { t } = useTranslation();
-  const { colors } = useTheme();
-  return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: colors.background,
-      }}
-    >
-      <Text
-        style={[
-          getTabStyles(colors).dummyScreenText,
-          { color: colors.primary },
-        ]}
-      >
-        {t("tabs.statsScreen")}
-      </Text>
-    </View>
-  );
-};
-
 // Wrap each screen so a horizontal swipe moves to the adjacent tab.
 const SwipeToday = withSwipeTabs(TodayScreen);
 const SwipeHabits = withSwipeTabs(HabitListScreen);
-const SwipeStats = withSwipeTabs(StatsScreen);
+const SwipeStats = withSwipeTabs(DashboardScreen);
 const SwipeGoals = withSwipeTabs(MyGoalsScreen);
 const SwipeMascot = withSwipeTabs(MascotScreen);
 

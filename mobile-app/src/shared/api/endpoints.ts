@@ -29,4 +29,10 @@ export const endpoints = {
   system: {
     reset: "/system/reset",
   },
+  dashboard: {
+    summary: "/dashboard/summary",
+    simpleHeatmap: "/dashboard/simple-heatmap",
+    weeklyProgress: "/dashboard/weekly-progress",
+    goals: "/dashboard/goals",
+  },
 } as const;
