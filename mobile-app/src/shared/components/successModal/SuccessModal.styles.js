@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-color-literals */
 import { StyleSheet } from "react-native";
 
 export const createSuccessModalStyles = (colors) =>
@@ -24,8 +25,7 @@ export const createSuccessModalStyles = (colors) =>
       borderRadius: 36,
       justifyContent: "center",
       alignItems: "center",
-      backgroundColor:
-        colors.primaryLight || "#E8F5E9",
+      backgroundColor: colors.primaryLight || "#E8F5E9",
       marginBottom: 16,
     },
 

@@ -7,8 +7,8 @@ import {
   View,
 } from "react-native";
 
-import { useTheme } from "../../providers/ThemeProvider";
 import { getStyles } from "./ConfirmModal.styles";
+import { useTheme } from "../../providers/ThemeProvider";
 
 // App-styled confirmation dialog (replaces the native Alert).
 export default function ConfirmModal({
@@ -67,4 +67,3 @@ export default function ConfirmModal({
     </Modal>
   );
 }
-

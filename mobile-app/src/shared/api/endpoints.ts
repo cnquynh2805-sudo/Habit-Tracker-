@@ -10,8 +10,8 @@ export const endpoints = {
   },
   checkins: {
     today: "/habits-today?timezone=Asia%2FHo_Chi_Minh",
-    list: "/checkins",
-    listAll: "/checkins", // used by derivedStateEngine to fetch full history
+    list: "/checkins", // supports ?start_date=YYYY-MM-DD&end_date=YYYY-MM-DD params
+    listAll: "/checkins", // kept for backward compatibility
     detail: (id: string) => `/checkins/${id}`,
     create: "/checkins",
     update: (id: string) => `/checkins/${id}`,
@@ -22,11 +22,18 @@ export const endpoints = {
     detail: (id: string) => `/goals/${id}`,
     dashboard: "/dashboard/goals",
     byHabit: (habitId: string) => `/habits/${habitId}/goals`,
-    updateByHabit: (habitId: string, goalId: string) => `/habits/${habitId}/goals/${goalId}`,
+    updateByHabit: (habitId: string, goalId: string) =>
+      `/habits/${habitId}/goals/${goalId}`,
     progressByHabit: (habitId: string, goalId: string) =>
       `/habits/${habitId}/goals/${goalId}/progress`,
   },
   system: {
     reset: "/system/reset",
+  },
+  dashboard: {
+    summary: "/dashboard/summary",
+    simpleHeatmap: "/dashboard/simple-heatmap",
+    weeklyProgress: "/dashboard/weekly-progress",
+    goals: "/dashboard/goals",
   },
 } as const;

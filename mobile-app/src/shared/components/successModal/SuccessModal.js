@@ -1,3 +1,4 @@
+/* eslint-disable i18next/no-literal-string */
 import React from "react";
 import {
   Modal,
@@ -7,8 +8,9 @@ import {
   TouchableWithoutFeedback,
 } from "react-native";
 
-import { useTheme } from "@/providers/ThemeProvider";
 import { createSuccessModalStyles } from "./SuccessModal.styles";
+
+import { useTheme } from "@/providers/ThemeProvider";
 
 export default function SuccessModal({
   visible,
@@ -27,30 +29,25 @@ export default function SuccessModal({
       animationType="fade"
       onRequestClose={onClose}
     >
-      <TouchableWithoutFeedback onPress={onClose}>
+      <TouchableWithoutFeedback accessibilityRole="button" onPress={onClose}>
         <View style={styles.modalOverlay}>
-          <TouchableWithoutFeedback>
+          <TouchableWithoutFeedback accessibilityRole="button">
             <View style={styles.modalCard}>
               <View style={styles.iconContainer}>
                 <Text style={styles.icon}>✓</Text>
               </View>
 
-              <Text style={styles.title}>
-                {title}
-              </Text>
+              <Text style={styles.title}>{title}</Text>
 
-              <Text style={styles.message}>
-                {message}
-              </Text>
+              <Text style={styles.message}>{message}</Text>
 
               <TouchableOpacity
+                accessibilityRole="button"
                 style={styles.button}
                 onPress={onClose}
                 activeOpacity={0.85}
               >
-                <Text style={styles.buttonText}>
-                  {buttonLabel}
-                </Text>
+                <Text style={styles.buttonText}>{buttonLabel}</Text>
               </TouchableOpacity>
             </View>
           </TouchableWithoutFeedback>

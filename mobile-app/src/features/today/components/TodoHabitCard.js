@@ -118,7 +118,9 @@ export default function TodoHabitCard({
                 {t(`category.${(habit.category || "other").toLowerCase()}`)} ·{" "}
                 {t("today.targetTimes", { count: target })}{" "}
                 {t(`frequency.${(habit.frequency || "daily").toLowerCase()}`)}
-                {streak > 1 ? ` · ${t("today.dayStreak", { count: streak })}` : ""}
+                {streak > 1
+                  ? ` · ${t("today.dayStreak", { count: streak })}`
+                  : ""}
               </Text>
             </View>
 
@@ -140,12 +142,23 @@ export default function TodoHabitCard({
           </View>
 
           <View style={styles.cardProgressRow}>
-            <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 4 }}>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                marginBottom: 4,
+              }}
+            >
               <Text style={[styles.cardProgressLabel, { marginBottom: 0 }]}>
                 {t("today.progress").toUpperCase()}
               </Text>
               {overdue && (
-                <Text style={[styles.habitMetaOverdue, { marginLeft: 8, fontSize: 11, letterSpacing: 0.5 }]}>
+                <Text
+                  style={[
+                    styles.habitMetaOverdue,
+                    { marginLeft: 8, fontSize: 11, letterSpacing: 0.5 },
+                  ]}
+                >
                   {t("today.overdue").toUpperCase()}
                 </Text>
               )}

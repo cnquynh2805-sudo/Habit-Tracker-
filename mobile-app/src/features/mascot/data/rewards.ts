@@ -13,9 +13,7 @@ export const rewardItems = [
 
     equipped: true,
 
-    animation: require(
-      "../../../assets/rewards/toys/helicopter.json"
-    ),
+    animation: require("../../../assets/rewards/toys/helicopter.json"),
   },
 
   {
@@ -34,9 +32,7 @@ export const rewardItems = [
 
     equipped: false,
 
-    animation: require(
-      "../../../assets/rewards/toys/beach_ball.json"
-    ),
+    animation: require("../../../assets/rewards/toys/beach_ball.json"),
   },
 
   {
@@ -54,9 +50,7 @@ export const rewardItems = [
 
     equipped: false,
 
-    animation: require(
-      "../../../assets/rewards/birds/flying_bird_1.json"
-    ),
+    animation: require("../../../assets/rewards/birds/flying_bird_1.json"),
   },
 
   {
@@ -74,9 +68,7 @@ export const rewardItems = [
 
     equipped: false,
 
-    animation: require(
-      "../../../assets/rewards/birds/flying_bird_2.json"
-    ),
+    animation: require("../../../assets/rewards/birds/flying_bird_2.json"),
   },
 
   {
@@ -94,9 +86,7 @@ export const rewardItems = [
 
     equipped: false,
 
-    animation: require(
-      "../../../assets/rewards/birds/flying_bird_3.json"
-    ),
+    animation: require("../../../assets/rewards/birds/flying_bird_3.json"),
   },
 
   {
@@ -115,9 +105,7 @@ export const rewardItems = [
 
     equipped: false,
 
-    animation: require(
-      "../../../assets/rewards/toys/car.json"
-    ),
+    animation: require("../../../assets/rewards/toys/car.json"),
   },
 
   {
@@ -136,9 +124,7 @@ export const rewardItems = [
 
     equipped: false,
 
-    animation: require(
-      "../../../assets/rewards/toys/duck.json"
-    ),
+    animation: require("../../../assets/rewards/toys/duck.json"),
   },
 
   {
@@ -157,9 +143,7 @@ export const rewardItems = [
 
     equipped: false,
 
-    animation: require(
-      "../../../assets/rewards/toys/rocket.json"
-    ),
+    animation: require("../../../assets/rewards/toys/rocket.json"),
   },
 
   {
@@ -178,9 +162,7 @@ export const rewardItems = [
 
     equipped: false,
 
-    animation: require(
-      "../../../assets/rewards/toys/train.json"
-    ),
+    animation: require("../../../assets/rewards/toys/train.json"),
   },
 
   {
@@ -199,9 +181,7 @@ export const rewardItems = [
 
     equipped: false,
 
-    animation: require(
-      "../../../assets/rewards/cats/lazy_cat_1.json"
-    ),
+    animation: require("../../../assets/rewards/cats/lazy_cat_1.json"),
   },
 
   {
@@ -220,9 +200,7 @@ export const rewardItems = [
 
     equipped: false,
 
-    animation: require(
-      "../../../assets/rewards/cats/lazy_cat_2.json"
-    ),
+    animation: require("../../../assets/rewards/cats/lazy_cat_2.json"),
   },
 
   {
@@ -241,9 +219,7 @@ export const rewardItems = [
 
     equipped: false,
 
-    animation: require(
-      "../../../assets/rewards/cats/lazy_cat_3.json"
-    ),
+    animation: require("../../../assets/rewards/cats/lazy_cat_3.json"),
   },
 
   {
@@ -262,9 +238,7 @@ export const rewardItems = [
 
     equipped: false,
 
-    animation: require(
-      "../../../assets/rewards/cats/lazy_cat_4.json"
-    ),
+    animation: require("../../../assets/rewards/cats/lazy_cat_4.json"),
   },
 
   {
@@ -283,9 +257,7 @@ export const rewardItems = [
 
     equipped: false,
 
-    animation: require(
-      "../../../assets/rewards/dogs/running_dog_1.json"
-    ),
+    animation: require("../../../assets/rewards/dogs/running_dog_1.json"),
   },
 
   {
@@ -304,9 +276,7 @@ export const rewardItems = [
 
     equipped: false,
 
-    animation: require(
-      "../../../assets/rewards/dogs/running_dog_2.json"
-    ),
+    animation: require("../../../assets/rewards/dogs/running_dog_2.json"),
   },
 
   {
@@ -325,9 +295,6 @@ export const rewardItems = [
 
     equipped: false,
 
-    animation: require(
-      "../../../assets/rewards/dogs/running_dog_3.json"
-    ),
+    animation: require("../../../assets/rewards/dogs/running_dog_3.json"),
   },
-
 ];

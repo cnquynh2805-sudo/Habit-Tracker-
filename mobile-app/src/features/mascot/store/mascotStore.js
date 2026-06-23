@@ -1,6 +1,6 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const useMascotStore = create(
   persist(
@@ -33,19 +33,13 @@ export const useMascotStore = create(
 
       storage: {
         getItem: async (name) => {
-          const value =
-            await AsyncStorage.getItem(name);
+          const value = await AsyncStorage.getItem(name);
 
-          return value
-            ? JSON.parse(value)
-            : null;
+          return value ? JSON.parse(value) : null;
         },
 
         setItem: async (name, value) => {
-          await AsyncStorage.setItem(
-            name,
-            JSON.stringify(value)
-          );
+          await AsyncStorage.setItem(name, JSON.stringify(value));
         },
 
         removeItem: async (name) => {
@@ -56,6 +50,6 @@ export const useMascotStore = create(
       onRehydrateStorage: () => (state) => {
         state?.setHydrated(true);
       },
-    }
-  )
+    },
+  ),
 );

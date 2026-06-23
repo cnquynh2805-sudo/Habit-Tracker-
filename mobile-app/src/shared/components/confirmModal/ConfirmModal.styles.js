@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-color-literals */
 import { StyleSheet } from "react-native";
 
 export const createConfirmModalStyles = (colors) =>
@@ -65,8 +66,6 @@ export const createConfirmModalStyles = (colors) =>
       paddingHorizontal: 18,
       borderRadius: 12,
 
-      backgroundColor:
-        colors.error ||
-        "#DC2626",
+      backgroundColor: colors.error || "#DC2626",
     },
   });

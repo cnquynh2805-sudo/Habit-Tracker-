@@ -87,21 +87,21 @@ export const getStyles = (colors) =>
     topFilterBarContainer: {
       width: "100%",
       flexDirection: "row",
-      justifyContent: "flex-end", 
+      justifyContent: "flex-end",
       paddingHorizontal: 20,
       paddingVertical: 0,
       marginBottom: 2,
       position: "relative",
     },
     filterTriggerRowBtn: {
-      flexDirection: "row",       
-      alignItems: "center",       
-      paddingVertical: 2,         
+      flexDirection: "row",
+      alignItems: "center",
+      paddingVertical: 2,
       paddingHorizontal: 6,
       borderRadius: 8,
     },
     filterTriggerText: {
-      marginLeft: 6,              
+      marginLeft: 6,
       color: colors.primary,
       fontWeight: "600",
       fontSize: 14,
@@ -170,7 +170,7 @@ export const getStyles = (colors) =>
     },
     categoryIconImage: {
       width: 20,
-      height: 20,     
+      height: 20,
       resizeMode: "contain",
     },
     iconCircleBadgePaused: {
@@ -193,13 +193,13 @@ export const getStyles = (colors) =>
 
     cardTagsGrid: {
       flexDirection: "column",
-      gap: 6,                       
+      gap: 6,
       marginTop: 2,
     },
     cardTagsTopGroup: {
       flexDirection: "row",
       alignItems: "center",
-      gap: 6,                       
+      gap: 6,
     },
     cardTagsRow: {
       flexDirection: "row",
@@ -208,15 +208,15 @@ export const getStyles = (colors) =>
     },
 
     miniMetaBadge: {
-      paddingHorizontal: 10,        
-      paddingVertical: 2,           
+      paddingHorizontal: 10,
+      paddingVertical: 2,
       borderRadius: 100,
       alignItems: "center",
       justifyContent: "center",
-      alignSelf: "flex-start",     
+      alignSelf: "flex-start",
     },
     miniMetaBadgeText: {
-      fontSize: 12,                 
+      fontSize: 12,
       lineHeight: 16,
       fontWeight: "500",
       textAlign: "center",
@@ -227,7 +227,7 @@ export const getStyles = (colors) =>
       borderRadius: 100,
       alignItems: "center",
       justifyContent: "center",
-      alignSelf: "flex-start",     
+      alignSelf: "flex-start",
     },
     figmaPriorityCapsuleText: {
       fontSize: 12,
@@ -248,11 +248,11 @@ export const getStyles = (colors) =>
       padding: 4,
       marginRight: -4,
     },
-    
+
     // --- TĂNG SIZE NÚT ACTIVE / CAPSULE TRẠNG THÁI CHUẨN ---
     statusCapsule: {
-      paddingHorizontal: 12,        // Tăng padding ngang để cân đối với text lớn hơn
-      height: 28,                   // Tăng chiều cao lên 1 size (Từ 24 lên 28)
+      paddingHorizontal: 12, // Tăng padding ngang để cân đối với text lớn hơn
+      height: 28, // Tăng chiều cao lên 1 size (Từ 24 lên 28)
       borderRadius: 100,
       alignItems: "center",
       justifyContent: "center",
@@ -267,7 +267,7 @@ export const getStyles = (colors) =>
       backgroundColor: colors.border,
     },
     statusCapsuleText: {
-      fontSize: 12,                 // Tăng kích thước chữ lên 1 size (Từ 11 lên 12)
+      fontSize: 12, // Tăng kích thước chữ lên 1 size (Từ 11 lên 12)
       fontWeight: "600",
       textAlign: "center",
     },

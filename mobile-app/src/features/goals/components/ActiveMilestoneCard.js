@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { View, Text, TouchableOpacity } from "react-native";
@@ -14,12 +15,20 @@ export default function ActiveMilestoneCard({ item, styles, colors, onPress }) {
   const { habitName, category, goal } = item;
   // targetType from the backend: "Streak" | "TotalCompletions"
   // isEncouraged and isAchieved come from derivedStateEngine (computed on FE).
-  const { targetType, targetValue, currentProgress, progressPercent, isEncouraged: engineEncouraged, isAchieved: engineAchieved } = goal;
+  const {
+    targetType,
+    targetValue,
+    currentProgress,
+    progressPercent,
+    isEncouraged: engineEncouraged,
+    isAchieved: engineAchieved,
+  } = goal;
 
   const isStreak = targetType === "Streak";
   // Use engine-computed flags if available; fall back to percentage calculation.
-  const isAchieved = engineAchieved ?? (progressPercent >= 100);
-  const isEncouraged = engineEncouraged ?? (progressPercent >= 80 && progressPercent < 100);
+  const isAchieved = engineAchieved ?? progressPercent >= 100;
+  const isEncouraged =
+    engineEncouraged ?? (progressPercent >= 80 && progressPercent < 100);
 
   const progress = useSharedValue(0);
 
@@ -46,27 +55,30 @@ export default function ActiveMilestoneCard({ item, styles, colors, onPress }) {
   else if (isEncouraged) statusText = t("goals.almostThere");
 
   // Category icon
-  const categoryIcon = {
-    Health: "💧",
-    Study: "📚",
-    Work: "💼",
-    Mindfulness: "🧘",
-    Other: "⭐",
-  }[category] || "🎯";
+  const categoryIcon =
+    {
+      Health: "💧",
+      Study: "📚",
+      Work: "💼",
+      Mindfulness: "🧘",
+      Other: "⭐",
+    }[category] || "🎯";
 
   return (
     <TouchableOpacity
       style={styles.milestoneCard}
       onPress={onPress}
       activeOpacity={0.8}
-      accessible={true}
+      accessible
       accessibilityRole="button"
       accessibilityLabel={`${habitName}, ${t("goals.goalTypePrefix")}: ${goalSubtitle}`}
     >
       {/* Header row */}
       <View style={styles.milestoneHeader}>
         <View style={styles.milestoneIconContainer}>
-          <Text style={{ fontSize: 22 }}>{isAchieved ? "✨" : categoryIcon}</Text>
+          <Text style={{ fontSize: 22 }}>
+            {isAchieved ? "✨" : categoryIcon}
+          </Text>
         </View>
         <View style={{ flex: 1 }}>
           <Text style={styles.milestoneTitle} numberOfLines={1}>
@@ -87,7 +99,12 @@ export default function ActiveMilestoneCard({ item, styles, colors, onPress }) {
 
       {/* Footer */}
       <View style={styles.milestoneFooter}>
-        <Text style={[styles.milestoneStatusText, isAchieved && { color: colors.success || colors.primary }]}>
+        <Text
+          style={[
+            styles.milestoneStatusText,
+            isAchieved && { color: colors.success || colors.primary },
+          ]}
+        >
           {isStreak && isEncouraged && !isAchieved ? "✦ " : ""}
           {statusText}
         </Text>

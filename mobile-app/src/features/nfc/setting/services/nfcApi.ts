@@ -42,7 +42,7 @@ export async function updateNfcTagRemote(
     tag_name: string;
     ndef_url: string;
     habit_id?: string | null;
-  }>
+  }>,
 ) {
   const res = await fetch(`${BASE}/${id}`, {
     method: "PATCH",

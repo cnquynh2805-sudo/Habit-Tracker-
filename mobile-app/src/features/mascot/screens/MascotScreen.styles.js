@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-color-literals */
 import { StyleSheet } from "react-native";
 
 export const createStyles = (colors) =>
@@ -51,7 +52,7 @@ export const createStyles = (colors) =>
       top: 38,
       right: 0,
 
-      minWidth: 140,   // 👈 QUAN TRỌNG (fix “đường thẳng”)
+      minWidth: 140, // 👈 QUAN TRỌNG (fix “đường thẳng”)
       maxWidth: 200,
 
       backgroundColor: colors.surface,
@@ -111,8 +112,7 @@ export const createStyles = (colors) =>
       position: "relative",
     },
 
-    activeTab: {
-    },
+    activeTab: {},
 
     tabText: {
       fontSize: 14,
@@ -242,5 +242,4 @@ export const createStyles = (colors) =>
       textDecorationLine: "underline",
       fontWeight: "600",
     },
-
   });

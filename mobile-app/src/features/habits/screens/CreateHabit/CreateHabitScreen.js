@@ -1,4 +1,4 @@
-/* eslint-disable i18next/no-literal-string */
+/* eslint-disable react-native/no-inline-styles, i18next/no-literal-string, no-unused-vars */
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { X } from "lucide-react-native";
 import React, { useState, useEffect } from "react";

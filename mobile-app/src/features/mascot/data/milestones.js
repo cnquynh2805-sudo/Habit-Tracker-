@@ -4,8 +4,7 @@ export const milestones = [
 
     title: "Consistency Master",
 
-    description:
-      "Maintain a 14-day streak across all core habits.",
+    description: "Maintain a 14-day streak across all core habits.",
 
     completed: true,
   },
@@ -15,8 +14,7 @@ export const milestones = [
 
     title: "Early Bird Rewards",
 
-    description:
-      "Complete your morning habits before 8:00 AM for 5 days.",
+    description: "Complete your morning habits before 8:00 AM for 5 days.",
 
     completed: false,
   },
