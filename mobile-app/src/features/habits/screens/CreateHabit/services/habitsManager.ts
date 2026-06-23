@@ -8,6 +8,13 @@ import {
   updateHabitRemote,
 } from "./habitsApi";
 import { Habit } from "./types";
+import { useDomainStore } from "@/shared/stores/useDomainStore";
+
+const CHECKINS_STORAGE_PREFIX = "@today_checkins_";
+function getTodayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
 
 const HABITS_KEY = "@habits_list";
 
@@ -65,6 +72,14 @@ export async function createHabit(
     habits.push(newHabit);
     await AsyncStorage.setItem(HABITS_KEY, JSON.stringify(habits));
 
+    // Sync to useDomainStore (Offline-first UI update)
+    try {
+      const domainHabits = useDomainStore.getState().habits || [];
+      useDomainStore.setState({ habits: [...domainHabits, newHabit] });
+    } catch (e) {
+      console.error("Error syncing new habit to useDomainStore:", e);
+    }
+
     // Push to Xano server
     if (await isOnline()) {
       try {
@@ -87,6 +102,17 @@ export async function createHabit(
             // Update reference object returned to the UI
             newHabit.syncStatus = "synced";
             newHabit.serverId = String(apiResult.serverId);
+
+            // Sync updated serverId and syncStatus to useDomainStore
+            try {
+              const domainHabits = useDomainStore.getState().habits || [];
+              const updated = domainHabits.map((h: any) =>
+                String(h.id) === String(uniqueId)
+                  ? { ...h, syncStatus: "synced", serverId: String(apiResult.serverId) }
+                  : h
+              );
+              useDomainStore.setState({ habits: updated });
+            } catch (e) {}
           }
         }
       } catch (apiErr) {
@@ -128,6 +154,17 @@ export async function updateHabit(
     habits[index] = updatedHabit;
     await AsyncStorage.setItem(HABITS_KEY, JSON.stringify(habits));
 
+    // Sync to useDomainStore
+    try {
+      const domainHabits = useDomainStore.getState().habits || [];
+      const updated = domainHabits.map((h: any) =>
+        String(h.id) === String(originalLocalId) ? updatedHabit : h
+      );
+      useDomainStore.setState({ habits: updated });
+    } catch (e) {
+      console.error("Error syncing updated habit to useDomainStore:", e);
+    }
+
     if (await isOnline()) {
       try {
         await updateHabitRemote(updatedHabit);
@@ -139,6 +176,17 @@ export async function updateHabit(
         if (syncIndex >= 0) {
           currentHabits[syncIndex].syncStatus = "synced";
           await AsyncStorage.setItem(HABITS_KEY, JSON.stringify(currentHabits));
+
+          // Sync syncedStatus back to useDomainStore
+          try {
+            const domainHabits = useDomainStore.getState().habits || [];
+            const updated = domainHabits.map((h: any) =>
+              String(h.id) === String(originalLocalId)
+                ? { ...h, syncStatus: "synced" }
+                : h
+            );
+            useDomainStore.setState({ habits: updated });
+          } catch (e) {}
         }
       } catch (apiErr) {
         // Kept pending for automatic background synchronization later
@@ -165,6 +213,46 @@ export async function deleteHabit(habitId: string): Promise<boolean> {
       (h) => String(h.id) !== String(targetHabit.id),
     );
     await AsyncStorage.setItem(HABITS_KEY, JSON.stringify(filteredHabits));
+
+    // Sync to useDomainStore (Remove from habits AND clear related checkins)
+    try {
+      const domainState = useDomainStore.getState();
+      const domainHabits = domainState.habits || [];
+      const domainCheckins = domainState.checkins || [];
+
+      const targetIdStr = String(targetHabit.id);
+      const targetServerIdStr = targetHabit.serverId ? String(targetHabit.serverId) : null;
+
+      // Filter out deleted habit
+      const updatedHabits = domainHabits.filter(
+        (h: any) => String(h.id) !== targetIdStr && (targetServerIdStr ? String(h.id) !== targetServerIdStr : true)
+      );
+
+      // Filter out related checkins
+      const updatedCheckins = domainCheckins.filter(
+        (c: any) =>
+          String(c.habit_id) !== targetIdStr &&
+          (targetServerIdStr ? String(c.habit_id) !== targetServerIdStr : true)
+      );
+
+      useDomainStore.setState({
+        habits: updatedHabits,
+        checkins: updatedCheckins,
+      });
+
+      // Clean up today checkins cache for the deleted habit
+      const todayKey = `${CHECKINS_STORAGE_PREFIX}${getTodayKey()}`;
+      const cacheRaw = await AsyncStorage.getItem(todayKey);
+      if (cacheRaw) {
+        const cache = JSON.parse(cacheRaw);
+        if (cache[targetHabit.id]) {
+          delete cache[targetHabit.id];
+          await AsyncStorage.setItem(todayKey, JSON.stringify(cache));
+        }
+      }
+    } catch (e) {
+      console.error("Error syncing deleted habit to useDomainStore:", e);
+    }
 
     // Step 2: Trigger the remote DELETE request
     if (await isOnline()) {

@@ -4,10 +4,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { calculateHabitStats } from "../../../shared/services/derivedStateEngine";
 import {
   createCheckin,
-  listCheckins,
   updateCheckin,
 } from "../services/checkinsApi";
-import { listHabits } from "../services/habitsApi";
+import { useDomainStore } from "../../../shared/stores/useDomainStore";
 import {
   CHECKINS_STORAGE_PREFIX,
   CHECKIN_STATUS,
@@ -109,27 +108,68 @@ export function useTodayCheckins() {
       AsyncStorage.setItem(storageKey, JSON.stringify(next)).catch((e) =>
         console.log("Error saving checkins:", e),
       );
+
+      // Sync to useDomainStore checkins list (Offline-first & cross-screen updates)
+      try {
+        const todayKey = getTodayKey();
+        const domainStore = useDomainStore.getState();
+        const domainCheckins = [...(domainStore.checkins || [])];
+        const todayCheckins = Object.values(next);
+
+        todayCheckins.forEach((localCheckin) => {
+          const idx = domainCheckins.findIndex(
+            (c) =>
+              Number(c.habit_id) === Number(localCheckin.habit_id) &&
+              (c.date_only === todayKey || toDateOnly(c.date) === todayKey)
+          );
+
+          const updatedCheckin = {
+            id: localCheckin.serverId || 0,
+            habit_id: localCheckin.habit_id,
+            date_only: todayKey,
+            date: new Date(localCheckin.date).toISOString(),
+            completedCount: localCheckin.completedCount,
+            status: localCheckin.status,
+          };
+
+          if (idx !== -1) {
+            // Keep the real server ID if it exists in store but is null/failed in local checkin
+            const prevCheckin = domainCheckins[idx];
+            if (!updatedCheckin.id && prevCheckin.id && prevCheckin.id !== "ignored") {
+              updatedCheckin.id = prevCheckin.id;
+            }
+            domainCheckins[idx] = updatedCheckin;
+          } else {
+            domainCheckins.push(updatedCheckin);
+          }
+        });
+
+        useDomainStore.setState({ checkins: domainCheckins });
+      } catch (err) {
+        console.log("Error syncing checkins to useDomainStore:", err);
+      }
     },
     [storageKey],
   );
 
-  const reload = useCallback(async () => {
+  const reload = useCallback(async (force = false) => {
     const todayKey = getTodayKey();
     try {
-      // Read from the server (GET /habits + GET /checkins) plus the local cache
-      // (needed for the day-rollover markers).
-      const [habitList, checkinList, cacheRaw] = await Promise.all([
-        listHabits(),
-        listCheckins(),
-        AsyncStorage.getItem(storageKey),
-      ]);
-      const todayHabits = (habitList || []).filter(isTodayHabit);
+      const domainStore = useDomainStore.getState();
+
+      // Trigger fetch domain data protected by a 5-minute cache TTL unless force=true
+      await domainStore.fetchDomainData(force);
+
+      const habitList = domainStore.habits || [];
+      const checkinList = domainStore.checkins || [];
+      const cacheRaw = await AsyncStorage.getItem(storageKey);
       const cache = cacheRaw ? JSON.parse(cacheRaw) : {};
+
+      const todayHabits = (habitList || []).filter(isTodayHabit);
 
       // Latest server check-in per habit FOR TODAY
       const serverByHabit = {};
       (checkinList || []).forEach((c) => {
-        // ONLY consider today's checkins for serverId matching!
         const cDateOnly = c.date_only || toDateOnly(c.date);
         if (cDateOnly === todayKey) {
           const prev = serverByHabit[c.habit_id];
@@ -143,29 +183,24 @@ export function useTodayCheckins() {
 
       todayHabits.forEach((h) => {
         const target = Math.max(1, h.targetPerDay || 1);
-        const server = serverByHabit[h.id]; // Xano record for today (may be null)
+        const server = serverByHabit[h.id]; // Xano record for today
         const cached = cache[h.id]; // Local AsyncStorage snapshot
 
         const habitId = Number(h.id) || 0;
 
         if (server) {
-          // ✅ SERVER WINS: Always sync to Xano's ground truth for today.
-          // This heals any stale local cache (e.g. from previous 500 errors).
           const serverCount = server.completedCount || 0;
-
           next[h.id] = {
             serverId: server.id,
             habit_id: habitId,
-            date: server.date || Date.now(), // Store actual timestamp
+            date: server.date || Date.now(),
             completedCount: serverCount,
             status: server.status || deriveStatus(serverCount, target),
             dayKey: todayKey,
           };
         } else if (cached && cached.dayKey === todayKey) {
-          // ⚠️ LOCAL ONLY: Server has no record yet for today (not synced yet or mid-session).
-          // Keep local progress but ensure serverId is null (POST will happen on next flush).
           next[h.id] = {
-            serverId: null,
+            serverId: cached.serverId === "ignored" ? "ignored" : null,
             habit_id: habitId,
             date: cached.date || Date.now(),
             completedCount: cached.completedCount || 0,
@@ -173,7 +208,6 @@ export function useTodayCheckins() {
             dayKey: todayKey,
           };
         } else {
-          // 🔄 FRESH or DAY ROLLOVER: No cache or previous day's cache — reset progress for today.
           next[h.id] = {
             serverId: null,
             habit_id: habitId,
@@ -188,31 +222,19 @@ export function useTodayCheckins() {
       setHabits(todayHabits);
       habitsRef.current = todayHabits;
       setAllCheckins(checkinList || []);
-      AsyncStorage.setItem(HABITS_CACHE_KEY, JSON.stringify(todayHabits)).catch(
-        () => {},
-      );
-      AsyncStorage.setItem(
-        ALL_CHECKINS_CACHE_KEY,
-        JSON.stringify(checkinList || []),
-      ).catch(() => {});
       persist(next); // also caches the check-in map for offline reads
     } catch (e) {
       console.log("Error loading from server, falling back to cache:", e);
-      // Offline fallback: last cached habits + check-in map.
       try {
-        const [habitsCache, checkinsCache, allCheckinsCache] =
-          await Promise.all([
-            AsyncStorage.getItem(HABITS_CACHE_KEY),
-            AsyncStorage.getItem(storageKey),
-            AsyncStorage.getItem(ALL_CHECKINS_CACHE_KEY),
-          ]);
-        const cachedHabits = habitsCache ? JSON.parse(habitsCache) : [];
+        const domainStore = useDomainStore.getState();
+        const cachedHabits = domainStore.habits || [];
+        const cachedAllCheckins = domainStore.checkins || [];
+        const checkinsCache = await AsyncStorage.getItem(storageKey);
         const cachedCheckins = checkinsCache ? JSON.parse(checkinsCache) : {};
-        const cachedAllCheckins = allCheckinsCache
-          ? JSON.parse(allCheckinsCache)
-          : [];
-        setHabits(cachedHabits);
-        habitsRef.current = cachedHabits;
+
+        const todayHabits = cachedHabits.filter(isTodayHabit);
+        setHabits(todayHabits);
+        habitsRef.current = todayHabits;
         checkinsRef.current = cachedCheckins;
         setCheckins(cachedCheckins);
         setAllCheckins(cachedAllCheckins);

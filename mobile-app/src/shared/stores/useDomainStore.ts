@@ -51,7 +51,7 @@ export interface RawGoal {
 }
 
 export interface RawCheckin {
-  id: number;
+  id: number | string;
   habit_id: number;
   date_only?: string;
   date?: string;
@@ -132,6 +132,14 @@ export const useDomainStore = create<DomainState>()(
           // If request was aborted mid-flight, do nothing
           if (signal.aborted) return;
 
+          // Check if any request was rejected due to 429 rate limiting
+          const isRateLimitError = [habitsRes, goalsRes, checkinsRes].some(
+            (res) =>
+              res.status === "rejected" &&
+              (res.reason?.message?.includes("429") ||
+               res.reason?.response?.status === 429)
+          );
+
           const habits =
             habitsRes.status === "fulfilled" && Array.isArray(habitsRes.value)
               ? habitsRes.value
@@ -142,11 +150,27 @@ export const useDomainStore = create<DomainState>()(
               ? goalsRes.value
               : get().goals;
 
-          const checkins =
-            checkinsRes.status === "fulfilled" &&
-            Array.isArray(checkinsRes.value)
-              ? checkinsRes.value
-              : get().checkins;
+          // Merge server checkins with pending offline checkins (id === 0 or ignored)
+          let checkins = get().checkins;
+          if (checkinsRes.status === "fulfilled" && Array.isArray(checkinsRes.value)) {
+            const serverCheckins = checkinsRes.value;
+            const offlineCheckins = get().checkins.filter(
+              (c) => !c.id || c.id === 0 || c.id === "ignored"
+            );
+            const mergedCheckins = [...serverCheckins];
+            offlineCheckins.forEach((offline) => {
+              const hasOnServer = serverCheckins.some(
+                (sc) =>
+                  Number(sc.habit_id) === Number(offline.habit_id) &&
+                  (sc.date_only === offline.date_only ||
+                   (sc.date && offline.date && sc.date.split("T")[0] === offline.date.split("T")[0]))
+              );
+              if (!hasOnServer) {
+                mergedCheckins.push(offline);
+              }
+            });
+            checkins = mergedCheckins;
+          }
 
           // Log any individual failures (non-fatal)
           if (habitsRes.status === "rejected") {
@@ -173,8 +197,10 @@ export const useDomainStore = create<DomainState>()(
             goals,
             checkins,
             isLoading: false,
-            lastFetched: now,
-            error: null,
+            lastFetched: isRateLimitError ? get().lastFetched : now,
+            error: isRateLimitError
+              ? "API requests are temporarily paused due to rate limits. Showing local data."
+              : null,
           });
         } catch (err: any) {
           if (err?.name === "CanceledError" || err?.name === "AbortError") {

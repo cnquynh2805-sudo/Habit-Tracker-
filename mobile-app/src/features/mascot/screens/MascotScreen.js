@@ -51,21 +51,48 @@ export default function MascotScreen() {
     try {
       await resetSystemData();
 
-      await AsyncStorage.multiRemove([
-        "@habits_list",
-        "@dashboard_goals_cache_v2",
-        "@local_nfc_mappings",
-        "@today_habits_cache",
-        "mascot-storage",
-      ]);
+      // Reset useDomainStore in memory to immediately clear Dashboard, Goals, and Today screens
+      try {
+        const { useDomainStore } = require("../../../shared/stores/useDomainStore");
+        useDomainStore.setState({
+          habits: [],
+          goals: [],
+          checkins: [],
+          lastFetched: null,
+          error: null,
+        });
+      } catch (storeErr) {
+        console.log("Error resetting useDomainStore in memory:", storeErr);
+      }
 
-      // Reset mascot store
+      // Reset useMascotStore fully
       useMascotStore.setState({
         equippedRewardId: 1,
+        mascotSelected: false,
+        selectedMascot: null,
+        unlockedRewardIds: [1],
+        notifiedMilestones: {},
       });
+
+      // Clear all related keys from AsyncStorage
+      const allKeys = await AsyncStorage.getAllKeys();
+      const keysToRemove = allKeys.filter(
+        (key) =>
+          key === "@habits_list" ||
+          key === "@dashboard_goals_cache_v2" ||
+          key === "@local_nfc_mappings" ||
+          key === "@today_habits_cache" ||
+          key === "mascot-storage" ||
+          key === "domain-storage" ||
+          key.startsWith("@today_checkins_")
+      );
+      if (keysToRemove.length > 0) {
+        await AsyncStorage.multiRemove(keysToRemove);
+      }
 
       Alert.alert("Success", "All data has been reset.");
     } catch (error) {
+      console.log("Error resetting system data:", error);
       Alert.alert("Error", "Failed to reset data.");
     }
   };
