@@ -114,14 +114,24 @@ function intensityToColor(intensity) {
 }
 
 const MONTH_NAMES = [
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
 ];
 
 function HeatmapGrid({ heatmapData }) {
   const { cells, numCols, monthLabels } = useMemo(
     () => buildHeatGrid(heatmapData),
-    [heatmapData]
+    [heatmapData],
   );
   const totalCols = Math.max(numCols, NUM_WEEKS);
   const svgWidth = totalCols * CELL_STEP;
@@ -171,7 +181,7 @@ function WeeklyBarChart({ weeklyData, colors }) {
   const uniqueCats = useMemo(() => {
     const s = new Set();
     (weeklyData || []).forEach((d) =>
-      Object.keys(d.categories || {}).forEach((cat) => s.add(cat))
+      Object.keys(d.categories || {}).forEach((cat) => s.add(cat)),
     );
     return [...s];
   }, [weeklyData]);
@@ -182,31 +192,47 @@ function WeeklyBarChart({ weeklyData, colors }) {
         {(weeklyData || []).map((entry, i) => {
           const cats = Object.entries(entry.categories || {});
           const totalRatio = cats.reduce((sum, [, v]) => sum + v, 0);
-          const barH = Math.max(4, Math.min(totalRatio * BAR_MAX_HEIGHT, BAR_MAX_HEIGHT));
+          const barH = Math.max(
+            4,
+            Math.min(totalRatio * BAR_MAX_HEIGHT, BAR_MAX_HEIGHT),
+          );
 
           return (
             <View key={i} style={wStyles.barCol}>
               <View style={wStyles.barWrapper}>
-                <View style={[wStyles.barContainer, { height: BAR_MAX_HEIGHT }]}>
+                <View
+                  style={[wStyles.barContainer, { height: BAR_MAX_HEIGHT }]}
+                >
                   {cats.length > 0 ? (
                     <View style={[wStyles.barStack, { height: barH }]}>
                       {[...cats].reverse().map(([cat, ratio], si) => {
                         const segH = (ratio / Math.max(totalRatio, 1)) * barH;
-                        const color = CATEGORY_COLORS[cat] || CATEGORY_COLORS.default;
+                        const color =
+                          CATEGORY_COLORS[cat] || CATEGORY_COLORS.default;
                         return (
                           <View
                             key={si}
-                            style={[wStyles.barSegment, { height: segH, backgroundColor: color }]}
+                            style={[
+                              wStyles.barSegment,
+                              { height: segH, backgroundColor: color },
+                            ]}
                           />
                         );
                       })}
                     </View>
                   ) : (
-                    <View style={[wStyles.barStack, { height: 6, backgroundColor: colors.border }]} />
+                    <View
+                      style={[
+                        wStyles.barStack,
+                        { height: 6, backgroundColor: colors.border },
+                      ]}
+                    />
                   )}
                 </View>
               </View>
-              <Text style={[wStyles.dayLabel, { color: colors.textMuted }]}>{entry.day}</Text>
+              <Text style={[wStyles.dayLabel, { color: colors.textMuted }]}>
+                {entry.day}
+              </Text>
             </View>
           );
         })}
@@ -219,7 +245,10 @@ function WeeklyBarChart({ weeklyData, colors }) {
               <View
                 style={[
                   wStyles.legendDot,
-                  { backgroundColor: CATEGORY_COLORS[cat] || CATEGORY_COLORS.default },
+                  {
+                    backgroundColor:
+                      CATEGORY_COLORS[cat] || CATEGORY_COLORS.default,
+                  },
                 ]}
               />
               <Text style={[wStyles.legendText, { color: colors.textMuted }]}>
@@ -243,7 +272,12 @@ const wStyles = StyleSheet.create({
   barCol: { flex: 1, alignItems: "center" },
   barWrapper: { alignItems: "center", justifyContent: "flex-end" },
   barContainer: { justifyContent: "flex-end", width: 22 },
-  barStack: { width: 22, borderRadius: 4, overflow: "hidden", justifyContent: "flex-end" },
+  barStack: {
+    width: 22,
+    borderRadius: 4,
+    overflow: "hidden",
+    justifyContent: "flex-end",
+  },
   barSegment: { width: "100%" },
   dayLabel: { fontSize: 11, marginTop: 6 },
   legend: {
@@ -261,11 +295,23 @@ const wStyles = StyleSheet.create({
 // ─── HABIT ICON MAP ──────────────────────────────────────────────────────────
 function HabitIcon({ name, color, size = 18 }) {
   const lower = (name || "").toLowerCase();
-  if (lower.includes("workout") || lower.includes("exercise") || lower.includes("gym"))
+  if (
+    lower.includes("workout") ||
+    lower.includes("exercise") ||
+    lower.includes("gym")
+  )
     return <Dumbbell size={size} color={color} />;
-  if (lower.includes("meditat") || lower.includes("mindful") || lower.includes("breath"))
+  if (
+    lower.includes("meditat") ||
+    lower.includes("mindful") ||
+    lower.includes("breath")
+  )
     return <Sparkles size={size} color={color} />;
-  if (lower.includes("read") || lower.includes("book") || lower.includes("study"))
+  if (
+    lower.includes("read") ||
+    lower.includes("book") ||
+    lower.includes("study")
+  )
     return <BookOpen size={size} color={color} />;
   if (lower.includes("run") || lower.includes("walk") || lower.includes("step"))
     return <Activity size={size} color={color} />;
@@ -285,8 +331,14 @@ function HabitIcon({ name, color, size = 18 }) {
  *   - 7d Rate label
  */
 function HabitPerformanceCard({ item, colors }) {
-  const { habit, currentStreak, longestStreak, totalCompletions, rate7d } = item;
-  const isAtRisk = rate7d < 50;
+  const {
+    habit,
+    currentStreak,
+    longestStreak,
+    totalCompletions,
+    rate7d,
+    isAtRisk,
+  } = item;
   const catColor = CATEGORY_COLORS[habit.category] || CATEGORY_COLORS.default;
 
   const cardBg = isAtRisk
@@ -313,14 +365,24 @@ function HabitPerformanceCard({ item, colors }) {
           <Text style={[s.habitRate, { color: percentColor }]}>{rate7d}%</Text>
         </View>
         <View style={s.habitRow}>
-          <Text style={[s.habitStreak, { color: isAtRisk ? "#E53E3E" : colors.textMuted }]}>
+          <Text
+            style={[
+              s.habitStreak,
+              { color: isAtRisk ? "#E53E3E" : colors.textMuted },
+            ]}
+          >
             {isAtRisk
               ? "⏱ At Risk"
               : currentStreak > 0
-              ? `🔥 ${currentStreak}d streak`
-              : "No active streak"}
+                ? `🔥 ${currentStreak}d streak`
+                : "No active streak"}
           </Text>
-          <Text style={[s.habitRateLabel, { color: isAtRisk ? "#E53E3E" : colors.textMuted }]}>
+          <Text
+            style={[
+              s.habitRateLabel,
+              { color: isAtRisk ? "#E53E3E" : colors.textMuted },
+            ]}
+          >
             7d Rate
           </Text>
         </View>
@@ -335,15 +397,19 @@ function HabitPerformanceCard({ item, colors }) {
 // ─── MASCOT MESSAGE ──────────────────────────────────────────────────────────
 function buildMascotMessage(performanceList) {
   if (!Array.isArray(performanceList) || performanceList.length === 0) {
-    return { text: "Keep building great habits! Every day counts.", name: "Keep going!" };
+    return {
+      text: "Keep building great habits! Every day counts.",
+      name: "Keep going!",
+    };
   }
 
-  const atRisk = performanceList.filter((p) => p.rate7d < 50);
+  const atRisk = performanceList.filter((p) => p.isAtRisk);
   const crushing = performanceList.filter((p) => p.rate7d >= 80);
 
   let msg = "";
   if (crushing.length > 0 && atRisk.length === 0) {
-    msg = "You're crushing all your habits! Keep this incredible momentum going!";
+    msg =
+      "You're crushing all your habits! Keep this incredible momentum going!";
   } else if (atRisk.length > 0 && crushing.length > 0) {
     const atRiskName = atRisk[0]?.habit?.name || "that habit";
     const crushingCat =
@@ -380,22 +446,22 @@ const DashboardScreen = () => {
   // ── Derived State (all computed from raw data via derivedStateEngine) ───────
   const { todayScore, todayTrend, activeHabits, atRisk } = useMemo(
     () => computeDashboardSummary(habits, checkins, goals),
-    [habits, checkins, goals]
+    [habits, checkins, goals],
   );
 
   const heatmapData = useMemo(
     () => computeHeatmap(habits, checkins, 90),
-    [habits, checkins]
+    [habits, checkins],
   );
 
   const weeklyData = useMemo(
     () => computeWeeklyProgress(habits, checkins),
-    [habits, checkins]
+    [habits, checkins],
   );
 
   const performanceList = useMemo(
     () => computePerformanceList(habits, checkins),
-    [habits, checkins]
+    [habits, checkins],
   );
 
   // ── Category filter derived from actual habit categories ───────────────────
@@ -411,7 +477,8 @@ const DashboardScreen = () => {
   const filteredPerformanceList = useMemo(() => {
     if (activeFilter === "All") return performanceList;
     return performanceList.filter(
-      (p) => (p.habit.category || "").toLowerCase() === activeFilter.toLowerCase()
+      (p) =>
+        (p.habit.category || "").toLowerCase() === activeFilter.toLowerCase(),
     );
   }, [performanceList, activeFilter]);
 
@@ -428,7 +495,7 @@ const DashboardScreen = () => {
 
   const mascotMsg = useMemo(
     () => buildMascotMessage(performanceList),
-    [performanceList]
+    [performanceList],
   );
 
   const styles = useMemo(() => makeStyles(C), [C]);
@@ -437,8 +504,16 @@ const DashboardScreen = () => {
   const trendDisplay = useMemo(() => {
     if (todayTrend === 0) return { label: "±0%", Icon: Minus, color: "#fff" };
     if (todayTrend > 0)
-      return { label: `+${todayTrend.toFixed(1)}%`, Icon: TrendingUp, color: "#fff" };
-    return { label: `${todayTrend.toFixed(1)}%`, Icon: TrendingDown, color: "#fff" };
+      return {
+        label: `+${todayTrend.toFixed(1)}%`,
+        Icon: TrendingUp,
+        color: "#fff",
+      };
+    return {
+      label: `${todayTrend.toFixed(1)}%`,
+      Icon: TrendingDown,
+      color: "#fff",
+    };
   }, [todayTrend]);
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -452,7 +527,9 @@ const DashboardScreen = () => {
             accessibilityLabel="Share dashboard"
             accessibilityRole="button"
             onPress={() =>
-              Share.share({ message: `My habit consistency today: ${todayScore}%` })
+              Share.share({
+                message: `My habit consistency today: ${todayScore}%`,
+              })
             }
           >
             <Upload size={22} color={C.text} />
@@ -470,7 +547,11 @@ const DashboardScreen = () => {
       <ScrollView
         contentContainerStyle={styles.scroll}
         refreshControl={
-          <RefreshControl refreshing={isLoading} onRefresh={onRefresh} tintColor={C.primary} />
+          <RefreshControl
+            refreshing={isLoading}
+            onRefresh={onRefresh}
+            tintColor={C.primary}
+          />
         }
         showsVerticalScrollIndicator={false}
       >
@@ -479,7 +560,11 @@ const DashboardScreen = () => {
           {/* Today % */}
           <View style={[styles.summaryCard, { backgroundColor: "#3E6669" }]}>
             <Text style={styles.summaryLabel}>Today %</Text>
-            <Text style={styles.summaryValue} adjustsFontSizeToFit numberOfLines={1}>
+            <Text
+              style={styles.summaryValue}
+              adjustsFontSizeToFit
+              numberOfLines={1}
+            >
               {todayScore}%
             </Text>
             <View style={styles.summarySubRow}>
@@ -491,7 +576,11 @@ const DashboardScreen = () => {
           {/* Active Habits */}
           <View style={[styles.summaryCard, { backgroundColor: "#327756" }]}>
             <Text style={styles.summaryLabel}>Active</Text>
-            <Text style={styles.summaryValue} adjustsFontSizeToFit numberOfLines={1}>
+            <Text
+              style={styles.summaryValue}
+              adjustsFontSizeToFit
+              numberOfLines={1}
+            >
               {activeHabits}
             </Text>
             <Text style={styles.summarySub}>Current{"\n"}Habits</Text>
@@ -500,12 +589,16 @@ const DashboardScreen = () => {
           {/* At Risk */}
           <View style={[styles.summaryCard, { backgroundColor: "#4A6A8F" }]}>
             <Text style={styles.summaryLabel}>At Risk</Text>
-            <Text style={styles.summaryValue} adjustsFontSizeToFit numberOfLines={1}>
+            <Text
+              style={styles.summaryValue}
+              adjustsFontSizeToFit
+              numberOfLines={1}
+            >
               {atRisk}
             </Text>
             <View style={styles.summarySubRow}>
               <AlertTriangle size={10} color="#fff" />
-              <Text style={styles.summarySub}>{" "}Action{"\n"}Needed</Text>
+              <Text style={styles.summarySub}> Action{"\n"}Needed</Text>
             </View>
           </View>
         </View>
@@ -513,33 +606,50 @@ const DashboardScreen = () => {
         {/* ── CONSISTENCY HEATMAP ───────────────────────────────────────── */}
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <Text style={[styles.cardTitle, { color: C.text }]}>Consistency</Text>
-            <Text style={[styles.cardSubtitle, { color: C.textMuted }]}>Last 3 Months</Text>
+            <Text style={[styles.cardTitle, { color: C.text }]}>
+              Consistency
+            </Text>
+            <Text style={[styles.cardSubtitle, { color: C.textMuted }]}>
+              Last 3 Months
+            </Text>
           </View>
           <HeatmapGrid heatmapData={heatmapData} />
           {/* Legend */}
           <View style={styles.legendRow}>
-            <Text style={[styles.legendLabel, { color: C.textMuted }]}>Less</Text>
+            <Text style={[styles.legendLabel, { color: C.textMuted }]}>
+              Less
+            </Text>
             {HEAT_COLORS.map((hc, i) => (
-              <View key={i} style={[styles.legendCell, { backgroundColor: hc }]} />
+              <View
+                key={i}
+                style={[styles.legendCell, { backgroundColor: hc }]}
+              />
             ))}
-            <Text style={[styles.legendLabel, { color: C.textMuted }]}>More</Text>
+            <Text style={[styles.legendLabel, { color: C.textMuted }]}>
+              More
+            </Text>
           </View>
         </View>
 
         {/* ── WEEKLY PROGRESS ───────────────────────────────────────────── */}
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <Text style={[styles.cardTitle, { color: C.text }]}>Weekly Progress</Text>
+            <Text style={[styles.cardTitle, { color: C.text }]}>
+              Weekly Progress
+            </Text>
             <View style={[styles.weekPill, { backgroundColor: C.background }]}>
-              <Text style={[styles.weekPillText, { color: C.text }]}>This Week ▾</Text>
+              <Text style={[styles.weekPillText, { color: C.text }]}>
+                This Week ▾
+              </Text>
             </View>
           </View>
           <WeeklyBarChart weeklyData={weeklyData} colors={C} />
         </View>
 
         {/* ── PERFORMANCE ───────────────────────────────────────────────── */}
-        <Text style={[styles.pageTitle, { marginBottom: 14 }]}>Performance</Text>
+        <Text style={[styles.pageTitle, { marginBottom: 14 }]}>
+          Performance
+        </Text>
 
         {/* Category chips — derived from actual habit data */}
         <ScrollView
@@ -556,7 +666,11 @@ const DashboardScreen = () => {
                 styles.chip,
                 activeFilter === cat
                   ? { backgroundColor: "#2D4A3E" }
-                  : { backgroundColor: C.surface, borderColor: C.border, borderWidth: 1 },
+                  : {
+                      backgroundColor: C.surface,
+                      borderColor: C.border,
+                      borderWidth: 1,
+                    },
               ]}
               accessibilityRole="button"
               accessibilityLabel={`Filter by ${cat}`}
@@ -606,8 +720,12 @@ const DashboardScreen = () => {
             <Text style={{ fontSize: 22 }}>🐾</Text>
           </View>
           <View style={styles.mascotContent}>
-            <Text style={[styles.mascotText, { color: "#2D4A3E" }]}>{mascotMsg.text}</Text>
-            <Text style={[styles.mascotName, { color: "#2D4A3E" }]}>{mascotMsg.name}</Text>
+            <Text style={[styles.mascotText, { color: "#2D4A3E" }]}>
+              {mascotMsg.text}
+            </Text>
+            <Text style={[styles.mascotName, { color: "#2D4A3E" }]}>
+              {mascotMsg.name}
+            </Text>
           </View>
         </View>
 

@@ -214,7 +214,7 @@ export function computeTodayScore(habits, checkins) {
   const todayStr = toDateOnly(today);
 
   const activeHabits = (habits || []).filter(
-    (h) => h.isActive !== false && isHabitScheduledOn(h, today)
+    (h) => h.isActive !== false && isHabitScheduledOn(h, today),
   );
   if (activeHabits.length === 0) return 0;
 
@@ -224,9 +224,12 @@ export function computeTodayScore(habits, checkins) {
   activeHabits.forEach((habit) => {
     const habitCheckins = checkinIndex.get(habit.id) || [];
     const todayCheckin = habitCheckins.find(
-      (c) => (c.date_only || c.date || "").slice(0, 10) === todayStr
+      (c) => (c.date_only || c.date || "").slice(0, 10) === todayStr,
     );
-    if (todayCheckin && (todayCheckin.completedCount || 0) >= Math.max(1, habit.targetPerDay || 1)) {
+    if (
+      todayCheckin &&
+      (todayCheckin.completedCount || 0) >= Math.max(1, habit.targetPerDay || 1)
+    ) {
       completed++;
     }
   });
@@ -241,7 +244,6 @@ export function computeTodayScore(habits, checkins) {
  * @returns {number} signed delta (e.g. +12.5 or -8.0)
  */
 export function computeTodayTrend(habits, checkins) {
-  const today = new Date();
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
   const yesterdayStr = toDateOnly(yesterday);
@@ -249,7 +251,7 @@ export function computeTodayTrend(habits, checkins) {
   const checkinIndex = buildCheckinIndex(checkins);
 
   const scheduledYesterday = (habits || []).filter(
-    (h) => h.isActive !== false && isHabitScheduledOn(h, yesterday)
+    (h) => h.isActive !== false && isHabitScheduledOn(h, yesterday),
   );
   if (scheduledYesterday.length === 0) return 0;
 
@@ -257,15 +259,18 @@ export function computeTodayTrend(habits, checkins) {
   scheduledYesterday.forEach((habit) => {
     const habitCheckins = checkinIndex.get(habit.id) || [];
     const yCheckin = habitCheckins.find(
-      (c) => (c.date_only || c.date || "").slice(0, 10) === yesterdayStr
+      (c) => (c.date_only || c.date || "").slice(0, 10) === yesterdayStr,
     );
-    if (yCheckin && (yCheckin.completedCount || 0) >= Math.max(1, habit.targetPerDay || 1)) {
+    if (
+      yCheckin &&
+      (yCheckin.completedCount || 0) >= Math.max(1, habit.targetPerDay || 1)
+    ) {
       completedYesterday++;
     }
   });
 
   const yesterdayScore = Math.round(
-    (completedYesterday / scheduledYesterday.length) * 100
+    (completedYesterday / scheduledYesterday.length) * 100,
   );
   const todayScore = computeTodayScore(habits, checkins);
 
@@ -281,27 +286,43 @@ export function computeTodayTrend(habits, checkins) {
  * @returns {{ todayScore: number, todayTrend: number, activeHabits: number, atRisk: number }}
  */
 export function computeDashboardSummary(habits, checkins, goals) {
-  const activeHabits = (habits || []).filter((h) => h.isActive !== false).length;
+  const activeHabits = (habits || []).filter(
+    (h) => h.isActive !== false,
+  ).length;
   const checkinIndex = buildCheckinIndex(checkins);
 
-  // At-risk: habits scheduled in the last 7 days with < 50% completion rate
+  // At-risk: habits scheduled in the last 7 days with < 50% completion rate OR active today but not completed
   const sevenDaysAgo = new Date();
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+  const today = new Date();
+  const todayStr = toDateOnly(today);
 
   let atRisk = 0;
   (habits || [])
     .filter((h) => h.isActive !== false)
     .forEach((habit) => {
       const habitCheckins = checkinIndex.get(habit.id) || [];
-      const recentCheckins = habitCheckins.filter((c) => {
+      const targetPerDay = Math.max(1, habit.targetPerDay || 1);
+
+      const recentCompleted = habitCheckins.filter((c) => {
         const d = new Date((c.date_only || c.date || "").slice(0, 10));
-        return d >= sevenDaysAgo;
-      });
-      const completed = recentCheckins.filter(
-        (c) => (c.completedCount || 0) >= Math.max(1, habit.targetPerDay || 1)
-      ).length;
-      const rate = completed / 7;
-      if (rate < 0.5) atRisk++;
+        return d >= sevenDaysAgo && (c.completedCount || 0) >= targetPerDay;
+      }).length;
+      const denominator =
+        habitCheckins.length < 7 ? Math.max(1, habitCheckins.length) : 7;
+      const rate7d = Math.round((recentCompleted / denominator) * 100);
+
+      const scheduledToday = isHabitScheduledOn(habit, today);
+      const todayCheckin = habitCheckins.find(
+        (c) => (c.date_only || c.date || "").slice(0, 10) === todayStr,
+      );
+      const completedToday = !!(
+        todayCheckin && (todayCheckin.completedCount || 0) >= targetPerDay
+      );
+
+      const isAtRisk = rate7d < 50 || (scheduledToday && !completedToday);
+      if (isAtRisk) atRisk++;
     });
 
   return {
@@ -331,7 +352,7 @@ export function computeHeatmap(habits, checkins, days = 90) {
     const dateStr = toDateOnly(d);
 
     const scheduledHabits = (habits || []).filter(
-      (h) => h.isActive !== false && isHabitScheduledOn(h, d)
+      (h) => h.isActive !== false && isHabitScheduledOn(h, d),
     );
 
     if (scheduledHabits.length === 0) {
@@ -343,9 +364,12 @@ export function computeHeatmap(habits, checkins, days = 90) {
     scheduledHabits.forEach((habit) => {
       const habitCheckins = checkinIndex.get(habit.id) || [];
       const dayCheckin = habitCheckins.find(
-        (c) => (c.date_only || c.date || "").slice(0, 10) === dateStr
+        (c) => (c.date_only || c.date || "").slice(0, 10) === dateStr,
       );
-      if (dayCheckin && (dayCheckin.completedCount || 0) >= Math.max(1, habit.targetPerDay || 1)) {
+      if (
+        dayCheckin &&
+        (dayCheckin.completedCount || 0) >= Math.max(1, habit.targetPerDay || 1)
+      ) {
         completed++;
       }
     });
@@ -385,7 +409,7 @@ export function computeWeeklyProgress(habits, checkins) {
 
     const categories = {};
     const scheduledHabits = (habits || []).filter(
-      (h) => h.isActive !== false && isHabitScheduledOn(h, d)
+      (h) => h.isActive !== false && isHabitScheduledOn(h, d),
     );
 
     scheduledHabits.forEach((habit) => {
@@ -395,9 +419,12 @@ export function computeWeeklyProgress(habits, checkins) {
 
       const habitCheckins = checkinIndex.get(habit.id) || [];
       const dayCheckin = habitCheckins.find(
-        (c) => (c.date_only || c.date || "").slice(0, 10) === dateStr
+        (c) => (c.date_only || c.date || "").slice(0, 10) === dateStr,
       );
-      if (dayCheckin && (dayCheckin.completedCount || 0) >= Math.max(1, habit.targetPerDay || 1)) {
+      if (
+        dayCheckin &&
+        (dayCheckin.completedCount || 0) >= Math.max(1, habit.targetPerDay || 1)
+      ) {
         categories[cat].completed++;
       }
     });
@@ -434,6 +461,9 @@ export function computePerformanceList(habits, checkins) {
   const sevenDaysAgo = new Date();
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
+  const today = new Date();
+  const todayStr = toDateOnly(today);
+
   return (habits || [])
     .filter((h) => h.isActive !== false)
     .map((habit) => {
@@ -448,15 +478,32 @@ export function computePerformanceList(habits, checkins) {
         .sort()
         .reverse();
 
-      const { currentStreak, longestStreak } = computeStreak(completedDates, habit);
-      const totalCompletions = computeTotalCompletions(habitCheckins, targetPerDay);
+      const { currentStreak, longestStreak } = computeStreak(
+        completedDates,
+        habit,
+      );
+      const totalCompletions = computeTotalCompletions(
+        habitCheckins,
+        targetPerDay,
+      );
 
       // 7-day completion rate (out of 7 calendar days, not just scheduled days)
       const recentCompleted = habitCheckins.filter((c) => {
         const d = new Date((c.date_only || c.date || "").slice(0, 10));
         return d >= sevenDaysAgo && (c.completedCount || 0) >= targetPerDay;
       }).length;
-      const rate7d = Math.round((recentCompleted / 7) * 100);
+      const denominator =
+        habitCheckins.length < 7 ? Math.max(1, habitCheckins.length) : 7;
+      const rate7d = Math.round((recentCompleted / denominator) * 100);
+
+      const scheduledToday = isHabitScheduledOn(habit, today);
+      const todayCheckin = habitCheckins.find(
+        (c) => (c.date_only || c.date || "").slice(0, 10) === todayStr,
+      );
+      const completedToday = !!(
+        todayCheckin && (todayCheckin.completedCount || 0) >= targetPerDay
+      );
+      const isAtRisk = rate7d < 50 || (scheduledToday && !completedToday);
 
       return {
         habit,
@@ -464,6 +511,7 @@ export function computePerformanceList(habits, checkins) {
         longestStreak,
         totalCompletions,
         rate7d,
+        isAtRisk,
       };
     });
 }
