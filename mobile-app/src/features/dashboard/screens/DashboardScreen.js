@@ -15,6 +15,7 @@ import {
   Settings,
   AlertTriangle,
   TrendingUp,
+  TrendingDown,
   Dumbbell,
   BookOpen,
   Sparkles,
@@ -23,12 +24,18 @@ import {
   Zap,
   Heart,
   BarChart2,
+  Minus,
 } from "lucide-react-native";
 import { Svg, Rect, Text as SvgText } from "react-native-svg";
 import { useTheme } from "@/providers/ThemeProvider";
-import { useDashboardStore } from "../store/useDashboardStore";
+import { useDomainStore } from "@/shared/stores/useDomainStore";
 import { useMascotStore } from "@/features/mascot/store/mascotStore";
-import { calculateHabitStats } from "@/shared/services/derivedStateEngine";
+import {
+  computeDashboardSummary,
+  computeHeatmap,
+  computeWeeklyProgress,
+  computePerformanceList,
+} from "@/shared/services/derivedStateEngine";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const CELL_SIZE = 12;
@@ -46,31 +53,26 @@ const CATEGORY_COLORS = {
   Personal: "#3E6669",
   mindfulness: "#7C6B9A",
   Mindfulness: "#7C6B9A",
+  fitness: "#327756",
+  Fitness: "#327756",
+  other: "#5F6368",
+  Other: "#5F6368",
   default: "#327756",
 };
 
 // ─── HEATMAP ─────────────────────────────────────────────────────────────────
-// Builds a 7-row × N-week grid from raw heatmap data from /dashboard/simple-heatmap
 const HEAT_COLORS = ["#E8F5EE", "#A8D5BA", "#52A477", "#327756", "#1E4631"];
 
-function buildHeatGrid(heatmap) {
-  // heatmap shape: { dates: { "2026-03-01": 0.4, ... } } or array
+/**
+ * Builds a 7-row × N-week grid from computed heatmap data.
+ * heatmapData shape: [{ date: "YYYY-MM-DD", completionRate: 0–1 }, ...]
+ */
+function buildHeatGrid(heatmapData) {
   const dateMap = {};
-  if (heatmap) {
-    if (Array.isArray(heatmap)) {
-      heatmap.forEach((item) => {
-        if (item.date || item.date_only) {
-          const key = (item.date || item.date_only).slice(0, 10);
-          dateMap[key] = item.completionRate ?? item.value ?? 0;
-        }
-      });
-    } else if (typeof heatmap === "object") {
-      // Some APIs return { dates: {}, summary: {} }
-      const raw = heatmap.dates || heatmap;
-      Object.entries(raw).forEach(([k, v]) => {
-        dateMap[k] = typeof v === "number" ? v : (v?.completionRate ?? 0);
-      });
-    }
+  if (Array.isArray(heatmapData)) {
+    heatmapData.forEach((item) => {
+      if (item.date) dateMap[item.date] = item.completionRate ?? 0;
+    });
   }
 
   const today = new Date();
@@ -111,18 +113,24 @@ function intensityToColor(intensity) {
   return HEAT_COLORS[4];
 }
 
-const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MONTH_NAMES = [
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+];
 
-function HeatmapGrid({ heatmap }) {
-  const { cells, numCols, monthLabels } = useMemo(() => buildHeatGrid(heatmap), [heatmap]);
+function HeatmapGrid({ heatmapData }) {
+  const { cells, numCols, monthLabels } = useMemo(
+    () => buildHeatGrid(heatmapData),
+    [heatmapData]
+  );
   const totalCols = Math.max(numCols, NUM_WEEKS);
   const svgWidth = totalCols * CELL_STEP;
   const headerH = 18;
   const svgHeight = headerH + 7 * CELL_STEP;
 
   return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-      <Svg width={svgWidth} height={svgHeight}>
+    <View style={{ width: "100%", aspectRatio: svgWidth / svgHeight }}>
+      <Svg width="100%" height="100%" viewBox={`0 0 ${svgWidth} ${svgHeight}`}>
         {/* Month labels */}
         {monthLabels.map((ml, i) => (
           <SvgText
@@ -148,76 +156,43 @@ function HeatmapGrid({ heatmap }) {
           />
         ))}
       </Svg>
-    </ScrollView>
+    </View>
   );
 }
 
 // ─── WEEKLY BAR CHART ─────────────────────────────────────────────────────────
 const BAR_MAX_HEIGHT = 100;
-const DAY_LABELS = ["M", "T", "W", "T", "F", "S", "S"];
 
 /**
- * weeklyProgress shape from /dashboard/weekly-progress:
- * Array of { day_label: "Mon", categories: { Health: 0.8, Study: 0.4, Personal: 0.6 } }
- * OR
- * { week: [{ day: "Mon", health: 0.8, study: 0.4 }] }
- *
- * We normalise into: [{ day, segments: [{category, ratio}] }]
+ * weeklyData shape from computeWeeklyProgress:
+ * [{ day: "M", categories: { Health: 0.8, Study: 0.4 } }, ...]
  */
-function normaliseWeeklyData(weeklyProgress) {
-  if (!weeklyProgress) return DAY_LABELS.map((d) => ({ day: d, segments: [] }));
-
-  const raw = Array.isArray(weeklyProgress)
-    ? weeklyProgress
-    : weeklyProgress.week || weeklyProgress.data || [];
-
-  if (!raw.length) return DAY_LABELS.map((d) => ({ day: d, segments: [] }));
-
-  return raw.map((entry, i) => {
-    const day = DAY_LABELS[i] ?? entry.day_label?.[0] ?? entry.day?.[0] ?? DAY_LABELS[i];
-    const cats = entry.categories || {};
-    const segments = Object.entries(cats).map(([cat, ratio]) => ({
-      category: cat,
-      ratio: Math.min(Number(ratio) || 0, 1),
-    }));
-    // Fallback: parse flat fields like { health: 0.8, study: 0.4 }
-    if (!segments.length) {
-      ["health", "study", "personal", "mindfulness"].forEach((cat) => {
-        if (entry[cat] != null) {
-          segments.push({ category: cat, ratio: Math.min(Number(entry[cat]) || 0, 1) });
-        }
-      });
-    }
-    return { day, segments };
-  });
-}
-
-function WeeklyBarChart({ weeklyProgress, colors }) {
-  const data = useMemo(() => normaliseWeeklyData(weeklyProgress), [weeklyProgress]);
+function WeeklyBarChart({ weeklyData, colors }) {
   const uniqueCats = useMemo(() => {
     const s = new Set();
-    data.forEach((d) => d.segments.forEach((seg) => s.add(seg.category)));
+    (weeklyData || []).forEach((d) =>
+      Object.keys(d.categories || {}).forEach((cat) => s.add(cat))
+    );
     return [...s];
-  }, [data]);
+  }, [weeklyData]);
 
   return (
     <View>
       <View style={wStyles.chartRow}>
-        {data.map((entry, i) => {
-          const totalRatio = entry.segments.reduce((sum, s) => sum + s.ratio, 0);
+        {(weeklyData || []).map((entry, i) => {
+          const cats = Object.entries(entry.categories || {});
+          const totalRatio = cats.reduce((sum, [, v]) => sum + v, 0);
           const barH = Math.max(4, Math.min(totalRatio * BAR_MAX_HEIGHT, BAR_MAX_HEIGHT));
-          let currentBottom = 0;
-          const segments = [...entry.segments].reverse(); // render bottom-up
 
           return (
             <View key={i} style={wStyles.barCol}>
               <View style={wStyles.barWrapper}>
                 <View style={[wStyles.barContainer, { height: BAR_MAX_HEIGHT }]}>
-                  {entry.segments.length > 0 ? (
+                  {cats.length > 0 ? (
                     <View style={[wStyles.barStack, { height: barH }]}>
-                      {segments.map((seg, si) => {
-                        const segH = (seg.ratio / Math.max(totalRatio, 1)) * barH;
-                        const color = CATEGORY_COLORS[seg.category] || CATEGORY_COLORS.default;
+                      {[...cats].reverse().map(([cat, ratio], si) => {
+                        const segH = (ratio / Math.max(totalRatio, 1)) * barH;
+                        const color = CATEGORY_COLORS[cat] || CATEGORY_COLORS.default;
                         return (
                           <View
                             key={si}
@@ -242,7 +217,10 @@ function WeeklyBarChart({ weeklyProgress, colors }) {
           {uniqueCats.map((cat) => (
             <View key={cat} style={wStyles.legendItem}>
               <View
-                style={[wStyles.legendDot, { backgroundColor: CATEGORY_COLORS[cat] || CATEGORY_COLORS.default }]}
+                style={[
+                  wStyles.legendDot,
+                  { backgroundColor: CATEGORY_COLORS[cat] || CATEGORY_COLORS.default },
+                ]}
               />
               <Text style={[wStyles.legendText, { color: colors.textMuted }]}>
                 {cat.charAt(0).toUpperCase() + cat.slice(1)}
@@ -262,31 +240,12 @@ const wStyles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 4,
   },
-  barCol: {
-    flex: 1,
-    alignItems: "center",
-  },
-  barWrapper: {
-    alignItems: "center",
-    justifyContent: "flex-end",
-  },
-  barContainer: {
-    justifyContent: "flex-end",
-    width: 22,
-  },
-  barStack: {
-    width: 22,
-    borderRadius: 4,
-    overflow: "hidden",
-    justifyContent: "flex-end",
-  },
-  barSegment: {
-    width: "100%",
-  },
-  dayLabel: {
-    fontSize: 11,
-    marginTop: 6,
-  },
+  barCol: { flex: 1, alignItems: "center" },
+  barWrapper: { alignItems: "center", justifyContent: "flex-end" },
+  barContainer: { justifyContent: "flex-end", width: 22 },
+  barStack: { width: 22, borderRadius: 4, overflow: "hidden", justifyContent: "flex-end" },
+  barSegment: { width: "100%" },
+  dayLabel: { fontSize: 11, marginTop: 6 },
   legend: {
     flexDirection: "row",
     justifyContent: "center",
@@ -294,19 +253,9 @@ const wStyles = StyleSheet.create({
     marginTop: 16,
     gap: 12,
   },
-  legendItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-  },
-  legendDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  legendText: {
-    fontSize: 12,
-  },
+  legendItem: { flexDirection: "row", alignItems: "center", gap: 5 },
+  legendDot: { width: 8, height: 8, borderRadius: 4 },
+  legendText: { fontSize: 12 },
 });
 
 // ─── HABIT ICON MAP ──────────────────────────────────────────────────────────
@@ -328,30 +277,21 @@ function HabitIcon({ name, color, size = 18 }) {
 }
 
 // ─── PERFORMANCE HABIT CARD ──────────────────────────────────────────────────
-function HabitPerformanceCard({ habit, checkins, colors }) {
-  const stats = useMemo(() => calculateHabitStats(checkins || [], habit), [checkins, habit]);
-
-  const rate7d = useMemo(() => {
-    if (!checkins || checkins.length === 0) return 0;
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    const recentCheckins = checkins.filter((c) => {
-      const d = new Date(c.date_only || c.date);
-      return d >= sevenDaysAgo;
-    });
-    const completed = recentCheckins.filter(
-      (c) => (c.completedCount || 0) >= Math.max(1, habit.targetPerDay || 1)
-    ).length;
-    return Math.round((completed / 7) * 100);
-  }, [checkins, habit]);
-
+/**
+ * Performance habit card matching the design:
+ *   - Habit icon + name + 7d rate%
+ *   - Current streak (or "At Risk")
+ *   - Best streak + Total completions
+ *   - 7d Rate label
+ */
+function HabitPerformanceCard({ item, colors }) {
+  const { habit, currentStreak, longestStreak, totalCompletions, rate7d } = item;
   const isAtRisk = rate7d < 50;
   const catColor = CATEGORY_COLORS[habit.category] || CATEGORY_COLORS.default;
 
   const cardBg = isAtRisk
     ? { backgroundColor: "#FFF0F0", borderColor: "#FFCCCC", borderWidth: 1 }
     : { backgroundColor: colors.surface };
-
   const iconBg = isAtRisk ? "#FFE4E4" : colors.background;
   const iconColor = isAtRisk ? "#E53E3E" : catColor;
   const percentColor = isAtRisk ? "#E53E3E" : catColor;
@@ -376,8 +316,8 @@ function HabitPerformanceCard({ habit, checkins, colors }) {
           <Text style={[s.habitStreak, { color: isAtRisk ? "#E53E3E" : colors.textMuted }]}>
             {isAtRisk
               ? "⏱ At Risk"
-              : stats.currentStreak > 0
-              ? `🔥 ${stats.currentStreak}d streak`
+              : currentStreak > 0
+              ? `🔥 ${currentStreak}d streak`
               : "No active streak"}
           </Text>
           <Text style={[s.habitRateLabel, { color: isAtRisk ? "#E53E3E" : colors.textMuted }]}>
@@ -385,86 +325,32 @@ function HabitPerformanceCard({ habit, checkins, colors }) {
           </Text>
         </View>
         <Text style={[s.habitBest, { color: colors.textMuted }]}>
-          Best: {stats.longestStreak}d • Total: {stats.totalCompletions}
+          Best: {longestStreak}d • Total: {totalCompletions}
         </Text>
       </View>
     </View>
   );
 }
 
-// ─── SUMMARY CARDS ───────────────────────────────────────────────────────────
-function deriveSummary(summary, goals) {
-  // /dashboard/summary shape:
-  //   { todayCompletionRate, activeHabitsCount, atRiskCount, weekTrend, ... }
-  // Fallback: derive from goals data
-  let todayScore = 0;
-  let todayTrend = null;
-  let activeHabits = 0;
-  let riskCount = 0;
-
-  if (summary) {
-    todayScore = Math.round(
-      (summary.todayCompletionRate ?? summary.today_completion_rate ?? summary.todayScore ?? 0) * 100
-    );
-    // Some APIs return 0-100 directly
-    if (todayScore > 1 && todayScore <= 100) {
-      // already in percentage
-    } else if (summary.todayCompletionRate > 1) {
-      todayScore = Math.round(summary.todayCompletionRate);
-    }
-    todayTrend = summary.weekTrend ?? summary.week_trend ?? null;
-    activeHabits = summary.activeHabitsCount ?? summary.active_habits_count ?? summary.activeHabits ?? 0;
-    riskCount = summary.atRiskCount ?? summary.at_risk_count ?? summary.riskCount ?? 0;
-  }
-
-  // If no API data yet, derive from goals
-  if (!summary && goals && Array.isArray(goals)) {
-    activeHabits = goals.length;
-    riskCount = goals.filter((g) => g.progressPercent < 50).length;
-  }
-
-  return { todayScore, todayTrend, activeHabits, riskCount };
-}
-
-// ─── FILTER CATEGORIES from goals data ──────────────────────────────────────
-function groupByCategory(goals) {
-  const groups = {};
-  if (!Array.isArray(goals)) return groups;
-  goals.forEach((item) => {
-    // goals data from /dashboard/goals has habit info
-    const habit = item.habit || item;
-    const cat = (habit.category || "Other").trim();
-    if (!groups[cat]) groups[cat] = [];
-    groups[cat].push(habit);
-  });
-  return groups;
-}
-
 // ─── MASCOT MESSAGE ──────────────────────────────────────────────────────────
-function buildMascotMessage(goals, selectedMascot) {
-  if (!Array.isArray(goals) || goals.length === 0) {
-    return { text: "Keep building great habits! Every day counts.", name: "Your Mascot" };
+function buildMascotMessage(performanceList) {
+  if (!Array.isArray(performanceList) || performanceList.length === 0) {
+    return { text: "Keep building great habits! Every day counts.", name: "Keep going!" };
   }
 
-  const atRisk = goals.filter((g) => {
-    const rate = g.sevenDayRate ?? g.seven_day_rate ?? (g.progressPercent || 0) / 100;
-    return rate < 0.5;
-  });
-
-  const crushing = goals.filter((g) => {
-    const rate = g.sevenDayRate ?? g.seven_day_rate ?? (g.progressPercent || 0) / 100;
-    return rate >= 0.8;
-  });
+  const atRisk = performanceList.filter((p) => p.rate7d < 50);
+  const crushing = performanceList.filter((p) => p.rate7d >= 80);
 
   let msg = "";
   if (crushing.length > 0 && atRisk.length === 0) {
-    msg = `You're crushing all your habits! Keep this incredible momentum going!`;
+    msg = "You're crushing all your habits! Keep this incredible momentum going!";
   } else if (atRisk.length > 0 && crushing.length > 0) {
-    const atRiskName = atRisk[0]?.habit?.name || atRisk[0]?.name || "that habit";
-    const crushingCat = crushing[0]?.habit?.category || "your strong categories";
+    const atRiskName = atRisk[0]?.habit?.name || "that habit";
+    const crushingCat =
+      crushing[0]?.habit?.category || "your strong categories";
     msg = `You're crushing it on ${crushingCat}, but ${atRiskName} needs some love today. Don't let that streak slip away!`;
   } else if (atRisk.length > 0) {
-    const atRiskName = atRisk[0]?.habit?.name || atRisk[0]?.name || "some habits";
+    const atRiskName = atRisk[0]?.habit?.name || "some habits";
     msg = `${atRiskName} needs attention. Give it some focus today to get back on track!`;
   } else {
     msg = "Keep building great habits! Every small action compounds over time.";
@@ -478,45 +364,82 @@ const DashboardScreen = () => {
   const { colors: themeColors } = useTheme();
   const C = themeColors;
 
-  const {
-    summary,
-    heatmap,
-    weeklyProgress,
-    goals,
-    isLoading,
-    error,
-    loadDashboardData,
-    checkinsByHabit,
-  } = useDashboardStore();
-
+  const { habits, goals, checkins, isLoading, error, fetchDomainData } =
+    useDomainStore();
   const { selectedMascot } = useMascotStore();
   const [activeFilter, setActiveFilter] = useState("All");
 
   useEffect(() => {
-    loadDashboardData();
-  }, [loadDashboardData]);
+    fetchDomainData();
+  }, [fetchDomainData]);
 
   const onRefresh = useCallback(() => {
-    loadDashboardData(true);
-  }, [loadDashboardData]);
+    fetchDomainData(true);
+  }, [fetchDomainData]);
 
-  // Derived state from store data
-  const { todayScore, todayTrend, activeHabits, riskCount } = useMemo(
-    () => deriveSummary(summary, goals),
-    [summary, goals]
+  // ── Derived State (all computed from raw data via derivedStateEngine) ───────
+  const { todayScore, todayTrend, activeHabits, atRisk } = useMemo(
+    () => computeDashboardSummary(habits, checkins, goals),
+    [habits, checkins, goals]
   );
 
-  const categoryGroups = useMemo(() => groupByCategory(goals), [goals]);
-  const categories = useMemo(() => ["All", ...Object.keys(categoryGroups)], [categoryGroups]);
+  const heatmapData = useMemo(
+    () => computeHeatmap(habits, checkins, 90),
+    [habits, checkins]
+  );
 
-  const filteredGroups = useMemo(() => {
-    if (activeFilter === "All") return categoryGroups;
-    return categoryGroups[activeFilter] ? { [activeFilter]: categoryGroups[activeFilter] } : {};
-  }, [activeFilter, categoryGroups]);
+  const weeklyData = useMemo(
+    () => computeWeeklyProgress(habits, checkins),
+    [habits, checkins]
+  );
 
-  const mascotMsg = useMemo(() => buildMascotMessage(goals, selectedMascot), [goals, selectedMascot]);
+  const performanceList = useMemo(
+    () => computePerformanceList(habits, checkins),
+    [habits, checkins]
+  );
+
+  // ── Category filter derived from actual habit categories ───────────────────
+  const categories = useMemo(() => {
+    const cats = new Set();
+    performanceList.forEach((p) => {
+      const cat = p.habit.category;
+      if (cat) cats.add(cat);
+    });
+    return ["All", ...Array.from(cats).sort()];
+  }, [performanceList]);
+
+  const filteredPerformanceList = useMemo(() => {
+    if (activeFilter === "All") return performanceList;
+    return performanceList.filter(
+      (p) => (p.habit.category || "").toLowerCase() === activeFilter.toLowerCase()
+    );
+  }, [performanceList, activeFilter]);
+
+  // Group filtered list by category for section headers
+  const groupedPerformance = useMemo(() => {
+    const groups = {};
+    filteredPerformanceList.forEach((item) => {
+      const cat = item.habit.category || "Other";
+      if (!groups[cat]) groups[cat] = [];
+      groups[cat].push(item);
+    });
+    return groups;
+  }, [filteredPerformanceList]);
+
+  const mascotMsg = useMemo(
+    () => buildMascotMessage(performanceList),
+    [performanceList]
+  );
 
   const styles = useMemo(() => makeStyles(C), [C]);
+
+  // ── Trend indicator ────────────────────────────────────────────────────────
+  const trendDisplay = useMemo(() => {
+    if (todayTrend === 0) return { label: "±0%", Icon: Minus, color: "#fff" };
+    if (todayTrend > 0)
+      return { label: `+${todayTrend.toFixed(1)}%`, Icon: TrendingUp, color: "#fff" };
+    return { label: `${todayTrend.toFixed(1)}%`, Icon: TrendingDown, color: "#fff" };
+  }, [todayTrend]);
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
@@ -559,14 +482,10 @@ const DashboardScreen = () => {
             <Text style={styles.summaryValue} adjustsFontSizeToFit numberOfLines={1}>
               {todayScore}%
             </Text>
-            {todayTrend != null && (
-              <View style={styles.summarySubRow}>
-                <TrendingUp size={10} color="#fff" />
-                <Text style={styles.summarySub}>{` ${todayTrend > 0 ? "+" : ""}${
-                  typeof todayTrend === "number" ? todayTrend.toFixed(1) + "%" : todayTrend
-                }`}</Text>
-              </View>
-            )}
+            <View style={styles.summarySubRow}>
+              <trendDisplay.Icon size={10} color={trendDisplay.color} />
+              <Text style={styles.summarySub}>{` ${trendDisplay.label}`}</Text>
+            </View>
           </View>
 
           {/* Active Habits */}
@@ -582,7 +501,7 @@ const DashboardScreen = () => {
           <View style={[styles.summaryCard, { backgroundColor: "#4A6A8F" }]}>
             <Text style={styles.summaryLabel}>At Risk</Text>
             <Text style={styles.summaryValue} adjustsFontSizeToFit numberOfLines={1}>
-              {riskCount}
+              {atRisk}
             </Text>
             <View style={styles.summarySubRow}>
               <AlertTriangle size={10} color="#fff" />
@@ -597,7 +516,7 @@ const DashboardScreen = () => {
             <Text style={[styles.cardTitle, { color: C.text }]}>Consistency</Text>
             <Text style={[styles.cardSubtitle, { color: C.textMuted }]}>Last 3 Months</Text>
           </View>
-          <HeatmapGrid heatmap={heatmap} />
+          <HeatmapGrid heatmapData={heatmapData} />
           {/* Legend */}
           <View style={styles.legendRow}>
             <Text style={[styles.legendLabel, { color: C.textMuted }]}>Less</Text>
@@ -616,13 +535,13 @@ const DashboardScreen = () => {
               <Text style={[styles.weekPillText, { color: C.text }]}>This Week ▾</Text>
             </View>
           </View>
-          <WeeklyBarChart weeklyProgress={weeklyProgress} colors={C} />
+          <WeeklyBarChart weeklyData={weeklyData} colors={C} />
         </View>
 
         {/* ── PERFORMANCE ───────────────────────────────────────────────── */}
         <Text style={[styles.pageTitle, { marginBottom: 14 }]}>Performance</Text>
 
-        {/* Category chips */}
+        {/* Category chips — derived from actual habit data */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -655,30 +574,28 @@ const DashboardScreen = () => {
         </ScrollView>
 
         {/* Habit performance list grouped by category */}
-        {Object.keys(filteredGroups).length === 0 ? (
+        {Object.keys(groupedPerformance).length === 0 ? (
           <View style={styles.emptyState}>
             <BarChart2 size={32} color={C.textMuted} />
             <Text style={[styles.emptyText, { color: C.textMuted }]}>
-              No habit data yet. Complete some habits to see your performance!
+              {habits.length === 0
+                ? "No habits found. Create some habits to see your performance!"
+                : "No habits match the selected category."}
             </Text>
           </View>
         ) : (
-          Object.entries(filteredGroups).map(([cat, habits]) => (
+          Object.entries(groupedPerformance).map(([cat, items]) => (
             <View key={cat}>
               <Text style={[styles.catLabel, { color: C.textMuted }]}>
                 {cat.toUpperCase()}
               </Text>
-              {habits.map((habit, i) => {
-                const habitCheckins = (checkinsByHabit || {})[habit.id] || [];
-                return (
-                  <HabitPerformanceCard
-                    key={habit.id ?? i}
-                    habit={habit}
-                    checkins={habitCheckins}
-                    colors={C}
-                  />
-                );
-              })}
+              {items.map((item) => (
+                <HabitPerformanceCard
+                  key={item.habit.id}
+                  item={item}
+                  colors={C}
+                />
+              ))}
             </View>
           ))
         )}
@@ -686,7 +603,6 @@ const DashboardScreen = () => {
         {/* ── MASCOT NOTE ───────────────────────────────────────────────── */}
         <View style={[styles.mascotCard, { backgroundColor: C.successLight }]}>
           <View style={[styles.mascotIconBg, { backgroundColor: "#2D4A3E" }]}>
-            {/* Simple smiley mascot face */}
             <Text style={{ fontSize: 22 }}>🐾</Text>
           </View>
           <View style={styles.mascotContent}>
@@ -738,7 +654,8 @@ function makeStyles(C) {
       borderRadius: 18,
       paddingHorizontal: 12,
       paddingVertical: 14,
-      minHeight: 120,
+      minHeight: 125,
+      justifyContent: "space-between",
     },
     summaryLabel: {
       fontSize: 11,
@@ -908,6 +825,35 @@ function makeStyles(C) {
   });
 }
 
-// ─── HELPERS ─────────────────────────────────────────────────────────────────
+const s = StyleSheet.create({
+  habitCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderRadius: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+    marginBottom: 10,
+  },
+  habitIconBg: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 14,
+  },
+  habitInfo: { flex: 1 },
+  habitRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 3,
+  },
+  habitName: { fontSize: 15, fontWeight: "500", flex: 1, marginRight: 8 },
+  habitRate: { fontSize: 15, fontWeight: "700" },
+  habitStreak: { fontSize: 13 },
+  habitRateLabel: { fontSize: 11 },
+  habitBest: { fontSize: 12, marginTop: 3 },
+});
 
 export default DashboardScreen;
