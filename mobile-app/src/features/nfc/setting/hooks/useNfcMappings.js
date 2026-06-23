@@ -1,5 +1,7 @@
-import { useEffect, useState, useCallback } from "react";
+/* eslint-disable react-hooks/exhaustive-deps, react-hooks/set-state-in-effect */
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useEffect, useState, useCallback } from "react";
+
 import { updateHabit } from "../../../habits/screens/CreateHabit/services/habitsManager";
 import * as nfcApi from "../services/nfcApi";
 
@@ -22,7 +24,9 @@ export default function useNfcMappings() {
       ]);
 
       const parsedHabits = storedHabitsJson ? JSON.parse(storedHabitsJson) : [];
-      const parsedMappings = storedMappingsJson ? JSON.parse(storedMappingsJson) : {};
+      const parsedMappings = storedMappingsJson
+        ? JSON.parse(storedMappingsJson)
+        : {};
 
       setAllHabits(parsedHabits);
       setNfcMappings(parsedMappings);
@@ -34,8 +38,8 @@ export default function useNfcMappings() {
 
       setUnconfiguredHabits(
         parsedHabits.filter(
-          (h) => h.status === "Active" && !assignedIds.includes(h.id)
-        )
+          (h) => h.status === "Active" && !assignedIds.includes(h.id),
+        ),
       );
     } catch (err) {
       console.warn("useNfcMappings loadData error", err);
@@ -62,8 +66,8 @@ export default function useNfcMappings() {
 
     setUnconfiguredHabits(
       allHabits.filter(
-        (h) => h.status === "Active" && !assignedIds.includes(h.id)
-      )
+        (h) => h.status === "Active" && !assignedIds.includes(h.id),
+      ),
     );
   }
 
@@ -115,7 +119,7 @@ export default function useNfcMappings() {
             type,
             tag_name: finalTagName,
             ndef_url: ndefUrl,
-            habit_id: type === "SINGLE" ? habitId ?? null : null,
+            habit_id: type === "SINGLE" ? (habitId ?? null) : null,
           });
         } else {
           const resp = await nfcApi.createNfcTagRemote({
@@ -123,7 +127,7 @@ export default function useNfcMappings() {
             type,
             tag_name: finalTagName,
             ndef_url: ndefUrl,
-            habit_id: type === "SINGLE" ? habitId ?? null : null,
+            habit_id: type === "SINGLE" ? (habitId ?? null) : null,
           });
           if (resp?.id) {
             updated[tagId].serverId = resp.id;

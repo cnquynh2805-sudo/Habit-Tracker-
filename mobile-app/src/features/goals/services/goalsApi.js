@@ -1,7 +1,7 @@
 import apiClient from "../../../shared/api/apiClient";
 import { endpoints } from "../../../shared/api/endpoints";
-import { listHabits } from "../../habits/services/habitsApi";
 import { calculateGoalProgress } from "../../../shared/services/derivedStateEngine";
+import { listHabits } from "../../habits/services/habitsApi";
 
 /**
  * Fetch all goals from the backend.
@@ -12,7 +12,11 @@ import { calculateGoalProgress } from "../../../shared/services/derivedStateEngi
  */
 export const fetchGoals = async () => {
   const data = await apiClient.get(endpoints.goals.list);
-  return Array.isArray(data?.value) ? data.value : Array.isArray(data) ? data : [];
+  return Array.isArray(data?.value)
+    ? data.value
+    : Array.isArray(data)
+      ? data
+      : [];
 };
 
 /**
@@ -22,7 +26,11 @@ export const fetchGoals = async () => {
 export const fetchAllCheckins = async () => {
   try {
     const data = await apiClient.get(endpoints.checkins.listAll);
-    return Array.isArray(data?.value) ? data.value : Array.isArray(data) ? data : [];
+    return Array.isArray(data?.value)
+      ? data.value
+      : Array.isArray(data)
+        ? data
+        : [];
   } catch {
     return [];
   }
@@ -115,7 +123,10 @@ export const createGoal = async (habitId, goalData) => {
     });
     return data;
   } catch (error) {
-    console.error("Error creating goal:", error.response?.data?.message || error.message);
+    console.error(
+      "Error creating goal:",
+      error.response?.data?.message || error.message,
+    );
     throw error;
   }
 };
@@ -131,11 +142,14 @@ export const updateGoal = async (habitId, goalId, goalData) => {
       endpoints.goals.updateByHabit(habitId, goalId),
       {
         targetValue: Number(goalData.targetValue),
-      }
+      },
     );
     return data;
   } catch (error) {
-    console.error("Error updating goal:", error.response?.data?.message || error.message);
+    console.error(
+      "Error updating goal:",
+      error.response?.data?.message || error.message,
+    );
     throw error;
   }
 };
@@ -146,10 +160,15 @@ export const updateGoal = async (habitId, goalId, goalData) => {
  */
 export const deleteGoal = async (habitId, goalId) => {
   try {
-    const data = await apiClient.delete(endpoints.goals.updateByHabit(habitId, goalId));
+    const data = await apiClient.delete(
+      endpoints.goals.updateByHabit(habitId, goalId),
+    );
     return data;
   } catch (error) {
-    console.error("Error deleting goal:", error.response?.data?.message || error.message);
+    console.error(
+      "Error deleting goal:",
+      error.response?.data?.message || error.message,
+    );
     throw error;
   }
 };

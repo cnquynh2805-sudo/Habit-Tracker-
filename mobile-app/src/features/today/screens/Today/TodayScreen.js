@@ -1,4 +1,5 @@
 /* eslint-disable i18next/no-literal-string */
+import { ChevronDown, ChevronUp } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -15,11 +16,10 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { useAppStore } from "../../../../shared/stores/useAppStore";
-
 import { getStyles } from "./TodayScreen.styles";
 import { useTheme } from "../../../../providers/ThemeProvider";
-import ConfirmModal from "@/shared/components/ConfirmModal";
+import { useAppStore } from "../../../../shared/stores/useAppStore";
+import { CATEGORY_ICONS } from "../../../habits/constants";
 import DailyProgressCard from "../../components/DailyProgressCard";
 import FilterMenu from "../../components/FilterMenu";
 import MascotAvatar from "../../components/MascotAvatar";
@@ -27,8 +27,8 @@ import TodoHabitCard from "../../components/TodoHabitCard";
 import UndoSnackbar from "../../components/UndoSnackbar";
 import { useTodayCheckins } from "../../hooks/useTodayCheckins";
 import { getGreetingKey } from "../../utils/today";
-import { CATEGORY_ICONS } from "../../../habits/constants";
-import { ChevronDown, ChevronUp } from "lucide-react-native";
+
+import ConfirmModal from "@/shared/components/ConfirmModal";
 
 if (
   Platform.OS === "android" &&
@@ -231,10 +231,14 @@ export default function TodayScreen({ navigation }) {
                 <View key={habit.id} style={styles.doneRow}>
                   <View style={styles.doneEmojiContainer}>
                     <Image
-                      source={CATEGORY_ICONS[(habit.category || "other").toLowerCase()]}
+                      source={
+                        CATEGORY_ICONS[
+                          (habit.category || "other").toLowerCase()
+                        ]
+                      }
                       style={styles.doneEmoji}
                     />
-                  </View>                 
+                  </View>
                   <Text style={styles.doneName} numberOfLines={1}>
                     {habit.name}
                   </Text>

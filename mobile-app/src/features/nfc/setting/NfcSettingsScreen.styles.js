@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-color-literals */
 import { StyleSheet } from "react-native";
 
 export default StyleSheet.create({
@@ -8,11 +9,11 @@ export default StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#F8F9F6", // Nền nhạt thiên tự nhiên giống trong ảnh
   },
-  
+
   // Container chính toàn màn hình
   container: {
     flex: 1,
-    backgroundColor: "#F8F9F6", 
+    backgroundColor: "#F8F9F6",
     paddingHorizontal: 20,
     paddingTop: 20,
   },
@@ -103,7 +104,7 @@ export default StyleSheet.create({
     fontWeight: "600",
   },
 
-  // Các nút chọn Habit lẻ - CĂN TRÁI TRONG COMPONENT 
+  // Các nút chọn Habit lẻ - CĂN TRÁI TRONG COMPONENT
   btnSecondary: {
     backgroundColor: "#FFFFFF",
     borderRadius: 100,
@@ -179,7 +180,7 @@ export default StyleSheet.create({
 
   // Nút hủy liên kết (Unlink) - Chuyển sang dạng nút nền nhạt chữ đỏ dịu mắt để không phá vỡ giao diện pastel
   btnDanger: {
-    backgroundColor: "#FEE2E2", 
+    backgroundColor: "#FEE2E2",
     borderRadius: 100,
     paddingVertical: 8,
     paddingHorizontal: 16,

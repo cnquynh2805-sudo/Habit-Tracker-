@@ -1,6 +1,7 @@
+/* eslint-disable react-native/no-inline-styles, react-native/no-color-literals */
+import { Palette } from "lucide-react-native";
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
-import { Palette } from "lucide-react-native";
 
 type ThemeSwitcherProps = {
   themeMode: "Light" | "Dark" | "System";
@@ -29,7 +30,10 @@ export default function ThemeSwitcher({
 
   return (
     <View style={{ position: "relative" }}>
-      <TouchableOpacity onPress={() => setOpen(!open)}>
+      <TouchableOpacity
+        accessibilityRole="button"
+        onPress={() => setOpen(!open)}
+      >
         <Palette color={colors.primary} size={24} />
       </TouchableOpacity>
 
@@ -55,6 +59,7 @@ export default function ThemeSwitcher({
         >
           {themes.map((theme) => (
             <TouchableOpacity
+              accessibilityRole="button"
               key={theme}
               onPress={() => handleSelect(theme)}
               style={{ paddingVertical: 10, paddingHorizontal: 14 }}

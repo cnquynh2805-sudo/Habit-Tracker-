@@ -1,5 +1,6 @@
 /* eslint-disable react-native/no-inline-styles */
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { ListTodo, Trophy } from "lucide-react-native";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -11,14 +12,14 @@ import {
   UIManager,
 } from "react-native";
 
-import { ListTodo, Trophy } from "lucide-react-native";
-
 import { getTabStyles } from "./BottomTabNavigator.styles";
-import MyGoalsScreen from "../features/goals/screens/MyGoals/MyGoalsScreen";
 import withSwipeTabs from "./withSwipeTabs";
+import DashboardScreen from "@/features/dashboard/screens/DashboardScreen";
+import MyGoalsScreen from "../features/goals/screens/MyGoals/MyGoalsScreen";
 import HabitListScreen from "../features/habits/screens/HabitList/HabitListScreen";
 import TodayScreen from "../features/today/screens/Today/TodayScreen";
 import { useTheme } from "../providers/ThemeProvider";
+
 import MascotScreen from "@/features/mascot/screens/MascotScreen";
 
 if (
@@ -28,35 +29,10 @@ if (
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-// --- CLEAN DUMMY SCREENS ---
-const StatsScreen = () => {
-  const { t } = useTranslation();
-  const { colors } = useTheme();
-  return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: colors.background,
-      }}
-    >
-      <Text
-        style={[
-          getTabStyles(colors).dummyScreenText,
-          { color: colors.primary },
-        ]}
-      >
-        {t("tabs.statsScreen")}
-      </Text>
-    </View>
-  );
-};
-
 // Wrap each screen so a horizontal swipe moves to the adjacent tab.
 const SwipeToday = withSwipeTabs(TodayScreen);
 const SwipeHabits = withSwipeTabs(HabitListScreen);
-const SwipeStats = withSwipeTabs(StatsScreen);
+const SwipeStats = withSwipeTabs(DashboardScreen);
 const SwipeGoals = withSwipeTabs(MyGoalsScreen);
 const SwipeMascot = withSwipeTabs(MascotScreen);
 

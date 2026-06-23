@@ -1,29 +1,18 @@
-import React from "react";
-
-import {
-  View,
-  Image,
-  ImageBackground,
-  Text,
-} from "react-native";
-
+/* eslint-disable react-hooks/purity */
 import LottieView from "lottie-react-native";
+import React from "react";
+import { View, Image, ImageBackground, Text } from "react-native";
 
-import { rewardItems } from "../data/rewards";
-
-import { useMascotStore } from "../store/mascotStore";
-import { useTheme } from "@/providers/ThemeProvider";
 import { createStyles } from "./MascotPreview.styles";
+import { rewardItems } from "../data/rewards";
+import { useMascotStore } from "../store/mascotStore";
+
+import { useTheme } from "@/providers/ThemeProvider";
 
 export default function MascotPreview() {
-  const { equippedRewardId } =
-    useMascotStore();
+  const { equippedRewardId } = useMascotStore();
 
-  const reward =
-    rewardItems.find(
-      (item) =>
-        item.id === equippedRewardId
-    );
+  const reward = rewardItems.find((item) => item.id === equippedRewardId);
 
   const { colors } = useTheme();
   const styles = createStyles(colors);
@@ -36,32 +25,21 @@ export default function MascotPreview() {
     "Let's build a streak! 🔥",
   ];
 
-  const randomMessage =
-  messages[
-    Math.floor(
-      Math.random() * messages.length
-    )
-  ];
+  const randomMessage = messages[Math.floor(Math.random() * messages.length)];
 
-  const selectedMascot =
-    useMascotStore(
-      (state) =>
-        state.selectedMascot
-    );
-    
+  const selectedMascot = useMascotStore((state) => state.selectedMascot);
+
   const mascotImages = {
     brother: require("../../../assets/mascot/happy_boy.gif"),
   };
 
-console.log("Current equip:", equippedRewardId);
+  console.log("Current equip:", equippedRewardId);
 
   return (
     <>
       <View style={styles.messageBubbleContainer}>
         <View style={styles.messageBubble}>
-          <Text style={styles.messageBubbleText}>
-            {randomMessage}
-          </Text>
+          <Text style={styles.messageBubbleText}>{randomMessage}</Text>
         </View>
         {/* Tail pointing down */}
         <View style={styles.messageBubbleTail} />
@@ -72,11 +50,7 @@ console.log("Current equip:", equippedRewardId);
       >
         <Image
           // source={require("../../../assets/mascot/happy_boy.gif")}
-          source={
-            mascotImages[
-              selectedMascot
-            ]
-          }
+          source={mascotImages[selectedMascot]}
           style={styles.mascotImage}
         />
 

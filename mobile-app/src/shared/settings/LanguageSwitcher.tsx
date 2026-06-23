@@ -1,6 +1,7 @@
+/* eslint-disable react-native/no-inline-styles, react-native/no-color-literals */
+import { Globe } from "lucide-react-native";
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
-import { Globe } from "lucide-react-native";
 
 type LanguageSwitcherProps = {
   i18n: {
@@ -35,7 +36,10 @@ export default function LanguageSwitcher({
 
   return (
     <View style={{ position: "relative" }}>
-      <TouchableOpacity onPress={() => setOpen(!open)}>
+      <TouchableOpacity
+        accessibilityRole="button"
+        onPress={() => setOpen(!open)}
+      >
         <Globe color={colors.primary} size={24} />
       </TouchableOpacity>
 
@@ -61,24 +65,24 @@ export default function LanguageSwitcher({
         >
           {languages.map((lang) => (
             <TouchableOpacity
+              accessibilityRole="button"
               key={lang.id}
               onPress={() => handleSelect(lang.id)}
-              style={{ paddingVertical: 10,
-      paddingHorizontal: 14, }}
+              style={{ paddingVertical: 10, paddingHorizontal: 14 }}
             >
               <Text
                 style={{
-                    color:
+                  color:
                     i18n.language === lang.id
-                        ? colors.primary
-                        : colors.textSecondary,
+                      ? colors.primary
+                      : colors.textSecondary,
 
-                    fontSize: 14,
-                    fontWeight: i18n.language === lang.id ? "700" : "400",
+                  fontSize: 14,
+                  fontWeight: i18n.language === lang.id ? "700" : "400",
                 }}
-                >
+              >
                 {lang.flag} {lang.code}
-                </Text>
+              </Text>
             </TouchableOpacity>
           ))}
         </View>

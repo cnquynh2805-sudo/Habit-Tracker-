@@ -1,3 +1,13 @@
+/* eslint-disable react-native/no-inline-styles, react-native/no-color-literals */
+import {
+  ArrowLeft,
+  Flame,
+  Trophy,
+  CheckCircle2,
+  Calendar,
+  Check,
+  AlertCircle,
+} from "lucide-react-native";
 import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -8,20 +18,11 @@ import {
   ActivityIndicator,
   SafeAreaView,
 } from "react-native";
-import {
-  ArrowLeft,
-  Flame,
-  Trophy,
-  CheckCircle2,
-  Calendar,
-  Check,
-  AlertCircle,
-} from "lucide-react-native";
 
+import { getStyles } from "./HistoryScreen.styles";
 import { useTheme } from "../../../providers/ThemeProvider";
 import { calculateHabitStats } from "../../../shared/services/derivedStateEngine";
 import { useHabitHistory } from "../hooks/useHabitHistory";
-import { getStyles } from "./HistoryScreen.styles";
 
 export default function HistoryScreen({ route, navigation }) {
   const { habit } = route.params || {};
@@ -93,7 +94,9 @@ export default function HistoryScreen({ route, navigation }) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={styles.loadingText}>{t("common.loading") || "Loading..."}</Text>
+        <Text style={styles.loadingText}>
+          {t("common.loading") || "Loading..."}
+        </Text>
       </View>
     );
   }
@@ -105,7 +108,7 @@ export default function HistoryScreen({ route, navigation }) {
         <TouchableOpacity
           style={styles.backButton}
           onPress={handleBack}
-          accessible={true}
+          accessible
           accessibilityRole="button"
           accessibilityLabel={t("history.back")}
         >
@@ -121,7 +124,12 @@ export default function HistoryScreen({ route, navigation }) {
       <View style={styles.statsContainer}>
         {/* Current Streak */}
         <View style={styles.statCard}>
-          <View style={[styles.statIconWrapper, { backgroundColor: "rgba(249, 115, 22, 0.1)" }]}>
+          <View
+            style={[
+              styles.statIconWrapper,
+              { backgroundColor: "rgba(249, 115, 22, 0.1)" },
+            ]}
+          >
             <Flame size={20} color="#F97316" />
           </View>
           <Text style={styles.statValue}>{stats.currentStreak}</Text>
@@ -130,16 +138,28 @@ export default function HistoryScreen({ route, navigation }) {
 
         {/* Longest Streak */}
         <View style={styles.statCard}>
-          <View style={[styles.statIconWrapper, { backgroundColor: "rgba(234, 179, 8, 0.1)" }]}>
+          <View
+            style={[
+              styles.statIconWrapper,
+              { backgroundColor: "rgba(234, 179, 8, 0.1)" },
+            ]}
+          >
             <Trophy size={20} color="#EAB308" />
           </View>
           <Text style={styles.statValue}>{stats.longestStreak}</Text>
-          <Text style={styles.statLabel}>{t("history.longest") || "Longest"}</Text>
+          <Text style={styles.statLabel}>
+            {t("history.longest") || "Longest"}
+          </Text>
         </View>
 
         {/* Total Completions */}
         <View style={styles.statCard}>
-          <View style={[styles.statIconWrapper, { backgroundColor: "rgba(16, 185, 129, 0.1)" }]}>
+          <View
+            style={[
+              styles.statIconWrapper,
+              { backgroundColor: "rgba(16, 185, 129, 0.1)" },
+            ]}
+          >
             <CheckCircle2 size={20} color="#10B981" />
           </View>
           <Text style={styles.statValue}>{stats.totalCompletions}</Text>
@@ -166,7 +186,9 @@ export default function HistoryScreen({ route, navigation }) {
                   <Calendar size={18} color={colors.textSecondary} />
                 </View>
                 <View>
-                  <Text style={styles.dateText}>{formatDate(item.date_only || item.date)}</Text>
+                  <Text style={styles.dateText}>
+                    {formatDate(item.date_only || item.date)}
+                  </Text>
                 </View>
               </View>
 

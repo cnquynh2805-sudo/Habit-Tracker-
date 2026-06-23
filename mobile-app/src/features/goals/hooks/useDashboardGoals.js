@@ -25,7 +25,7 @@ export function useDashboardGoals() {
         // Persist to AsyncStorage for manual offline fallback
         await AsyncStorage.setItem(
           GOALS_DASHBOARD_CACHE_KEY,
-          JSON.stringify(data)
+          JSON.stringify(data),
         );
         return data;
       } catch (err) {
@@ -35,7 +35,7 @@ export function useDashboardGoals() {
         throw err;
       }
     },
-    staleTime: 1000 * 60 * 5,   // 5 minutes — data is stale after this
+    staleTime: 1000 * 60 * 5, // 5 minutes — data is stale after this
     gcTime: 1000 * 60 * 60 * 24, // 24 hours — keep in memory/persisted cache
   });
 
@@ -53,8 +53,10 @@ export function useDashboardGoals() {
 
     const activeGoals = rawData.habitsWithGoals || [];
     const habitsWithoutGoals = rawData.habitsWithoutGoals || [];
-    const totalHabits = rawData.totalHabits || (activeGoals.length + habitsWithoutGoals.length);
-    const habitsWithGoalsCount = rawData.habitsWithGoalsCount || activeGoals.length;
+    const totalHabits =
+      rawData.totalHabits || activeGoals.length + habitsWithoutGoals.length;
+    const habitsWithGoalsCount =
+      rawData.habitsWithGoalsCount || activeGoals.length;
 
     return {
       activeGoals,
@@ -62,7 +64,8 @@ export function useDashboardGoals() {
       overallProgress: {
         activeCount: habitsWithGoalsCount,
         totalCount: totalHabits,
-        percent: totalHabits > 0 ? (habitsWithGoalsCount / totalHabits) * 100 : 0,
+        percent:
+          totalHabits > 0 ? (habitsWithGoalsCount / totalHabits) * 100 : 0,
       },
     };
   }, [rawData]);

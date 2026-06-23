@@ -1,5 +1,7 @@
+/* eslint-disable node/handle-callback-err */
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+
 import { createGoal, updateGoal, deleteGoal } from "../services/goalsApi";
 
 const GOALS_DASHBOARD_CACHE_KEY = "@dashboard_goals_cache_v2";
@@ -10,7 +12,10 @@ export function useGoalMutations() {
   // Helper to persist data to AsyncStorage for offline fallback
   const persistCache = async (data) => {
     try {
-      await AsyncStorage.setItem(GOALS_DASHBOARD_CACHE_KEY, JSON.stringify(data));
+      await AsyncStorage.setItem(
+        GOALS_DASHBOARD_CACHE_KEY,
+        JSON.stringify(data),
+      );
     } catch (err) {
       console.warn("Failed to persist goals cache to AsyncStorage:", err);
     }
@@ -20,7 +25,13 @@ export function useGoalMutations() {
   const createMutation = useMutation({
     mutationFn: ({ habitId, targetType, targetValue }) =>
       createGoal(habitId, { targetType, targetValue }),
-    onMutate: async ({ habitId, habitName, category, targetType, targetValue }) => {
+    onMutate: async ({
+      habitId,
+      habitName,
+      category,
+      targetType,
+      targetValue,
+    }) => {
       // Cancel any outgoing refetches so they don't overwrite our optimistic update
       await queryClient.cancelQueries({ queryKey: ["dashboard_goals_v2"] });
 
@@ -30,19 +41,19 @@ export function useGoalMutations() {
       // Optimistically update to the new value
       if (previousData) {
         const nextData = { ...previousData };
-        nextData.habitsWithoutGoals = (previousData.habitsWithoutGoals || []).filter(
-          (h) => String(h.id) !== String(habitId)
-        );
+        nextData.habitsWithoutGoals = (
+          previousData.habitsWithoutGoals || []
+        ).filter((h) => String(h.id) !== String(habitId));
 
         const alreadyExists = (previousData.habitsWithGoals || []).some(
-          (h) => String(h.habitId) === String(habitId)
+          (h) => String(h.habitId) === String(habitId),
         );
 
         if (!alreadyExists) {
           const newGoalItem = {
             habitId: String(habitId),
-            habitName: habitName,
-            category: category,
+            habitName,
+            category,
             goal: {
               id: "temp_" + Date.now(),
               targetType,
@@ -51,8 +62,12 @@ export function useGoalMutations() {
               progressPercent: 0,
             },
           };
-          nextData.habitsWithGoals = [...(previousData.habitsWithGoals || []), newGoalItem];
-          nextData.habitsWithGoalsCount = (previousData.habitsWithGoalsCount || 0) + 1;
+          nextData.habitsWithGoals = [
+            ...(previousData.habitsWithGoals || []),
+            newGoalItem,
+          ];
+          nextData.habitsWithGoalsCount =
+            (previousData.habitsWithGoalsCount || 0) + 1;
         }
 
         queryClient.setQueryData(["dashboard_goals_v2"], nextData);
@@ -85,16 +100,23 @@ export function useGoalMutations() {
 
       if (previousData) {
         const nextData = { ...previousData };
-        nextData.habitsWithGoals = (previousData.habitsWithGoals || []).map((item) => {
-          if (String(item.habitId) === String(habitId)) {
-            const nextGoal = { ...item.goal, targetValue: Number(targetValue) };
-            const current = nextGoal.currentProgress || 0;
-            nextGoal.progressPercent =
-              nextGoal.targetValue > 0 ? Math.min((current / nextGoal.targetValue) * 100, 100) : 0;
-            return { ...item, goal: nextGoal };
-          }
-          return item;
-        });
+        nextData.habitsWithGoals = (previousData.habitsWithGoals || []).map(
+          (item) => {
+            if (String(item.habitId) === String(habitId)) {
+              const nextGoal = {
+                ...item.goal,
+                targetValue: Number(targetValue),
+              };
+              const current = nextGoal.currentProgress || 0;
+              nextGoal.progressPercent =
+                nextGoal.targetValue > 0
+                  ? Math.min((current / nextGoal.targetValue) * 100, 100)
+                  : 0;
+              return { ...item, goal: nextGoal };
+            }
+            return item;
+          },
+        );
 
         queryClient.setQueryData(["dashboard_goals_v2"], nextData);
         await persistCache(nextData);
@@ -123,13 +145,13 @@ export function useGoalMutations() {
       if (previousData) {
         const nextData = { ...previousData };
         const removedItem = (previousData.habitsWithGoals || []).find(
-          (item) => String(item.habitId) === String(habitId)
+          (item) => String(item.habitId) === String(habitId),
         );
 
         if (removedItem) {
-          nextData.habitsWithGoals = (previousData.habitsWithGoals || []).filter(
-            (item) => String(item.habitId) !== String(habitId)
-          );
+          nextData.habitsWithGoals = (
+            previousData.habitsWithGoals || []
+          ).filter((item) => String(item.habitId) !== String(habitId));
           nextData.habitsWithoutGoals = [
             ...(previousData.habitsWithoutGoals || []),
             {
@@ -138,7 +160,10 @@ export function useGoalMutations() {
               category: removedItem.category,
             },
           ];
-          nextData.habitsWithGoalsCount = Math.max(0, (previousData.habitsWithGoalsCount || 1) - 1);
+          nextData.habitsWithGoalsCount = Math.max(
+            0,
+            (previousData.habitsWithGoalsCount || 1) - 1,
+          );
         }
 
         queryClient.setQueryData(["dashboard_goals_v2"], nextData);

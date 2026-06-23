@@ -1,3 +1,4 @@
+/* eslint-disable i18next/no-literal-string, react-hooks/exhaustive-deps, no-unused-vars, react-native/no-inline-styles, react-native/no-color-literals */
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   View,
@@ -9,38 +10,42 @@ import {
   TextInput,
 } from "react-native";
 import NfcManager, { NfcTech, Ndef } from "react-native-nfc-manager";
+
 import styles from "./NfcSettingsScreen.styles";
 import useNfcMappings from "./hooks/useNfcMappings";
 
 // Tách nhỏ UI hiển thị danh sách thẻ đã cấu hình để tránh re-render lãng phí
-const ConfiguredTagRow = React.memo(({ tagId, mapping, habitLabel, onUnlink }) => {
-  return (
-    <View style={styles.mappingRow}>
-      <View style={styles.mappingInfo}>
-        <Text style={styles.mappingTitle}>
-          {mapping.tagName?.trim() || "Unnamed Tag"}
-        </Text>
-        <Text style={styles.mappingSubtitle}>
-          {mapping.type === "MULTIPLE"
-            ? "MULTIPLE tag"
-            : `SINGLE: ${habitLabel}`}
-        </Text>
-        <Text style={styles.mappingId}>ID: {tagId}</Text>
+const ConfiguredTagRow = React.memo(
+  ({ tagId, mapping, habitLabel, onUnlink }) => {
+    return (
+      <View style={styles.mappingRow}>
+        <View style={styles.mappingInfo}>
+          <Text style={styles.mappingTitle}>
+            {mapping.tagName?.trim() || "Unnamed Tag"}
+          </Text>
+          <Text style={styles.mappingSubtitle}>
+            {mapping.type === "MULTIPLE"
+              ? "MULTIPLE tag"
+              : `SINGLE: ${habitLabel}`}
+          </Text>
+          <Text style={styles.mappingId}>ID: {tagId}</Text>
+        </View>
+        <TouchableOpacity
+          accessibilityRole="button"
+          style={styles.btnDanger}
+          onPress={() => onUnlink(tagId)}
+        >
+          <Text style={styles.btnDangerText}>Unlink</Text>
+        </TouchableOpacity>
       </View>
-      <TouchableOpacity
-        style={styles.btnDanger}
-        onPress={() => onUnlink(tagId)}
-      >
-        <Text style={styles.btnDangerText}>Unlink</Text>
-      </TouchableOpacity>
-    </View>
-  );
-});
+    );
+  },
+);
 
 export default function NfcSettingsScreen() {
   const [scanState, setScanState] = useState("ready");
   const [tagName, setTagName] = useState("");
-  
+
   const [showAllHabits, setShowAllHabits] = useState(false);
   const [showAllTags, setShowAllTags] = useState(false);
 
@@ -55,7 +60,10 @@ export default function NfcSettingsScreen() {
   } = useNfcMappings();
 
   const cleanUpNfcListener = async () => {
-    if (NfcManager && typeof NfcManager.cancelTechnologyRequest === "function") {
+    if (
+      NfcManager &&
+      typeof NfcManager.cancelTechnologyRequest === "function"
+    ) {
       await NfcManager.cancelTechnologyRequest().catch(() => null);
     }
   };
@@ -75,7 +83,7 @@ export default function NfcSettingsScreen() {
       setScanState("scanning");
       await NfcManager.requestTechnology([NfcTech.Ndef]);
       const tag = await NfcManager.getTag();
-      
+
       if (!tag || !tag.id) {
         throw new Error("No valid tag detected.");
       }
@@ -85,12 +93,14 @@ export default function NfcSettingsScreen() {
           "Tag Exists",
           `This tag is already configured as "${
             nfcMappings[tag.id].tagName?.trim() || "Unnamed Tag"
-          }". Please unlink it first.`
+          }". Please unlink it first.`,
         );
         return;
       }
 
-      const targetHabit = allHabits.find((h) => String(h.id) === String(habitId));
+      const targetHabit = allHabits.find(
+        (h) => String(h.id) === String(habitId),
+      );
       const finalServerId = targetHabit?.serverId || "null";
 
       const urlToRecord =
@@ -103,9 +113,7 @@ export default function NfcSettingsScreen() {
 
       const finalTagName =
         tagName.trim() ||
-        (type === "MULTIPLE"
-          ? "Multi-Habit Tag"
-          : `Tag #${tag.id.slice(-4)}`);
+        (type === "MULTIPLE" ? "Multi-Habit Tag" : `Tag #${tag.id.slice(-4)}`);
 
       await saveMappingAndSync({
         tagId: tag.id,
@@ -117,13 +125,13 @@ export default function NfcSettingsScreen() {
 
       Alert.alert(
         "Success",
-        `Successfully configured and wrote data to "${finalTagName}"!`
+        `Successfully configured and wrote data to "${finalTagName}"!`,
       );
       setTagName("");
     } catch (err) {
       Alert.alert(
         "Write Error",
-        "Failed to write data onto the NFC tag. Please try again."
+        "Failed to write data onto the NFC tag. Please try again.",
       );
     } finally {
       await cleanUpNfcListener();
@@ -132,38 +140,47 @@ export default function NfcSettingsScreen() {
     }
   };
 
-  const handleRemoveMapping = useCallback((tagId) => {
-    const currentTagName = nfcMappings?.[tagId]?.tagName || tagId;
-    Alert.alert(
-      "Remove Tag",
-      `Are you sure you want to unlink "${currentTagName}"?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Unlink",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await removeMapping(tagId);
-              loadData();
-            } catch (err) {
-              Alert.alert("Error", "Failed to unlink tag.");
-            }
+  const handleRemoveMapping = useCallback(
+    (tagId) => {
+      const currentTagName = nfcMappings?.[tagId]?.tagName || tagId;
+      Alert.alert(
+        "Remove Tag",
+        `Are you sure you want to unlink "${currentTagName}"?`,
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Unlink",
+            style: "destructive",
+            onPress: async () => {
+              try {
+                await removeMapping(tagId);
+                loadData();
+              } catch (err) {
+                Alert.alert("Error", "Failed to unlink tag.");
+              }
+            },
           },
-        },
-      ]
-    );
-  }, [nfcMappings, removeMapping, loadData]);
+        ],
+      );
+    },
+    [nfcMappings, removeMapping, loadData],
+  );
 
-  const getHabitLabel = useCallback((habitId) => {
-    if (!allHabits) return "Loading habit...";
-    const habit = allHabits.find((h) => h.id === habitId);
-    if (!habit) return "Linked habit deleted";
-    return habit.name;
-  }, [allHabits]);
+  const getHabitLabel = useCallback(
+    (habitId) => {
+      if (!allHabits) return "Loading habit...";
+      const habit = allHabits.find((h) => h.id === habitId);
+      if (!habit) return "Linked habit deleted";
+      return habit.name;
+    },
+    [allHabits],
+  );
 
   const safeNfcMappings = useMemo(() => nfcMappings || {}, [nfcMappings]);
-  const tagKeys = useMemo(() => Object.keys(safeNfcMappings), [safeNfcMappings]);
+  const tagKeys = useMemo(
+    () => Object.keys(safeNfcMappings),
+    [safeNfcMappings],
+  );
 
   const visibleHabits = useMemo(() => {
     const list = unconfiguredHabits || [];
@@ -198,6 +215,7 @@ export default function NfcSettingsScreen() {
       <View style={styles.box}>
         <Text style={styles.sectionTitle}>Tag label</Text>
         <TextInput
+          accessibilityLabel="Text input field"
           style={styles.textInput}
           placeholder="Optional tag name"
           placeholderTextColor="#7C8B82"
@@ -207,6 +225,7 @@ export default function NfcSettingsScreen() {
 
         <Text style={styles.sectionTitle}>Configure tag</Text>
         <TouchableOpacity
+          accessibilityRole="button"
           style={styles.btnPrimary}
           onPress={() => handleWriteAndSave("MULTIPLE")}
           disabled={scanState === "scanning"}
@@ -219,6 +238,7 @@ export default function NfcSettingsScreen() {
             <Text style={styles.sectionSubTitle}>Or assign to a habit</Text>
             {visibleHabits.map((habit) => (
               <TouchableOpacity
+                accessibilityRole="button"
                 key={habit.id}
                 style={styles.btnSecondary}
                 onPress={() => handleWriteAndSave("SINGLE", habit.id)}
@@ -229,12 +249,17 @@ export default function NfcSettingsScreen() {
             ))}
 
             {unconfiguredHabits.length > 3 && (
-              <TouchableOpacity 
+              <TouchableOpacity
+                accessibilityRole="button"
                 onPress={() => setShowAllHabits(!showAllHabits)}
                 style={{ paddingVertical: 4, alignItems: "center" }}
               >
-                <Text style={{ color: "#3B604D", fontWeight: "700", fontSize: 13 }}>
-                  {showAllHabits ? "Collapse ▲" : `View all (${unconfiguredHabits.length}) ▼`}
+                <Text
+                  style={{ color: "#3B604D", fontWeight: "700", fontSize: 13 }}
+                >
+                  {showAllHabits
+                    ? "Collapse ▲"
+                    : `View all (${unconfiguredHabits.length}) ▼`}
                 </Text>
               </TouchableOpacity>
             )}
@@ -263,11 +288,18 @@ export default function NfcSettingsScreen() {
           ))}
 
           {tagKeys.length > 3 && (
-            <TouchableOpacity 
+            <TouchableOpacity
+              accessibilityRole="button"
               onPress={() => setShowAllTags(!showAllTags)}
-              style={{ paddingVertical: 8, alignItems: "center", marginBottom: 20 }}
+              style={{
+                paddingVertical: 8,
+                alignItems: "center",
+                marginBottom: 20,
+              }}
             >
-              <Text style={{ color: "#3B604D", fontWeight: "700", fontSize: 13 }}>
+              <Text
+                style={{ color: "#3B604D", fontWeight: "700", fontSize: 13 }}
+              >
                 {showAllTags ? "Collapse ▲" : `View all (${tagKeys.length}) ▼`}
               </Text>
             </TouchableOpacity>

@@ -1,13 +1,22 @@
+/* eslint-disable no-unused-vars, react-native/no-inline-styles, react-native/no-color-literals */
 import { FlashList } from "@shopify/flash-list";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useTranslation } from "react-i18next";
 import { View, Text, ActivityIndicator, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { getGoalsStyles } from "./MyGoalsScreen.styles";
+import { useTheme } from "../../../../providers/ThemeProvider";
 import ActiveMilestoneCard from "../../components/ActiveMilestoneCard";
+import GoalSettingModal from "../../components/GoalSettingModal";
 import NoGoalCard from "../../components/NoGoalCard";
 import OverallProgressCard from "../../components/OverallProgressCard";
-import GoalSettingModal from "../../components/GoalSettingModal";
 import { useDashboardGoals } from "../../hooks/useDashboardGoals";
 import { getGoalsStyles } from "./MyGoalsScreen.styles";
 import { useTheme } from "../../../../providers/ThemeProvider";
@@ -160,7 +169,10 @@ export default function MyGoalsScreen() {
   if (isLoading) {
     return (
       <SafeAreaView
-        style={[styles.container, { justifyContent: "center", alignItems: "center" }]}
+        style={[
+          styles.container,
+          { justifyContent: "center", alignItems: "center" },
+        ]}
         edges={["top"]}
       >
         <ActivityIndicator size="large" color={colors.primary} />

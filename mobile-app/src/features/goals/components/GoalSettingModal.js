@@ -12,8 +12,9 @@ import {
   ActivityIndicator,
   TextInput,
 } from "react-native";
-import { useGoalMutations } from "../hooks/useGoalMutations";
+
 import { useAppStore } from "../../../shared/stores/useAppStore";
+import { useGoalMutations } from "../hooks/useGoalMutations";
 
 export default function GoalSettingModal({ visible, onClose, habit, colors }) {
   const { t } = useTranslation();
@@ -85,7 +86,9 @@ export default function GoalSettingModal({ visible, onClose, habit, colors }) {
       // in case it instantly reaches 80% or 100% based on existing check-ins.
       useAppStore.getState().checkMilestoneForHabit(habit.habitId || habit.id);
     } catch (error) {
-      const debugInfo = __DEV__ ? `\nDetails: ${error?.message || String(error)}` : "";
+      const debugInfo = __DEV__
+        ? `\nDetails: ${error?.message || String(error)}`
+        : "";
       useAppStore.getState().showGlobalAlert({
         title: t("common.error"),
         message: t("goals.goalSaveFailed") + debugInfo,
@@ -332,11 +335,11 @@ export default function GoalSettingModal({ visible, onClose, habit, colors }) {
   return (
     <Modal
       visible={visible}
-      transparent={true}
+      transparent
       animationType="slide"
       onRequestClose={onClose}
-      accessible={true}
-      accessibilityViewIsModal={true}
+      accessible
+      accessibilityViewIsModal
     >
       <Pressable style={customStyles.backdrop} onPress={onClose}>
         <Pressable
@@ -370,7 +373,7 @@ export default function GoalSettingModal({ visible, onClose, habit, colors }) {
               ]}
               onPress={() => setTargetType("Streak")}
               activeOpacity={0.8}
-              accessible={true}
+              accessible
               accessibilityRole="radio"
               accessibilityState={{ checked: targetType === "Streak" }}
               accessibilityLabel={t("goals.streakTarget")}
@@ -383,8 +386,12 @@ export default function GoalSettingModal({ visible, onClose, habit, colors }) {
               >
                 <Text style={customStyles.cardEmoji}>🔥</Text>
               </View>
-              <Text style={customStyles.cardTitle}>{t("goals.streakTarget")}</Text>
-              <Text style={customStyles.cardDesc}>{t("goals.streakTargetDesc")}</Text>
+              <Text style={customStyles.cardTitle}>
+                {t("goals.streakTarget")}
+              </Text>
+              <Text style={customStyles.cardDesc}>
+                {t("goals.streakTargetDesc")}
+              </Text>
             </TouchableOpacity>
 
             {/* Total Completions card */}
@@ -395,27 +402,36 @@ export default function GoalSettingModal({ visible, onClose, habit, colors }) {
               ]}
               onPress={() => setTargetType("TotalCompletions")}
               activeOpacity={0.8}
-              accessible={true}
+              accessible
               accessibilityRole="radio"
-              accessibilityState={{ checked: targetType === "TotalCompletions" }}
+              accessibilityState={{
+                checked: targetType === "TotalCompletions",
+              }}
               accessibilityLabel={t("goals.totalCompletions")}
             >
               <View
                 style={[
                   customStyles.iconWrapper,
-                  targetType === "TotalCompletions" && customStyles.selectedIconWrapper,
+                  targetType === "TotalCompletions" &&
+                    customStyles.selectedIconWrapper,
                 ]}
               >
                 <Text style={customStyles.cardEmoji}>✔️</Text>
               </View>
-              <Text style={customStyles.cardTitle}>{t("goals.totalCompletions")}</Text>
-              <Text style={customStyles.cardDesc}>{t("goals.totalCompletionsDesc")}</Text>
+              <Text style={customStyles.cardTitle}>
+                {t("goals.totalCompletions")}
+              </Text>
+              <Text style={customStyles.cardDesc}>
+                {t("goals.totalCompletionsDesc")}
+              </Text>
             </TouchableOpacity>
           </View>
 
           {/* Target Value adjustment section */}
           <View style={customStyles.targetSection}>
-            <Text style={customStyles.targetSectionTitle}>{t("goals.targetGoal")}</Text>
+            <Text style={customStyles.targetSectionTitle}>
+              {t("goals.targetGoal")}
+            </Text>
 
             <View style={customStyles.adjustRow}>
               <TextInput
@@ -429,7 +445,9 @@ export default function GoalSettingModal({ visible, onClose, habit, colors }) {
             </View>
 
             <Text style={customStyles.targetUnitText}>
-              {targetType === "Streak" ? t("goals.daysInARow") : t("goals.timesTotal")}
+              {targetType === "Streak"
+                ? t("goals.daysInARow")
+                : t("goals.timesTotal")}
             </Text>
           </View>
 
@@ -445,11 +463,13 @@ export default function GoalSettingModal({ visible, onClose, habit, colors }) {
               style={customStyles.cancelButton}
               onPress={onClose}
               activeOpacity={0.8}
-              accessible={true}
+              accessible
               accessibilityRole="button"
               accessibilityLabel={t("common.cancel")}
             >
-              <Text style={customStyles.cancelButtonText}>{t("common.cancel")}</Text>
+              <Text style={customStyles.cancelButtonText}>
+                {t("common.cancel")}
+              </Text>
             </TouchableOpacity>
 
             {/* Save/Submit Button */}
@@ -458,14 +478,16 @@ export default function GoalSettingModal({ visible, onClose, habit, colors }) {
               onPress={handleSave}
               disabled={isLoading}
               activeOpacity={0.8}
-              accessible={true}
+              accessible
               accessibilityRole="button"
               accessibilityLabel={t("goals.saveGoal")}
             >
               {isLoading ? (
                 <ActivityIndicator size="small" color="#FFFFFF" />
               ) : (
-                <Text style={customStyles.saveButtonText}>{t("goals.saveGoal")}</Text>
+                <Text style={customStyles.saveButtonText}>
+                  {t("goals.saveGoal")}
+                </Text>
               )}
             </TouchableOpacity>
           </View>

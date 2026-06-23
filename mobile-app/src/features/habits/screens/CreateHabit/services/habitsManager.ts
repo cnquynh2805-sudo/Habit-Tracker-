@@ -1,7 +1,13 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Habit } from "./types";
-import { createHabitRemote, deleteHabitRemote, updateHabitRemote } from "./habitsApi";
+
 import { isOnline } from "./config";
+import {
+  createHabitRemote,
+  deleteHabitRemote,
+  updateHabitRemote,
+} from "./habitsApi";
+import { Habit } from "./types";
 
 const HABITS_KEY = "@habits_list";
 
@@ -23,30 +29,32 @@ export async function getHabitById(id: string): Promise<Habit | undefined> {
 }
 
 // 3. CREATE NEW HABIT (CREATE)
-export async function createHabit(habitData: Partial<Habit>): Promise<Habit | null> {
+export async function createHabit(
+  habitData: Partial<Habit>,
+): Promise<Habit | null> {
   try {
     const habits = await getHabits();
-    
+
     const newName = (habitData.name || "").trim();
     if (!newName) throw new Error("EMPTY_NAME");
 
     const isDuplicate = habits.some(
-      (h) => h.name && h.name.trim().toLowerCase() === newName.toLowerCase()
+      (h) => h.name && h.name.trim().toLowerCase() === newName.toLowerCase(),
     );
     if (isDuplicate) {
-      throw new Error("DUPLICATE_NAME"); 
+      throw new Error("DUPLICATE_NAME");
     }
-    
+
     // Initialize a unique string ID locally
     const uniqueId = Date.now().toString();
-    let newHabit: any = {
-      id: uniqueId, 
+    const newHabit: any = {
+      id: uniqueId,
       serverId: null, // Initially has no server ID
       name: newName,
       category: habitData.category || "Mindfulness",
       frequency: habitData.frequency || "Daily",
       daysOfWeek: habitData.daysOfWeek || null,
-      targetPerDay: habitData.targetPerDay || 1, 
+      targetPerDay: habitData.targetPerDay || 1,
       priority: habitData.priority || "Medium",
       status: habitData.status || "Active",
       createdAt: new Date().toISOString(),
@@ -61,16 +69,21 @@ export async function createHabit(habitData: Partial<Habit>): Promise<Habit | nu
     if (await isOnline()) {
       try {
         const apiResult = await createHabitRemote(newHabit);
-        
+
         if (apiResult && apiResult.serverId) {
           const currentHabits = await getHabits();
-          const syncIndex = currentHabits.findIndex((h) => String(h.id) === String(uniqueId));
+          const syncIndex = currentHabits.findIndex(
+            (h) => String(h.id) === String(uniqueId),
+          );
           if (syncIndex >= 0) {
             // Update sync status and serverId in local storage
             currentHabits[syncIndex].syncStatus = "synced";
             currentHabits[syncIndex].serverId = String(apiResult.serverId);
-            await AsyncStorage.setItem(HABITS_KEY, JSON.stringify(currentHabits));
-            
+            await AsyncStorage.setItem(
+              HABITS_KEY,
+              JSON.stringify(currentHabits),
+            );
+
             // Update reference object returned to the UI
             newHabit.syncStatus = "synced";
             newHabit.serverId = String(apiResult.serverId);
@@ -88,7 +101,10 @@ export async function createHabit(habitData: Partial<Habit>): Promise<Habit | nu
 }
 
 // 4. UPDATE HABIT (UPDATE)
-export async function updateHabit(habitId: string, habitData: Partial<Habit>): Promise<void> {
+export async function updateHabit(
+  habitId: string,
+  habitData: Partial<Habit>,
+): Promise<void> {
   try {
     const habits = await getHabits();
     const index = habits.findIndex((h) => String(h.id) === String(habitId));
@@ -104,20 +120,22 @@ export async function updateHabit(habitId: string, habitData: Partial<Habit>): P
     const updatedHabit = {
       ...habits[index],
       ...habitData,
-      id: originalLocalId, 
-      serverId: currentServerId, 
+      id: originalLocalId,
+      serverId: currentServerId,
       syncStatus: "pending" as const,
     };
-    
+
     habits[index] = updatedHabit;
     await AsyncStorage.setItem(HABITS_KEY, JSON.stringify(habits));
 
     if (await isOnline()) {
       try {
         await updateHabitRemote(updatedHabit);
-        
+
         const currentHabits = await getHabits();
-        const syncIndex = currentHabits.findIndex((h) => String(h.id) === String(originalLocalId));
+        const syncIndex = currentHabits.findIndex(
+          (h) => String(h.id) === String(originalLocalId),
+        );
         if (syncIndex >= 0) {
           currentHabits[syncIndex].syncStatus = "synced";
           await AsyncStorage.setItem(HABITS_KEY, JSON.stringify(currentHabits));
@@ -139,11 +157,13 @@ export async function deleteHabit(habitId: string): Promise<boolean> {
     const targetHabit = habits.find((h) => String(h.id) === String(habitId));
 
     if (!targetHabit) {
-      return false; 
+      return false;
     }
 
     // Step 1: Remove from local storage immediately based on the local ID
-    const filteredHabits = habits.filter((h) => String(h.id) !== String(targetHabit.id));
+    const filteredHabits = habits.filter(
+      (h) => String(h.id) !== String(targetHabit.id),
+    );
     await AsyncStorage.setItem(HABITS_KEY, JSON.stringify(filteredHabits));
 
     // Step 2: Trigger the remote DELETE request
@@ -199,14 +219,16 @@ export async function syncOfflineData(): Promise<void> {
 }
 
 // 7. RESTORE FROM SERVER (USED ON RE-INSTALLATION OR RELOAD)
-export async function downloadHabitsFromServer(remoteHabits: any[]): Promise<void> {
+export async function downloadHabitsFromServer(
+  remoteHabits: any[],
+): Promise<void> {
   try {
     if (!Array.isArray(remoteHabits)) return;
-    
+
     const formattedHabits: Habit[] = remoteHabits.map((rh) => ({
       // Use the remote ID as the local ID mapping to keep both in alignment
-      id: String(rh.id), 
-      serverId: String(rh.id), 
+      id: String(rh.id),
+      serverId: String(rh.id),
       name: rh.name,
       category: rh.category || "Mindfulness",
       frequency: rh.frequency || "Daily",
