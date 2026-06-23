@@ -37,6 +37,41 @@ export interface Goal {
   targetValue: number;
 }
 
+let idCounter = 0;
+
+const createId = () => {
+  idCounter += 1;
+  return `${Date.now()}-${idCounter}`;
+};
+
+const validCategories: HabitCategory[] = ["Health", "Study", "Work", "Mindfulness", "Other"];
+const validPriorities: HabitPriority[] = ["Low", "Medium", "High"];
+const validStatuses: HabitStatus[] = ["Active", "Paused", "Archived"];
+const validTargetTypes: TargetType[] = ["Streak target", "Total completions target"];
+
+const hasText = (value: unknown) => typeof value === "string" && value.trim().length > 0;
+
+const isValidHabit = (habit: Omit<Habit, "id" | "createdAt"> | Habit) => {
+  return (
+    hasText(habit.name) &&
+    validCategories.includes(habit.category) &&
+    hasText(habit.frequency) &&
+    Number.isFinite(habit.targetPerDay) &&
+    habit.targetPerDay > 0 &&
+    validPriorities.includes(habit.priority) &&
+    validStatuses.includes(habit.status)
+  );
+};
+
+const isValidGoal = (goal: Omit<Goal, "id"> | Goal) => {
+  return (
+    hasText(goal.habitId) &&
+    validTargetTypes.includes(goal.targetType) &&
+    Number.isFinite(goal.targetValue) &&
+    goal.targetValue > 0
+  );
+};
+
 interface HabitState {
   habits: Habit[];
   checkins: Checkin[];
@@ -66,12 +101,14 @@ export const useHabitStore = create<HabitState>()(
       lastAction: null,
 
       addHabit: (habitData) => {
+        if (!isValidHabit(habitData)) return;
+
         set((state) => ({
           habits: [
             ...state.habits,
             {
               ...habitData,
-              id: Date.now().toString(),
+              id: createId(),
               createdAt: new Date().toISOString(),
             },
           ],
@@ -80,9 +117,12 @@ export const useHabitStore = create<HabitState>()(
 
       updateHabit: (id, updates) => {
         set((state) => ({
-          habits: state.habits.map((habit) =>
-            habit.id === id ? { ...habit, ...updates } : habit
-          ),
+          habits: state.habits.map((habit) => {
+            if (habit.id !== id) return habit;
+
+            const updatedHabit = { ...habit, ...updates };
+            return isValidHabit(updatedHabit) ? updatedHabit : habit;
+          }),
         }));
       },
 
@@ -129,7 +169,7 @@ export const useHabitStore = create<HabitState>()(
             };
           } else {
             newCheckins.push({
-              id: Date.now().toString(),
+              id: createId(),
               habitId,
               date,
               completedCount,
@@ -167,12 +207,15 @@ export const useHabitStore = create<HabitState>()(
       },
 
       setGoal: (goalData) => {
+        const habitExists = get().habits.some((habit) => habit.id === goalData.habitId);
+        if (!habitExists || !isValidGoal(goalData)) return;
+
         set((state) => ({
           goals: [
             ...state.goals.filter(g => g.habitId !== goalData.habitId), // Ensure one goal per habit
             {
               ...goalData,
-              id: Date.now().toString(),
+              id: createId(),
             },
           ],
         }));
@@ -180,9 +223,12 @@ export const useHabitStore = create<HabitState>()(
       
       updateGoal: (id, updates) => {
         set((state) => ({
-          goals: state.goals.map((g) =>
-            g.id === id ? { ...g, ...updates } : g
-          ),
+          goals: state.goals.map((goal) => {
+            if (goal.id !== id) return goal;
+
+            const updatedGoal = { ...goal, ...updates };
+            return isValidGoal(updatedGoal) ? updatedGoal : goal;
+          }),
         }));
       },
 

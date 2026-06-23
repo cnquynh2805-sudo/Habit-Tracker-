@@ -5,14 +5,29 @@ export const getTodayDateString = () => {
   return new Date().toISOString().split('T')[0];
 };
 
-export const getHabitsForToday = (habits: Habit[]) => {
-  // Simplification: assuming 'Daily' means every day.
-  // We can expand logic for specific days later.
-  return habits.filter(h => h.status === 'Active');
+const getWeekdayName = (date: string) => {
+  const parsedDate = new Date(`${date}T00:00:00`);
+  return parsedDate.toLocaleDateString('en-US', { weekday: 'long' });
+};
+
+const frequencyMatchesDate = (frequency: string, date: string) => {
+  if (frequency === 'Daily') return true;
+
+  const weekday = getWeekdayName(date);
+  const selectedDays = frequency
+    .split(',')
+    .map(day => day.trim())
+    .filter(Boolean);
+
+  return selectedDays.includes(weekday);
+};
+
+export const getHabitsForToday = (habits: Habit[], date = getTodayDateString()) => {
+  return habits.filter(h => h.status === 'Active' && frequencyMatchesDate(h.frequency, date));
 };
 
 export const getDailyProgress = (habits: Habit[], checkins: Checkin[], date: string) => {
-  const activeHabits = getHabitsForToday(habits);
+  const activeHabits = getHabitsForToday(habits, date);
   if (activeHabits.length === 0) return { total: 0, completed: 0, percentage: 0 };
 
   const checkinsToday = checkins.filter(c => c.date === date && c.status === 'Completed');
