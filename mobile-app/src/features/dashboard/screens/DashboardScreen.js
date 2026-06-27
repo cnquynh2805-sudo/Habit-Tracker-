@@ -1,4 +1,5 @@
 /* eslint-disable no-unused-vars, react-native/no-inline-styles, react-native/no-color-literals, i18next/no-literal-string */
+/* global Blob, URL, document */
 import {
   Upload,
   Settings,
@@ -26,6 +27,7 @@ import {
   SafeAreaView,
   Dimensions,
   Share,
+  Platform,
 } from "react-native";
 import { Svg, Rect, Text as SvgText } from "react-native-svg";
 
@@ -445,6 +447,84 @@ const DashboardScreen = () => {
     fetchDomainData(true);
   }, [fetchDomainData]);
 
+  const handleExportData = async () => {
+    try {
+      const {
+        habits: rawHabits,
+        goals: rawGoals,
+        checkins: rawCheckins,
+      } = useDomainStore.getState();
+
+      const habits = (rawHabits || []).map((h) => ({
+        id: h.id,
+        name: h.name,
+        category: h.category,
+        frequency: h.frequency,
+        daysOfWeek: h.daysOfWeek,
+        targetPerDay: h.targetPerDay,
+        isActive: h.isActive,
+        created_at: h.created_at,
+      }));
+
+      const goals = (rawGoals || []).map((g) => ({
+        id: g.id,
+        habit_id: g.habit_id,
+        targetType: g.targetType,
+        targetValue: g.targetValue,
+        startDate: g.startDate,
+        endDate: g.endDate,
+        isAchieved: g.isAchieved,
+      }));
+
+      const checkins = (rawCheckins || []).map((c) => ({
+        id: c.id,
+        habit_id: c.habit_id,
+        date_only: c.date_only,
+        date: c.date,
+        completedCount: c.completedCount,
+      }));
+
+      const exportData = {
+        habits,
+        goals,
+        checkins,
+        exportedAt: new Date().toISOString(),
+      };
+
+      const jsonString = JSON.stringify(exportData, null, 2);
+
+      // Generate filename bloom_yyyymmddhhmmss.json
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, "0");
+      const dd = String(now.getDate()).padStart(2, "0");
+      const hh = String(now.getHours()).padStart(2, "0");
+      const min = String(now.getMinutes()).padStart(2, "0");
+      const ss = String(now.getSeconds()).padStart(2, "0");
+      const fileName = `bloom_${yyyy}${mm}${dd}${hh}${min}${ss}.json`;
+
+      if (Platform.OS === "web") {
+        const blob = new Blob([jsonString], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = fileName;
+        a.click();
+        URL.revokeObjectURL(url);
+        return;
+      }
+
+      // Mobile - direct sharing via RN Share API to avoid needing new native modules in custom APK
+      await Share.share({
+        message: jsonString,
+        title: fileName,
+      });
+    } catch (err) {
+      console.error("Failed to export data:", err);
+      alert("Failed to export data: " + err.message);
+    }
+  };
+
   // ── Derived State (all computed from raw data via derivedStateEngine) ───────
   const { todayScore, todayTrend, activeHabits, atRisk } = useMemo(
     () => computeDashboardSummary(habits, checkins, goals),
@@ -524,6 +604,16 @@ const DashboardScreen = () => {
       {/* HEADER */}
       <View style={styles.header}>
         <Text style={styles.pageTitle}>Dashboard</Text>
+        <View style={styles.headerActions}>
+          <TouchableOpacity
+            onPress={handleExportData}
+            style={styles.headerButton}
+            accessibilityRole="button"
+            accessibilityLabel="Export Data"
+          >
+            <Upload size={22} color={C.text} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView
@@ -741,6 +831,11 @@ function makeStyles(C) {
       color: C.text,
     },
     headerActions: { flexDirection: "row", alignItems: "center" },
+    headerButton: {
+      padding: 8,
+      justifyContent: "center",
+      alignItems: "center",
+    },
     scroll: { paddingHorizontal: 20, paddingBottom: 110 },
 
     // Summary cards
